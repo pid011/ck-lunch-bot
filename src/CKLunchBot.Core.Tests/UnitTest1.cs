@@ -9,7 +9,7 @@ namespace CKLunchBot.Core.Tests
         [TestMethod]
         public async void TestMethod1Async()
         {
-            Assert.IsTrue(await new MenuRequester().RequestData() != null, "¿äÃ»À» ¹ŞÁö ¸øÇÔ.");
+            Assert.IsTrue(await new MenuRequester().RequestData() != null, "ìš”ì²­ì„ ë°›ì§€ ëª»í•¨");
         }
     }
 }
