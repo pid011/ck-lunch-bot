@@ -1,13 +1,46 @@
-﻿using System;
+﻿using CKLunchBot.Core.Requester;
+
+using Newtonsoft.Json.Linq;
+
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Menu
 {
-    public class MenuRequester
+    public class MenuLoader
     {
+        public async Task<List<MenuItem>> GetWeekMenuFromAPIAsync()
+        {
+            try
+            {
+                return MenuJsonParser(await new MenuRequester().RequestData());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private List<MenuItem> MenuJsonParser(JObject jsonObject)
+        {
+            var success = (bool)jsonObject["success"];
+            if (!success)
+            {
+                var message = (string)jsonObject["result"];
+                throw new Exception($"API request fail message: {message}");
+            }
+
+            List<MenuItem> menuList = jsonObject["result"]
+                .Select(a => new MenuItem(a.ToObject<RawMenuItem>()))
+                .ToList();
+
+            return menuList;
+        }
     }
 }
+
 /*
 API response data examples
 

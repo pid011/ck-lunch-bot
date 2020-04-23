@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json.Linq;
 
-using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Requester
 {
@@ -18,7 +17,7 @@ namespace CKLunchBot.Core.Requester
         {
             if (string.IsNullOrEmpty(url))
             {
-                throw new ArgumentException("요청받을 url이 null을 참조하고 있거나 비어있습니다.", nameof(url));
+                throw new ArgumentException("요청받을 url이 null을 참조하고 있거나 비어있습니다", nameof(url));
             }
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);

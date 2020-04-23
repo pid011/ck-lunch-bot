@@ -1,15 +1,15 @@
-﻿using System;
-using System.IO;
-using CKLunchBot.Core.Requester;
-using Newtonsoft.Json.Linq;
+using CKLunchBot.Core.Menu;
+
 using Serilog;
+
+using System.IO;
 using System.Threading.Tasks;
 
 namespace CKLunchBot.Twitter
 {
-    class Program
+    internal class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -18,7 +18,8 @@ namespace CKLunchBot.Twitter
                 .CreateLogger();
 
             Log.Information("Hello, World!");
-            Log.Debug((await new MenuRequester().RequestData()).ToString());
+            var menuList = await new MenuLoader().GetWeekMenuFromAPIAsync();
+            Log.Debug("Done");
         }
     }
 }

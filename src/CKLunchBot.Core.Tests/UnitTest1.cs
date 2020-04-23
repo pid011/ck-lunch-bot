@@ -1,5 +1,6 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CKLunchBot.Core.Requester;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CKLunchBot.Core.Tests
 {
