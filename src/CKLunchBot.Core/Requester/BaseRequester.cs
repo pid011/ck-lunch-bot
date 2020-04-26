@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 
 using System;
 using System.Collections.Generic;
@@ -43,6 +43,7 @@ namespace CKLunchBot.Core.Requester
             }
             catch (Exception)
             {
+                // TODO: Exception 전달 시 Response받은 문자열도 같이 넣어서 반환
                 throw;
             }
         }
@@ -56,6 +57,7 @@ namespace CKLunchBot.Core.Requester
             }
             catch (Exception)
             {
+                //Exception 전달 시 json 파싱 실패한 문자열도 같이 넣어서 반환
                 throw;
             }
         }
