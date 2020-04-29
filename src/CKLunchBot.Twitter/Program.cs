@@ -40,8 +40,8 @@ namespace CKLunchBot.Twitter
             }
             catch (Exception e)
             {
-                Log.Error(e.Message);
-                Log.Debug(e.ToString());
+                // Log.Error(e.Message);
+                Log.Error(e.ToString());
             }
         }
     }

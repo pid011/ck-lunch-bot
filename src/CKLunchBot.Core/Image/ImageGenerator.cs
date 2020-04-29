@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
 namespace CKLunchBot.Core.Image
 {
@@ -12,7 +14,7 @@ namespace CKLunchBot.Core.Image
         public Dictionary<string, Font> Fonts { get; } = new Dictionary<string, Font>();
         public Bitmap ImageSource { get; }
 
-        private Graphics graphics;
+        private readonly Graphics graphics;
 
         public ImageGenerator(string imagePath)
         {
@@ -23,6 +25,10 @@ namespace CKLunchBot.Core.Image
             }
             ImageSource = new Bitmap(imagePath);
             graphics = Graphics.FromImage(ImageSource);
+
+            // Set Antialiasing mode
+            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
         }
 
         public void DrawText((float x, float y) position, Font font, (int r, int g, int b) rgbColor, string text,
