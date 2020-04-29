@@ -9,50 +9,50 @@ using System.IO;
 
 namespace CKLunchBot.Core.Image
 {
-    public class MenuImageGenerator
+    public class MenuImageGenerator : ImageGenerator
     {
-        public static byte[] GenerateImage(List<MenuItem> menus)
+        private static readonly string menuTemplateImagePath =
+            Path.Combine(Directory.GetCurrentDirectory(), "assets", "images", "menu_template.png");
+
+        private readonly List<MenuItem> menus;
+
+        public MenuImageGenerator(List<MenuItem> menus) : base(menuTemplateImagePath)
         {
             if (menus is null)
             {
                 throw new ArgumentNullException(nameof(menus));
             }
 
-            using var generator = new ImageGenerator(
-                    Path.Combine(
-                        Directory.GetCurrentDirectory(), "assets", "images", "menu_template.png"
-                        )
-                    );
+            this.menus = menus;
 
             PrivateFontCollection fontCollection = new PrivateFontCollection();
-            fontCollection.AddFontFile(
-                Path.Combine(
-                    Directory.GetCurrentDirectory(), generator.FontsPath, "NANUMGOTHICEXTRABOLD.OTF"
-                    )
-                );
 
-            fontCollection.AddFontFile(
-                Path.Combine(
-                    Directory.GetCurrentDirectory(), generator.FontsPath, "NANUMGOTHICBOLD.OTF"
-                    )
-                );
+            string titleFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "NANUMGOTHICEXTRABOLD.OTF");
+            string contetsFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "NANUMGOTHICBOLD.OTF");
+            fontCollection.AddFontFile(titleFontPath);
+            fontCollection.AddFontFile(contetsFontPath);
 
             float titleFontEmSize = 23.0f;
             float contentFontEmSize = 16.0f;
 
-            generator.Fonts.Add("title", new Font(fontCollection.Families[1], titleFontEmSize));
-            generator.Fonts.Add("content", new Font(fontCollection.Families[0], contentFontEmSize));
+            Fonts.Add("title", new Font(fontCollection.Families[1], titleFontEmSize));
+            Fonts.Add("content", new Font(fontCollection.Families[0], contentFontEmSize));
+        }
 
+        public override byte[] Generate()
+        {
             (int, int, int) white = (238, 238, 238);
             (int, int, int) black = (45, 45, 48);
 
             (float x, float y) titlePosition = (400.0f, 37.0f);
 
-            var titleText = DateTime.Now.ToString("D", new System.Globalization.CultureInfo("ko-KR"));
-            generator.DrawText(titlePosition, generator.Fonts["title"], white, titleText, StringAlignment.Far);
+            // Korea Standard Time (UTC +9:00)
+            DateTime koreaTime = DateTime.UtcNow.AddHours(9);
+            var titleText = koreaTime.ToString("D", new System.Globalization.CultureInfo("ko-KR"));
+            DrawText(titlePosition, Fonts["title"], white, titleText, StringAlignment.Far);
 
             var titleText2 = "오늘의 점심메뉴는?";
-            generator.DrawText(titlePosition, generator.Fonts["title"], black, titleText2);
+            DrawText(titlePosition, Fonts["title"], black, titleText2);
 
             foreach (var weekMenu in menus)
             {
@@ -110,10 +110,10 @@ namespace CKLunchBot.Core.Image
                 }
 
                 void DrawContentOnImage((float, float) position, string text) =>
-                    generator.DrawText(position, generator.Fonts["content"], black, text);
+                    DrawText(position, Fonts["content"], black, text);
             }
 
-            return generator.ToByteArray(ImageFormat.Png);
+            return ToByteArray(ImageFormat.Png);
         }
 
         private static string[] GetTodaysMenu(MenuItem menu)

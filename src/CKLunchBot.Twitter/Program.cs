@@ -13,7 +13,6 @@ namespace CKLunchBot.Twitter
     {
         private static async Task Main(string[] args)
         {
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
@@ -25,16 +24,22 @@ namespace CKLunchBot.Twitter
                 Log.Information("Hello, World!");
                 var menuList = await new MenuLoader().GetWeekMenuFromAPIAsync();
                 // TODO: 주말일경우 WeekendImageGenerator.GenerateImage(DayOfWeek week) 호출해서 주말 전용 이미지 생성하기
-                var image = await Task.Run(() => MenuImageGenerator.GenerateImage(menuList));
+                var menuImage = await Task.Run(() =>
+                {
+                    using var generator = new MenuImageGenerator(menuList);
+                    return generator.Generate();
+                });
 
                 #region Test
+
                 System.Drawing.Bitmap bmp;
-                using (var ms = new MemoryStream(image))
+                using (var ms = new MemoryStream(menuImage))
                 {
                     bmp = new System.Drawing.Bitmap(ms);
                 }
                 bmp.Save("test.png", System.Drawing.Imaging.ImageFormat.Png);
-                #endregion
+
+                #endregion Test
 
                 Log.Debug("Done");
             }

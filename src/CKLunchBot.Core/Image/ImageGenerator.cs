@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.IO;
 
 namespace CKLunchBot.Core.Image
 {
-    public class ImageGenerator : IDisposable
+    public abstract class ImageGenerator : IDisposable
     {
         public readonly string FontsPath = Path.Combine("assets", "fonts");
         public Dictionary<string, Font> Fonts { get; } = new Dictionary<string, Font>();
@@ -16,9 +16,10 @@ namespace CKLunchBot.Core.Image
 
         private readonly Graphics graphics;
 
-        public ImageGenerator(string imagePath)
+        private bool disposed;
+
+        protected ImageGenerator(string imagePath)
         {
-            //  TODO: ImageSource의 타입을 Image로 바꿔도 원본파일이 수정되지 않는지 확인
             if (!File.Exists(imagePath))
             {
                 throw new FileNotFoundException($"Image file does not exist. path: {imagePath}");
@@ -31,7 +32,13 @@ namespace CKLunchBot.Core.Image
             graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
         }
 
-        public void DrawText((float x, float y) position, Font font, (int r, int g, int b) rgbColor, string text,
+        /// <summary>
+        /// Generate an image and return it as a byte array.
+        /// </summary>
+        /// <returns>image as a byte array</returns>
+        public abstract byte[] Generate();
+
+        protected void DrawText((float x, float y) position, Font font, (int r, int g, int b) rgbColor, string text,
                              StringAlignment alignment = StringAlignment.Near)
         {
             try
@@ -46,7 +53,7 @@ namespace CKLunchBot.Core.Image
             }
         }
 
-        public byte[] ToByteArray(ImageFormat format)
+        protected byte[] ToByteArray(ImageFormat format)
         {
             using var stream = new MemoryStream();
             ImageSource.Save(stream, format);
@@ -55,12 +62,19 @@ namespace CKLunchBot.Core.Image
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             foreach (var font in Fonts)
             {
-                font.Value.Dispose();
+                if (font.Value != null) font.Value.Dispose();
             }
             ImageSource.Dispose();
-            graphics.Dispose();
+            if (graphics != null) graphics.Dispose();
+
+            disposed = true;
         }
     }
 }
