@@ -1,4 +1,4 @@
-﻿using CKLunchBot.Core.Requester;
+using CKLunchBot.Core.Requester;
 
 using Newtonsoft.Json.Linq;
 

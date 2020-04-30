@@ -1,4 +1,5 @@
 using CKLunchBot.Core.Menu;
+using CKLunchBot.Core.Utils;
 
 using System;
 using System.Collections.Generic;
@@ -41,18 +42,13 @@ namespace CKLunchBot.Core.Image
 
         public override byte[] Generate()
         {
-            (int, int, int) white = (238, 238, 238);
-            (int, int, int) black = (45, 45, 48);
-
             (float x, float y) titlePosition = (400.0f, 37.0f);
 
-            // Korea Standard Time (UTC +9:00)
-            DateTime koreaTime = DateTime.UtcNow.AddHours(9);
-            var titleText = koreaTime.ToString("D", new System.Globalization.CultureInfo("ko-KR"));
-            DrawText(titlePosition, Fonts["title"], white, titleText, StringAlignment.Far);
+            string titleText = TimeUtils.FormattedKoreaNowTime;
+            DrawText(titlePosition, Fonts["title"], CKLunchBotColors.White, titleText, StringAlignment.Far);
 
             var titleText2 = "오늘의 점심메뉴는?";
-            DrawText(titlePosition, Fonts["title"], black, titleText2);
+            DrawText(titlePosition, Fonts["title"], CKLunchBotColors.Black, titleText2);
 
             foreach (var weekMenu in menus)
             {
@@ -110,7 +106,7 @@ namespace CKLunchBot.Core.Image
                 }
 
                 void DrawContentOnImage((float, float) position, string text) =>
-                    DrawText(position, Fonts["content"], black, text);
+                    DrawText(position, Fonts["content"], CKLunchBotColors.Black, text);
             }
 
             return ToByteArray(ImageFormat.Png);

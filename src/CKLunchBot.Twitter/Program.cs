@@ -22,6 +22,9 @@ namespace CKLunchBot.Twitter
             try
             {
                 Log.Information("Hello, World!");
+
+                #region MenuImageTest
+
                 var menuList = await new MenuLoader().GetWeekMenuFromAPIAsync();
                 // TODO: 주말일경우 WeekendImageGenerator.GenerateImage(DayOfWeek week) 호출해서 주말 전용 이미지 생성하기
                 var menuImage = await Task.Run(() =>
@@ -30,16 +33,31 @@ namespace CKLunchBot.Twitter
                     return generator.Generate();
                 });
 
-                #region Test
-
-                System.Drawing.Bitmap bmp;
+                System.Drawing.Bitmap menuImageBmp;
                 using (var ms = new MemoryStream(menuImage))
                 {
-                    bmp = new System.Drawing.Bitmap(ms);
+                    menuImageBmp = new System.Drawing.Bitmap(ms);
                 }
-                bmp.Save("test.png", System.Drawing.Imaging.ImageFormat.Png);
+                menuImageBmp.Save("test_menu.png", System.Drawing.Imaging.ImageFormat.Png);
 
-                #endregion Test
+                #endregion MenuImageTest
+
+                #region WeekendImageTest
+
+                var weekendImage = await Task.Run(() =>
+                {
+                    using var generator = new WeekendImageGenerator();
+                    return generator.Generate();
+                });
+
+                System.Drawing.Bitmap weekendImageBmp;
+                using (var ms = new MemoryStream(weekendImage))
+                {
+                    weekendImageBmp = new System.Drawing.Bitmap(ms);
+                }
+                weekendImageBmp.Save("test_weekend.png", System.Drawing.Imaging.ImageFormat.Png);
+
+                #endregion WeekendImageTest
 
                 Log.Debug("Done");
             }
