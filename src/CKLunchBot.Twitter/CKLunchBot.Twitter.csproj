@@ -6,6 +6,7 @@
     <RootNamespace>CKLunchBot.Twitter</RootNamespace>
     <AssemblyName>CKLunchBot.Twitter</AssemblyName>
     <RepositoryUrl>https://github.com/pid011/ck-lunch-bot</RepositoryUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
