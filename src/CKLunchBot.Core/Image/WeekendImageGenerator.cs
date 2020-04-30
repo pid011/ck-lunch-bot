@@ -27,7 +27,7 @@ namespace CKLunchBot.Core.Image
         {
             (float x, float y) titlePosition = (400.0f, 37.0f);
 
-            string date = TimeUtils.FormattedKoreaNowTime;
+            string date = TimeUtils.Time.FormattedKoreaNowTime;
             DrawText(titlePosition, Fonts["title"], CKLunchBotColors.White, date, StringAlignment.Far);
 
             return ToByteArray(ImageFormat.Png);

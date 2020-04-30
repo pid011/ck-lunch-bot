@@ -44,7 +44,7 @@ namespace CKLunchBot.Core.Image
         {
             (float x, float y) titlePosition = (400.0f, 37.0f);
 
-            string titleText = TimeUtils.FormattedKoreaNowTime;
+            string titleText = TimeUtils.Time.FormattedKoreaNowTime;
             DrawText(titlePosition, Fonts["title"], CKLunchBotColors.White, titleText, StringAlignment.Far);
 
             var titleText2 = "오늘의 점심메뉴는?";

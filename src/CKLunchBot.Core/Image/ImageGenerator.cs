@@ -36,7 +36,7 @@ namespace CKLunchBot.Core.Image
         /// Generate an image and return it as a byte array.
         /// </summary>
         /// <returns>image as a byte array</returns>
-        public abstract byte[] Generate();
+        public abstract byte[] Generate(); // TODO: Task<byte[]>로 반환타입 변경하고 사용 시 await ...으로 사용하기
 
         protected void DrawText((float x, float y) position, Font font, (int r, int g, int b) rgbColor, string text,
                              StringAlignment alignment = StringAlignment.Near)
