@@ -23,7 +23,7 @@ namespace CKLunchBot.Twitter
             using var botCancel = new CancellationTokenSource();
 
             var botTask = new BotService().Run(botCancel.Token);
-            Log.Information("@ck_lunch_bot is now running.");
+            //Log.Information("@ck_lunch_bot is now running.");
 
             var stopCommandTask = Task.Run(() =>
             {

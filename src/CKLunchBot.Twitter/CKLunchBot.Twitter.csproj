@@ -20,4 +20,10 @@
     <ProjectReference Include="..\CKLunchBot.Core\CKLunchBot.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ck_lunch_bot_twitter_tokens.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

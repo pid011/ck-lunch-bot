@@ -20,8 +20,9 @@ namespace CKLunchBot.Twitter
 {
     public class BotService
     {
-        // private (int hour, int minute) tweetTime = (11, 50);
-        private (int hour, int minute) tweetTime = (TimeUtils.Time.KoreaNowTime.Hour, TimeUtils.Time.KoreaNowTime.Minute);
+        // TODO: config.json에서 시간을 조정할 수 있도록 수정
+        private readonly (int hour, int minute) tweetTime = (8, 50);
+        //private (int hour, int minute) tweetTime = (TimeUtils.Time.KoreaNowTime.Hour, TimeUtils.Time.KoreaNowTime.Minute);
 
         private bool alreadyTweeted;
 
@@ -38,7 +39,7 @@ namespace CKLunchBot.Twitter
                 while (true)
                 {
                     await WaitForTweetTime(token);
-
+                    Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
                     var image = await GenerateImageAsync();
 
@@ -52,6 +53,18 @@ namespace CKLunchBot.Twitter
                     });
                     Log.Debug($"tweet link: {tweetWithImage}");
                     Log.Information("Tweet publish completed.");
+
+                    var date = TimeUtils.Time.KoreaNowTime;
+                    int month = date.Month;
+                    int day = date.Day + 1;
+
+                    date = new DateTime(date.Year,
+                                        date.Month,
+                                        date.Day + 1,
+                                        tweetTime.hour,
+                                        tweetTime.minute,
+                                        0);
+                    Log.Information($"Next tweet time is {date}");
                 }
             }
             catch (TaskCanceledException)
@@ -94,7 +107,7 @@ namespace CKLunchBot.Twitter
                     });
                     break;
             }
-            Log.Information("Generate completed.");
+            //Log.Information("Generate completed.");
             return image;
         }
 
@@ -149,6 +162,8 @@ namespace CKLunchBot.Twitter
                 }
                 throw new JsonException(errorMessage.ToString());
             }
+            var time = new TimeSpan(tweetTime.hour, tweetTime.minute, 0);
+            Log.Information($"This bot is tweet image always {time}");
         }
 
         private async Task WaitForTweetTime(CancellationToken token)
@@ -167,7 +182,7 @@ namespace CKLunchBot.Twitter
                     {
                         continue;
                     }
-                    tweetTime.minute += 2;
+                    //tweetTime.minute += 2;
                     alreadyTweeted = true;
                     break;
                 }
