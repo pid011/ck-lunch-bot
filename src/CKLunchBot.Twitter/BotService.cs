@@ -30,12 +30,9 @@ namespace CKLunchBot.Twitter
         {
             try
             {
-                Startup(out TwitterTokens twitterTokens);
+                var startupResult = await Startup();
+                var client = startupResult.Client;
 
-                var client = new TwitterClient(twitterTokens.ConsumerApiKey,
-                                               twitterTokens.ConsumerSecretKey,
-                                               twitterTokens.AccessToken,
-                                               twitterTokens.AccessTokenSecret);
                 while (true)
                 {
                     await WaitForTweetTime(token);
@@ -73,7 +70,10 @@ namespace CKLunchBot.Twitter
             }
             catch (Exception e)
             {
-                Log.Error(e.ToString());
+                Log.Fatal(e.ToString());
+                Log.Debug(e.Message);
+                Log.Debug(e.Source);
+                Log.Debug(e.StackTrace);
                 Log.Information("The bot has stopped due to an error.");
             }
         }
@@ -111,10 +111,10 @@ namespace CKLunchBot.Twitter
             return image;
         }
 
-        private void Startup(out TwitterTokens tokens)
+        private async Task<StartupResult> Startup()
         {
             const string tokensFileName = "ck_lunch_bot_twitter_tokens.json";
-
+            TwitterTokens tokens;
             try
             {
                 using StreamReader reader = File.OpenText(tokensFileName);
@@ -162,8 +162,20 @@ namespace CKLunchBot.Twitter
                 }
                 throw new JsonException(errorMessage.ToString());
             }
+
+            // TwitterClient를 만들고 토큰이 제대로 된건지 테스트 과정 필요
+            var client = new TwitterClient(tokens.ConsumerApiKey, tokens.ConsumerSecretKey, tokens.AccessToken, tokens.AccessTokenSecret);
+            var authenticatedUser = await client.Users.GetAuthenticatedUser();
+            var botInfo = new StringBuilder();
+            botInfo.AppendLine("[Bot information]");
+            botInfo.AppendLine($"Bot name: {authenticatedUser.Name}");
+            botInfo.AppendLine($"Bot description: {authenticatedUser.Description}");
+            Log.Debug(botInfo.ToString());
+
             var time = new TimeSpan(tweetTime.hour, tweetTime.minute, 0);
             Log.Information($"This bot is tweet image always {time}");
+
+            return new StartupResult(client);
         }
 
         private async Task WaitForTweetTime(CancellationToken token)
@@ -191,6 +203,16 @@ namespace CKLunchBot.Twitter
                     alreadyTweeted = false;
                 }
             }
+        }
+    }
+
+    public class StartupResult
+    {
+        public TwitterClient Client { get; }
+
+        public StartupResult(TwitterClient client)
+        {
+            Client = client;
         }
     }
 }
