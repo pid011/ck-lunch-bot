@@ -21,7 +21,7 @@ namespace CKLunchBot.Twitter
     public class BotService
     {
         // TODO: config.json에서 시간을 조정할 수 있도록 수정
-        private readonly (int hour, int minute) tweetTime = (8, 50);
+        private readonly (int hour, int minute) tweetTime = (11, 50);
         //private (int hour, int minute) tweetTime = (TimeUtils.Time.KoreaNowTime.Hour, TimeUtils.Time.KoreaNowTime.Minute);
 
         private bool alreadyTweeted;
@@ -44,7 +44,8 @@ namespace CKLunchBot.Twitter
                     var uploadedImage = await client.Upload.UploadTweetImage(image);
                     //Log.Debug(uploadedImage.ToString());
                     Log.Information("Publishing tweet...");
-                    var tweetWithImage = await client.Tweets.PublishTweet(new PublishTweetParameters("")
+                    var tweetText = TimeUtils.Time.FormattedKoreaNowTime + " 오늘은...";
+                    var tweetWithImage = await client.Tweets.PublishTweet(new PublishTweetParameters(tweetText)
                     {
                         Medias = { uploadedImage }
                     });
