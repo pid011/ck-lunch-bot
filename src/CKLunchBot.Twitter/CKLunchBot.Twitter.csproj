@@ -28,9 +28,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy D:\ck_lunch_bot\twitter-tokens.json D:\workspace\repos\github.com\pid011\ck-lunch-bot\src\CKLunchBot.Twitter\bin\Debug\netcoreapp3.1\twitter-tokens.json" />
-  </Target>
-
 </Project>
