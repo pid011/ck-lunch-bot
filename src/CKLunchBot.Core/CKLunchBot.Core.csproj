@@ -16,19 +16,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Image\ImageGenerator.cs~RF30a36e6.TMP" />
+    <None Remove="ImageProcess\ImageGenerator.cs~RF30a36e6.TMP" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0009" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="assets\fonts\NANUMGOTHICBOLD.OTF">
+    <None Update="assets\fonts\Maplestory Bold.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="assets\fonts\NANUMGOTHICEXTRABOLD.OTF">
+    <None Update="assets\fonts\Maplestory Light.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="assets\images\menu_template.png">

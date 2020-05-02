@@ -1,4 +1,4 @@
-using CKLunchBot.Core.Image;
+using CKLunchBot.Core.ImageProcess;
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Utils;
 
@@ -21,8 +21,9 @@ namespace CKLunchBot.Twitter
     public class BotService
     {
         // TODO: config.json에서 시간을 조정할 수 있도록 수정
-        private readonly (int hour, int minute) tweetTime = (11, 50);
-        //private (int hour, int minute) tweetTime = (TimeUtils.Time.KoreaNowTime.Hour, TimeUtils.Time.KoreaNowTime.Minute);
+        //private readonly (int hour, int minute) tweetTime = (11, 50);
+        private (int hour, int minute) tweetTime =
+            (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute); // test code
 
         private bool alreadyTweeted;
 
@@ -40,19 +41,9 @@ namespace CKLunchBot.Twitter
                     Log.Information("Starting image generate...");
                     var image = await GenerateImageAsync();
 
-                    Log.Information("Uploading tweet image...");
-                    var uploadedImage = await client.Upload.UploadTweetImage(image);
-                    //Log.Debug(uploadedImage.ToString());
-                    Log.Information("Publishing tweet...");
-                    var tweetText = TimeUtils.Time.FormattedKoreaNowTime + " 오늘은...";
-                    var tweetWithImage = await client.Tweets.PublishTweet(new PublishTweetParameters(tweetText)
-                    {
-                        Medias = { uploadedImage }
-                    });
-                    Log.Debug($"tweet link: {tweetWithImage}");
-                    Log.Information("Tweet publish completed.");
+                    await Tweet(client, image);
 
-                    var date = TimeUtils.Time.KoreaNowTime;
+                    var date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int month = date.Month;
                     int day = date.Day + 1;
 
@@ -79,10 +70,25 @@ namespace CKLunchBot.Twitter
             }
         }
 
+        private async Task Tweet(TwitterClient client, byte[] image)
+        {
+            Log.Information("Uploading tweet image...");
+            var uploadedImage = await client.Upload.UploadTweetImage(image);
+            //Log.Debug(uploadedImage.ToString());
+            Log.Information("Publishing tweet...");
+            var tweetText = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow) + " 오늘은...";
+            var tweetWithImage = await client.Tweets.PublishTweet(new PublishTweetParameters(tweetText)
+            {
+                Medias = { uploadedImage }
+            });
+            Log.Debug($"tweet link: {tweetWithImage}");
+            Log.Information("Tweet publish completed.");
+        }
+
         private async Task<byte[]> GenerateImageAsync()
         {
             byte[] image;
-            switch (TimeUtils.Time.KoreaNowTime.DayOfWeek)
+            switch (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek)
             {
                 case DayOfWeek.Sunday:
                 case DayOfWeek.Saturday:
@@ -168,7 +174,7 @@ namespace CKLunchBot.Twitter
             var client = new TwitterClient(tokens.ConsumerApiKey, tokens.ConsumerSecretKey, tokens.AccessToken, tokens.AccessTokenSecret);
             var authenticatedUser = await client.Users.GetAuthenticatedUser();
             var botInfo = new StringBuilder();
-            botInfo.AppendLine("[Bot information]");
+            botInfo.AppendLine("---Bot information---");
             botInfo.AppendLine($"Bot name: {authenticatedUser.Name}");
             botInfo.AppendLine($"Bot description: {authenticatedUser.Description}");
             Log.Debug(botInfo.ToString());
@@ -188,14 +194,14 @@ namespace CKLunchBot.Twitter
                     throw new TaskCanceledException();
                 }
                 await Task.Delay(500);
-                var now = TimeUtils.Time.KoreaNowTime;
+                var now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                 if (now.Hour == tweetTime.hour && now.Minute == tweetTime.minute)
                 {
                     if (alreadyTweeted)
                     {
                         continue;
                     }
-                    //tweetTime.minute += 2;
+                    tweetTime.minute += 2; // test code
                     alreadyTweeted = true;
                     break;
                 }

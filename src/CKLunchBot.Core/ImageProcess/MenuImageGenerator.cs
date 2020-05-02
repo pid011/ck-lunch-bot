@@ -1,14 +1,13 @@
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Utils;
 
+using SixLabors.Fonts;
+
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
 using System.IO;
 
-namespace CKLunchBot.Core.Image
+namespace CKLunchBot.Core.ImageProcess
 {
     public class MenuImageGenerator : ImageGenerator
     {
@@ -26,28 +25,24 @@ namespace CKLunchBot.Core.Image
 
             this.menus = menus;
 
-            PrivateFontCollection fontCollection = new PrivateFontCollection();
+            string titleFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "Maplestory Bold.ttf");
+            string contentFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "Maplestory Light.ttf");
 
-            string titleFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "NANUMGOTHICEXTRABOLD.OTF");
-            string contetsFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "NANUMGOTHICBOLD.OTF");
-            fontCollection.AddFontFile(titleFontPath);
-            fontCollection.AddFontFile(contetsFontPath);
+            float titleFontEmSize = 32.0f;
+            float contentFontEmSize = 24.0f;
 
-            float titleFontEmSize = 23.0f;
-            float contentFontEmSize = 16.0f;
-
-            Fonts.Add("title", new Font(fontCollection.Families[1], titleFontEmSize));
-            Fonts.Add("content", new Font(fontCollection.Families[0], contentFontEmSize));
+            AddFont("title", titleFontPath, titleFontEmSize, FontStyle.Regular);
+            AddFont("content", contentFontPath, contentFontEmSize, FontStyle.Regular);
         }
 
         public override byte[] Generate()
         {
-            (float x, float y) titlePosition = (400.0f, 37.0f);
+            (float x, float y) titlePosition = (405.0f, 37.0f);
 
-            string titleText = TimeUtils.Time.FormattedKoreaNowTime;
-            DrawText(titlePosition, Fonts["title"], CKLunchBotColors.White, titleText, StringAlignment.Far);
+            string titleText = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow);
+            DrawText(titlePosition, Fonts["title"], CKLunchBotColors.White, titleText, HorizontalAlignment.Right);
 
-            var titleText2 = "오늘의 점심메뉴는?";
+            var titleText2 = " 오늘의 점심메뉴는?";
             DrawText(titlePosition, Fonts["title"], CKLunchBotColors.Black, titleText2);
 
             foreach (var weekMenu in menus)
@@ -109,7 +104,7 @@ namespace CKLunchBot.Core.Image
                     DrawText(position, Fonts["content"], CKLunchBotColors.Black, text);
             }
 
-            return ToByteArray(ImageFormat.Png);
+            return ExportAsPng();
         }
 
         private static string[] GetTodaysMenu(MenuItem menu)

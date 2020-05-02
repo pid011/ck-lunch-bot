@@ -9,7 +9,7 @@ namespace CKLunchBot.Twitter
 {
     internal class Program
     {
-        private static async Task Main(string[] args)
+        private static async Task Main()
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()

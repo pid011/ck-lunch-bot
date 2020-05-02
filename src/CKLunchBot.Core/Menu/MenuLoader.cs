@@ -23,6 +23,18 @@ namespace CKLunchBot.Core.Menu
             }
         }
 
+        public List<MenuItem> GetWeekMenuFromJsonString(string json)
+        {
+            try
+            {
+                return MenuJsonParser(JObject.Parse(json));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private List<MenuItem> MenuJsonParser(JObject jsonObject)
         {
             var success = (bool)jsonObject["success"];

@@ -2,23 +2,17 @@ using System;
 
 namespace CKLunchBot.Core.Utils
 {
-    public class TimeUtils
+    public static class TimeUtils
     {
-        public static TimeUtils Time => new TimeUtils();
+        /// <summary>
+        /// Get Korea Standard Time.
+        /// </summary>
+        public static DateTime GetKoreaNowTime(DateTime utcNow) => utcNow.AddHours(9);
 
         /// <summary>
-        /// Get current Korea Standard Time.
+        /// Get Time as a formatted string.
         /// </summary>
-        public DateTime KoreaNowTime => DateTime.UtcNow.AddHours(9);
-
-        /// <summary>
-        /// Get current Korea Standard Time as a formatted string.
-        /// </summary>
-        public string FormattedKoreaNowTime =>
-            KoreaNowTime.ToString("D", new System.Globalization.CultureInfo("ko-KR"));
-
-        private TimeUtils()
-        {
-        }
+        public static string GetFormattedKoreaTime(DateTime utcNow) =>
+            GetKoreaNowTime(utcNow).ToString("D", new System.Globalization.CultureInfo("ko-KR"));
     }
 }
