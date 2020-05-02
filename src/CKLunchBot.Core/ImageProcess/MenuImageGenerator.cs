@@ -24,15 +24,11 @@ namespace CKLunchBot.Core.ImageProcess
             }
 
             this.menus = menus;
-
-            string titleFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "Maplestory Bold.ttf");
-            string contentFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "Maplestory Light.ttf");
-
             float titleFontEmSize = 32.0f;
             float contentFontEmSize = 24.0f;
 
-            AddFont("title", titleFontPath, titleFontEmSize, FontStyle.Regular);
-            AddFont("content", contentFontPath, contentFontEmSize, FontStyle.Regular);
+            AddFont("title", FontPath.TitleFontPath, titleFontEmSize, FontStyle.Regular);
+            AddFont("content", FontPath.ContentFontPath, contentFontEmSize, FontStyle.Regular);
         }
 
         public override byte[] Generate()

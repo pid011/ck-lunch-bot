@@ -11,7 +11,6 @@ namespace CKLunchBot.Core.ImageProcess
 {
     public abstract class ImageGenerator : IDisposable
     {
-        public readonly string FontsPath = Path.Combine("assets", "fonts");
         public Dictionary<string, Font> Fonts { get; } = new Dictionary<string, Font>();
 
         private readonly Image image;

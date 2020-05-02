@@ -14,10 +14,8 @@ namespace CKLunchBot.Core.ImageProcess
 
         public WeekendImageGenerator() : base(weekendImagePath)
         {
-            string titleFontPath = Path.Combine(Directory.GetCurrentDirectory(), FontsPath, "Maplestory Bold.ttf");
-
             float contentFontEmSize = 32.0f;
-            AddFont("title", titleFontPath, contentFontEmSize, FontStyle.Regular);
+            AddFont("title", FontPath.TitleFontPath, contentFontEmSize, FontStyle.Regular);
         }
 
         public override byte[] Generate()
