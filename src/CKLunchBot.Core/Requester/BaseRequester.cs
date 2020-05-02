@@ -12,6 +12,7 @@ namespace CKLunchBot.Core.Requester
     {
         private static readonly HttpClient client = new HttpClient();
 
+        // TODO: Refactoring: https://www.newtonsoft.com/json/help/html/Performance.htm#MemoryUsage
         protected async Task<string> GetResponseString(
             string url, string jsonContent = null, Dictionary<string, string> headers = null)
         {

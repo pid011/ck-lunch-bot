@@ -4,21 +4,21 @@ namespace CKLunchBot.Twitter
 {
     public class TwitterTokens
     {
-        public const string ConsumerApiKeyName = "consumer-api-key";
-        public const string ConsumerSecretKeyName = "consumer-secret-key";
-        public const string AccessTokenName = "access-token";
-        public const string AccessTokenSecretName = "access-token-secret";
+        public const string ConsumerApiKeyPropertyName = "consumer-api-key";
+        public const string ConsumerSecretKeyPropertyName = "consumer-secret-key";
+        public const string AccessTokenPropertyName = "access-token";
+        public const string AccessTokenSecretPropertyName = "access-token-secret";
 
-        [JsonProperty(ConsumerApiKeyName)]
+        [JsonProperty(ConsumerApiKeyPropertyName)]
         public string ConsumerApiKey { get; set; }
 
-        [JsonProperty(ConsumerSecretKeyName)]
+        [JsonProperty(ConsumerSecretKeyPropertyName)]
         public string ConsumerSecretKey { get; set; }
 
-        [JsonProperty(AccessTokenName)]
+        [JsonProperty(AccessTokenPropertyName)]
         public string AccessToken { get; set; }
 
-        [JsonProperty(AccessTokenSecretName)]
+        [JsonProperty(AccessTokenSecretPropertyName)]
         public string AccessTokenSecret { get; set; }
     }
 }

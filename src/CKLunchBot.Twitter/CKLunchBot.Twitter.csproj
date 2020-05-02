@@ -21,13 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="ck_lunch_bot_twitter_tokens.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="twitter-tokens.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy D:\ck_lunch_bot\ck_lunch_bot_twitter_tokens.json D:\workspace\repos\github.com\pid011\ck-lunch-bot\src\CKLunchBot.Twitter\bin\Debug\netcoreapp3.1\ck_lunch_bot_twitter_tokens.json" />
+    <Exec Command="copy D:\ck_lunch_bot\twitter-tokens.json D:\workspace\repos\github.com\pid011\ck-lunch-bot\src\CKLunchBot.Twitter\bin\Debug\netcoreapp3.1\twitter-tokens.json" />
   </Target>
 
 </Project>
