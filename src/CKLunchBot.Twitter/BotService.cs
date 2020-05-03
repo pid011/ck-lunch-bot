@@ -43,7 +43,7 @@ namespace CKLunchBot.Twitter
                 Log.Information("The bot has stopped due to a startup error.");
                 return;
             }
-            
+
             while (true)
             {
                 try
@@ -53,7 +53,7 @@ namespace CKLunchBot.Twitter
                     Log.Information("Starting image generate...");
                     var image = await GenerateImageAsync();
 
-                    //await Tweet(client, image);
+                    await Tweet(client, image);
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
@@ -70,7 +70,7 @@ namespace CKLunchBot.Twitter
                     Log.Fatal(e.ToString());
                     Log.Information("The bot has stopped due to an error. It will try again at the next tweet time.");
                 }
-            }            
+            }
         }
 
         private async Task Tweet(TwitterClient client, byte[] image)
