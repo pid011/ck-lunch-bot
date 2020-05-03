@@ -1,3 +1,5 @@
+using Figgle;
+
 using Serilog;
 
 using System;
@@ -16,6 +18,10 @@ namespace CKLunchBot.Twitter
                 .WriteTo.Console()
                 .WriteTo.File(Path.Combine("logs", ".log"), rollingInterval: RollingInterval.Month)
                 .CreateLogger();
+
+            Log.Information($"\n{FiggleFonts.Small.Render("CKLunchBot")}");
+            var assembly = typeof(Program).Assembly.GetName();
+            Log.Information($"[{assembly.Name} v{assembly.Version.ToString(3)}]");
 
             using var bot = new BotService();
             Log.Information("Starting bot...");

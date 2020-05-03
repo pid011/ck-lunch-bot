@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <RepositoryUrl>https://github.com/pid011/ck-lunch-bot</RepositoryUrl>
   </PropertyGroup>
 
@@ -13,10 +13,6 @@
     <EmbeddedResource Remove="Resources\**" />
     <None Remove="Properties\**" />
     <None Remove="Resources\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="ImageProcess\ImageGenerator.cs~RF30a36e6.TMP" />
   </ItemGroup>
 
   <ItemGroup>
