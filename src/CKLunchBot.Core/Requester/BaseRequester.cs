@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Requester
 {
-    public class BaseRequester
+    public abstract class BaseRequester
     {
         private static readonly HttpClient client = new HttpClient();
 
-        // TODO: Refactoring: https://www.newtonsoft.com/json/help/html/Performance.htm#MemoryUsage
+        public abstract Task<JObject> RequestData();
+
         protected async Task<string> GetResponseString(
             string url, string jsonContent = null, Dictionary<string, string> headers = null)
         {
@@ -37,30 +38,15 @@ namespace CKLunchBot.Core.Requester
             }
 
             HttpResponseMessage response;
-            try
-            {
-                response = await client.SendAsync(request);
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception)
-            {
-                // TODO: Exception 전달 시 Response받은 문자열도 같이 넣어서 반환
-                throw;
-            }
+            response = await client.SendAsync(request);
+            return await response.Content.ReadAsStringAsync();
         }
 
         protected async Task<JObject> GetJsonFromUrl(
             string url, string jsonContent = null, Dictionary<string, string> headers = null)
         {
-            try
-            {
-                return JObject.Parse(await GetResponseString(url, jsonContent, headers));
-            }
-            catch (Exception)
-            {
-                //Exception 전달 시 json 파싱 실패한 문자열도 같이 넣어서 반환
-                throw;
-            }
+            var jsonString = await GetResponseString(url, jsonContent, headers);
+            return JObject.Parse(jsonString);
         }
     }
 }

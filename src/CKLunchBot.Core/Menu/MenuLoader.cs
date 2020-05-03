@@ -13,26 +13,13 @@ namespace CKLunchBot.Core.Menu
     {
         public async Task<List<MenuItem>> GetWeekMenuFromAPIAsync()
         {
-            try
-            {
-                return MenuJsonParser(await new MenuRequester().RequestData());
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var jsonObj = await new MenuRequester().RequestData();
+            return MenuJsonParser(jsonObj);
         }
 
         public List<MenuItem> GetWeekMenuFromJsonString(string json)
         {
-            try
-            {
-                return MenuJsonParser(JObject.Parse(json));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return MenuJsonParser(JObject.Parse(json));
         }
 
         private List<MenuItem> MenuJsonParser(JObject jsonObject)
@@ -56,12 +43,28 @@ namespace CKLunchBot.Core.Menu
 /*
 API response data examples
 
+[Wrong service name]
+
 {
   "success": false,
   "result": "Wrong Service Name.",
   "date": "20200420213128"
 }
+
 ----------------------------------------------------------
+
+[Response success but nothing recieved]
+
+{
+  "success": true,
+  "result": [],
+  "date": "20200504003540"
+}
+
+----------------------------------------------------------
+
+[Response success]
+
 {
   "success": true,
   "result": [

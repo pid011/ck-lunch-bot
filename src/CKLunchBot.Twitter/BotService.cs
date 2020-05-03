@@ -26,6 +26,7 @@ namespace CKLunchBot.Twitter
 
         public async Task Run(CancellationToken token)
         {
+            // TODO: 실행 중 오류가 발생했을 경우 강제종료가 아닌 다음 트윗 시간에 다시 시도하도록 수정하기
             try
             {
                 var startupResult = await Startup();

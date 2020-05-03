@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CKLunchBot.ImageGenTest", "src\CKLunchBot.ImageGenTest\CKLunchBot.ImageGenTest.csproj", "{DACCCA22-570D-4019-96A1-9FD163813790}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,18 @@ Global
 		{B6294F91-0280-437F-AEE2-093369DD88BA}.Release|x64.Build.0 = Release|Any CPU
 		{B6294F91-0280-437F-AEE2-093369DD88BA}.Release|x86.ActiveCfg = Release|Any CPU
 		{B6294F91-0280-437F-AEE2-093369DD88BA}.Release|x86.Build.0 = Release|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Debug|x64.Build.0 = Debug|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Debug|x86.Build.0 = Debug|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Release|x64.ActiveCfg = Release|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Release|x64.Build.0 = Release|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Release|x86.ActiveCfg = Release|Any CPU
+		{DACCCA22-570D-4019-96A1-9FD163813790}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,6 +84,7 @@ Global
 		{A3559CDD-18AB-48ED-8BD6-0D15F9FE9063} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
 		{98E066BD-5136-4EA9-8EAB-8D1C51FC2BE5} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
 		{B6294F91-0280-437F-AEE2-093369DD88BA} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
+		{DACCCA22-570D-4019-96A1-9FD163813790} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2371DCA4-17BA-4361-8ADE-E1862B69573A}

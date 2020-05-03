@@ -1,12 +1,11 @@
 using Newtonsoft.Json.Linq;
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Requester
 {
-    public class MenuRequester : BaseRequester, IRequester
+    public class MenuRequester : BaseRequester
     {
         private static readonly string ApiKey = "852f99ba1fd20a2b5f662467635f58d55dd18ae9ee16e635123dd187d8179738";
 
@@ -22,21 +21,14 @@ namespace CKLunchBot.Core.Requester
                 }
             }).ToString();
 
-        public async Task<JObject> RequestData()
+        public override async Task<JObject> RequestData()
         {
             var headers = new Dictionary<string, string>()
             {
                 ["X-Dreamfactory-API-Key"] = ApiKey
             };
 
-            try
-            {
-                return await GetJsonFromUrl(ApiRequestUrl, MenuRequestContent, headers);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return await GetJsonFromUrl(ApiRequestUrl, MenuRequestContent, headers);
         }
     }
 }
