@@ -37,6 +37,11 @@ namespace CKLunchBot.Twitter
                 // test code
                 //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
             }
+            catch (CreateConfigException)
+            {
+                Log.Error("Create a new config.json because it does not exist. Please setup the config and start again.");
+                return;
+            }
             catch (Exception e)
             {
                 Log.Fatal(e.ToString());
@@ -123,8 +128,7 @@ namespace CKLunchBot.Twitter
         private async Task<StartupResult> Startup()
         {
             ConfigItem config = LoadConfig();
-            TwitterTokens tokens = LoadTwitterToken();
-            TwitterClient client = await ConnectToTwitter(tokens);
+            TwitterClient client = await ConnectToTwitter(config.TwitterTokens);
 
             tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
 
@@ -140,77 +144,94 @@ namespace CKLunchBot.Twitter
         {
             const string configFileName = "config.json";
             ConfigItem config;
+
+            JsonSerializer serializer = new JsonSerializer();
+
+            if (!File.Exists(configFileName))
+            {
+                var newConfig = new ConfigItem()
+                {
+                    TweetTime = new ConfigItem.Time()
+                    {
+                        Hour = 11,
+                        Minute = 50
+                    },
+                    TwitterTokens = new ConfigItem.TwitterToken()
+                    {
+                        ConsumerApiKey = "consumer_api_key",
+                        ConsumerSecretKey = "consumer_secret_key",
+                        AccessToken = "bot_access_token",
+                        AccessTokenSecret = "bot_access_token_secret"
+                    }
+                };
+
+                using var stream = File.CreateText(configFileName);
+                using var jsonWriter = new JsonTextWriter(stream)
+                {
+                    Formatting = Formatting.Indented
+                };
+                serializer.Serialize(jsonWriter, newConfig, typeof(ConfigItem));
+
+                throw new CreateConfigException();
+            }
+
             using StreamReader configReader = File.OpenText(configFileName);
             using JsonReader configJsonReader = new JsonTextReader(configReader);
-            config = new JsonSerializer().Deserialize<ConfigItem>(configJsonReader);
+            config = serializer.Deserialize<ConfigItem>(configJsonReader);
 
             if (config is null)
             {
                 throw new JsonException("All configs are could not be retrieved.");
             }
 
+            #region tweet time
+
+            var time = config.TweetTime;
+
             var faildList = new List<string>();
-            if (config.TweetTime is null)
+            if (time is null)
             {
                 faildList.Add(ConfigItem.TweetTimePropertyName);
             }
 
-            if (faildList.Count != 0)
-            {
-                var errorMessage = new StringBuilder("Faild to loaded configs: ");
-                for (int i = 0; i < faildList.Count; i++)
-                {
-                    errorMessage.Append(faildList[i]);
-                    if (i < faildList.Count - 1)
-                    {
-                        errorMessage.Append(", ");
-                    }
-                }
-                throw new JsonException(errorMessage.ToString());
-            }
-
-            if (config.TweetTime.Hour > 23)
+            if (time.Hour > 23)
             {
                 throw new JsonException("The hour value is must be 23 or less.");
             }
-            if (config.TweetTime.Minute > 59)
+            if (time.Minute > 59)
             {
                 throw new JsonException("The minute value is must be 59 or less.");
             }
 
-            return config;
-        }
+            #endregion tweet time
 
-        private TwitterTokens LoadTwitterToken()
-        {
-            const string tokensFileName = "twitter-tokens.json";
-            TwitterTokens tokens;
-            using StreamReader tokenReader = File.OpenText(tokensFileName);
-            using JsonReader tokenJsonReader = new JsonTextReader(tokenReader);
-            tokens = new JsonSerializer().Deserialize<TwitterTokens>(tokenJsonReader);
+            #region twitter tokens
+
+            var tokens = config.TwitterTokens;
 
             if (tokens is null)
             {
                 throw new JsonException("All tokens are could not be retrieved.");
             }
 
-            var faildList = new List<string>();
             if (tokens.ConsumerApiKey is null)
             {
-                faildList.Add(TwitterTokens.ConsumerApiKeyPropertyName);
+                faildList.Add(ConfigItem.TwitterToken.ConsumerApiKeyPropertyName);
             }
             if (tokens.ConsumerSecretKey is null)
             {
-                faildList.Add(TwitterTokens.ConsumerSecretKeyPropertyName);
+                faildList.Add(ConfigItem.TwitterToken.ConsumerSecretKeyPropertyName);
             }
             if (tokens.AccessToken is null)
             {
-                faildList.Add(TwitterTokens.AccessTokenPropertyName);
+                faildList.Add(ConfigItem.TwitterToken.AccessTokenPropertyName);
             }
             if (tokens.AccessTokenSecret is null)
             {
-                faildList.Add(TwitterTokens.AccessTokenSecretPropertyName);
+                faildList.Add(ConfigItem.TwitterToken.AccessTokenSecretPropertyName);
             }
+
+            #endregion twitter tokens
 
             if (faildList.Count != 0)
             {
@@ -226,10 +247,10 @@ namespace CKLunchBot.Twitter
                 throw new JsonException(errorMessage.ToString());
             }
 
-            return tokens;
+            return config;
         }
 
-        private async Task<TwitterClient> ConnectToTwitter(TwitterTokens tokens)
+        private async Task<TwitterClient> ConnectToTwitter(ConfigItem.TwitterToken tokens)
         {
             // TwitterClient를 만들고 토큰이 제대로 된건지 테스트 과정 필요
             var client = new TwitterClient(tokens.ConsumerApiKey, tokens.ConsumerSecretKey, tokens.AccessToken, tokens.AccessTokenSecret);

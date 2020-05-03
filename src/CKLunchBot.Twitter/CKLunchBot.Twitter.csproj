@@ -19,13 +19,4 @@
   <ItemGroup>
     <ProjectReference Include="..\CKLunchBot.Core\CKLunchBot.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="twitter-tokens.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
