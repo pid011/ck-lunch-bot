@@ -49,23 +49,23 @@ namespace CKLunchBot.Twitter
 
                 try
                 {
-                    #region test code
+                    //#region test code
 
-                    for (int i = 0; i < 1; i++)
-                    {
-                        tweetTime.minute++;
-                        if (tweetTime.minute > 59)
-                        {
-                            tweetTime.minute = 0;
-                            tweetTime.hour++;
-                            if (tweetTime.hour > 23)
-                            {
-                                tweetTime.hour = 0;
-                            }
-                        }
-                    }
+                    //for (int i = 0; i < 1; i++)
+                    //{
+                    //    tweetTime.minute++;
+                    //    if (tweetTime.minute > 59)
+                    //    {
+                    //        tweetTime.minute = 0;
+                    //        tweetTime.hour++;
+                    //        if (tweetTime.hour > 23)
+                    //        {
+                    //            tweetTime.hour = 0;
+                    //        }
+                    //    }
+                    //}
 
-                    #endregion test code
+                    //#endregion test code
 
                     await WaitForTweetTime(token, tweetTime);
 
@@ -124,8 +124,21 @@ namespace CKLunchBot.Twitter
                 default:
                     Log.Information("Requesting menu list...");
                     var menuList = await menuLoader.GetWeekMenuFromAPIAsync();
-                    Log.Debug("Responsed menu list:");
-                    Log.Debug(menuList.ToString()); // foreach문으로 ToString 구현
+                    Log.Debug($"Responsed menu list count: {menuList.Count}");
+
+                    try
+                    {
+                        // Tostring()이 검증되지 않음. 만약을 위해 예외처리
+                        foreach (var menu in menuList)
+                        {
+                            Log.Debug(menu.ToString());
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.ToString());
+                    }
+                    
 
                     Log.Information("Generating menu image...");
                     menuImgGenerator.SetMenu(menuList);
@@ -149,7 +162,7 @@ namespace CKLunchBot.Twitter
                 tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
 
                 // test code
-                tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
+                //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
 
                 weekendImgGenerator = new WeekendImageGenerator();
                 menuImgGenerator = new MenuImageGenerator();

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CKLunchBot.Core.Menu
@@ -34,5 +35,27 @@ namespace CKLunchBot.Core.Menu
 
         private string[] SplitMenu(string rawMenuText) =>
             rawMenuText != null ? Regex.Split(rawMenuText, "\r\n") : null;
+
+        public override string ToString()
+        {
+            var menuText = new StringBuilder();
+            menuText.AppendLine($"[{RestaurantName}]");
+            menuText.Append($"Monday: ");
+            menuText.AppendJoin(", ", MondayMenu);
+            menuText.Append($"Tuesday: ");
+            menuText.AppendJoin(", ", TuesdayMenu);
+            menuText.Append($"Wednesday: ");
+            menuText.AppendJoin(", ", WednesdayMenu);
+            menuText.Append($"Thursday: ");
+            menuText.AppendJoin(", ", ThursdayMenu);
+            menuText.Append($"Friday: ");
+            menuText.AppendJoin(", ", FridayMenu);
+            menuText.Append($"Saturday: ");
+            menuText.AppendJoin(", ", SaturdayMenu);
+            menuText.Append($"Sunday: ");
+            menuText.AppendJoin(", ", SundayMenu);
+
+            return menuText.ToString();
+        }
     }
 }
