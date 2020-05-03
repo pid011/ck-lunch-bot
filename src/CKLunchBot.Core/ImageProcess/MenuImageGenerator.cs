@@ -130,7 +130,7 @@ namespace CKLunchBot.Core.ImageProcess
 
             return ExportAsPng();
         }
-
+        
         private static string[] GetTodaysMenu(MenuItem menu)
         {
             string[] todaysMenu = null;

@@ -26,41 +26,51 @@ namespace CKLunchBot.Twitter
 
         public async Task Run(CancellationToken token)
         {
-            // TODO: 실행 중 오류가 발생했을 경우 강제종료가 아닌 다음 트윗 시간에 다시 시도하도록 수정하기
+            StartupResult startupResult;
+            TwitterClient client;
             try
             {
-                var startupResult = await Startup();
-                var client = startupResult.Client;
+                startupResult = await Startup();
+                client = startupResult.Client;
 
                 tweetTime = (startupResult.Config.TweetTime.Hour, startupResult.Config.TweetTime.Minute);
-
                 // test code
                 //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
-
-                while (true)
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e.ToString());
+                Log.Information("The bot has stopped due to a startup error.");
+                return;
+            }
+            
+            while (true)
+            {
+                try
                 {
                     await WaitForTweetTime(token);
                     Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
                     var image = await GenerateImageAsync();
 
-                    await Tweet(client, image);
+                    //await Tweet(client, image);
 
-                    var date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
+                    DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
                     date = new DateTime(date.Year, date.Month, day, tweetTime.hour, tweetTime.minute, 0);
                     Log.Information($"Next tweet time is {date}");
                 }
-            }
-            catch (TaskCanceledException)
-            {
-                Log.Information("The bot has stopped.");
-            }
-            catch (Exception e)
-            {
-                Log.Fatal(e.ToString());
-                Log.Information("The bot has stopped due to an error.");
-            }
+                catch (TaskCanceledException)
+                {
+                    Log.Information("The bot has stopped.");
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Log.Fatal(e.ToString());
+                    Log.Information("The bot has stopped due to an error. It will try again at the next tweet time.");
+                }
+            }            
         }
 
         private async Task Tweet(TwitterClient client, byte[] image)
