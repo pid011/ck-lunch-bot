@@ -20,26 +20,30 @@ namespace CKLunchBot.Twitter
 {
     public class BotService
     {
-        private (int hour, int minute) tweetTime;
-
         private bool alreadyTweeted;
 
         public async Task Run(CancellationToken token)
         {
-            StartupResult startupResult;
-            TwitterClient client;
+            ConfigItem config;
+            TwitterClient twitter;
+            (int hour, int min) tweetTime;
+
             try
             {
-                startupResult = await Startup();
-                client = startupResult.Client;
-
-                tweetTime = (startupResult.Config.TweetTime.Hour, startupResult.Config.TweetTime.Minute);
-                // test code
-                //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
+                (config, twitter) = await Setup();
+                tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
             }
-            catch (CreateConfigException)
+            catch (ConfigCreatedException e)
             {
-                Log.Error("Create a new config.json because it does not exist. Please setup the config and start again.");
+                string message = "Create a new config.json because ";
+                switch (e.Reason)
+                {
+                    case ConfigCreatedException.Reasons.ConfigDoesNotExist:
+                        message += "it does not exist. Please setup the config and start again.";
+                        break;
+                }
+
+                Log.Error(message);
                 return;
             }
             catch (Exception e)
@@ -53,16 +57,16 @@ namespace CKLunchBot.Twitter
             {
                 try
                 {
-                    await WaitForTweetTime(token);
+                    await WaitForTweetTime(token, tweetTime);
                     Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
                     var image = await GenerateImageAsync();
 
-                    await Tweet(client, image);
+                    await Tweet(twitter, image);
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
-                    date = new DateTime(date.Year, date.Month, day, tweetTime.hour, tweetTime.minute, 0);
+                    date = new DateTime(date.Year, date.Month, day, config.TweetTime.Hour, config.TweetTime.Minute, 0);
                     Log.Information($"Next tweet time is {date}");
                 }
                 catch (TaskCanceledException)
@@ -125,19 +129,19 @@ namespace CKLunchBot.Twitter
             return image;
         }
 
-        private async Task<StartupResult> Startup()
+        private async Task<(ConfigItem, TwitterClient)> Setup()
         {
             ConfigItem config = LoadConfig();
-            TwitterClient client = await ConnectToTwitter(config.TwitterTokens);
+            TwitterClient twitter = await ConnectToTwitter(config.TwitterTokens);
 
-            tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
+            (int hour, int min) tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
 
             var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
             var hour = tweetTime.hour > 12 ? tweetTime.hour - 12 : tweetTime.hour < 1 ? 12 : tweetTime.hour;
 
-            Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.minute:D2} {ampm}");
+            Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.min:D2} {ampm}");
 
-            return new StartupResult(config, client);
+            return (config, twitter);
         }
 
         private ConfigItem LoadConfig()
@@ -172,7 +176,7 @@ namespace CKLunchBot.Twitter
                 };
                 serializer.Serialize(jsonWriter, newConfig, typeof(ConfigItem));
 
-                throw new CreateConfigException();
+                throw new ConfigCreatedException(ConfigCreatedException.Reasons.ConfigDoesNotExist);
             }
 
             using StreamReader configReader = File.OpenText(configFileName);
@@ -264,7 +268,7 @@ namespace CKLunchBot.Twitter
             return client;
         }
 
-        private async Task WaitForTweetTime(CancellationToken token)
+        private async Task WaitForTweetTime(CancellationToken token, (int hour, int minute) tweetTime)
         {
             while (true)
             {
@@ -281,24 +285,6 @@ namespace CKLunchBot.Twitter
                         continue;
                     }
 
-                    //#region test code
-
-                    //for (int i = 0; i < 2; i++)
-                    //{
-                    //    tweetTime.minute++;
-                    //    if (tweetTime.minute > 59)
-                    //    {
-                    //        tweetTime.minute = 0;
-                    //        tweetTime.hour++;
-                    //        if (tweetTime.hour > 23)
-                    //        {
-                    //            tweetTime.hour = 0;
-                    //        }
-                    //    }
-                    //}
-
-                    //#endregion test code
-
                     alreadyTweeted = true;
                     break;
                 }
@@ -307,19 +293,6 @@ namespace CKLunchBot.Twitter
                     alreadyTweeted = false;
                 }
             }
-        }
-    }
-
-    public class StartupResult
-    {
-        public ConfigItem Config { get; }
-
-        public TwitterClient Client { get; }
-
-        public StartupResult(ConfigItem config, TwitterClient client)
-        {
-            Config = config;
-            Client = client;
         }
     }
 }
