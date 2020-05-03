@@ -22,51 +22,50 @@ namespace CKLunchBot.Twitter
     {
         private bool alreadyTweeted;
 
-        public async Task Run(CancellationToken token)
+        /// <summary>
+        /// Bot running task.
+        /// </summary>
+        /// <param name="token">task cancel token</param>
+        /// <param name="config">bot config</param>
+        /// <param name="twitter"><see cref="TwitterClient"/> for tweet image.</param>
+        /// <returns></returns>
+        public async Task Run(CancellationToken token, ConfigItem config, TwitterClient twitter)
         {
-            ConfigItem config;
-            TwitterClient twitter;
-            (int hour, int min) tweetTime;
-
-            try
-            {
-                (config, twitter) = await Setup();
-                tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
-            }
-            catch (ConfigCreatedException e)
-            {
-                string message = "Create a new config.json because ";
-                switch (e.Reason)
-                {
-                    case ConfigCreatedException.Reasons.ConfigDoesNotExist:
-                        message += "it does not exist. Please setup the config and start again.";
-                        break;
-                }
-
-                Log.Error(message);
-                return;
-            }
-            catch (Exception e)
-            {
-                Log.Fatal(e.ToString());
-                Log.Information("The bot has stopped due to a startup error.");
-                return;
-            }
-
+            (int hour, int min) tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
+            tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
             while (true)
             {
                 try
                 {
+                    #region test code
+
+                    for (int i = 0; i < 1; i++)
+                    {
+                        tweetTime.min++;
+                        if (tweetTime.min > 59)
+                        {
+                            tweetTime.min = 0;
+                            tweetTime.hour++;
+                            if (tweetTime.hour > 23)
+                            {
+                                tweetTime.hour = 0;
+                            }
+                        }
+                    }
+
+                    #endregion test code
+                    
                     await WaitForTweetTime(token, tweetTime);
+
                     Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
                     var image = await GenerateImageAsync();
 
-                    await Tweet(twitter, image);
+                    //await Tweet(twitter, image);
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
-                    date = new DateTime(date.Year, date.Month, day, config.TweetTime.Hour, config.TweetTime.Minute, 0);
+                    date = new DateTime(date.Year, date.Month, day, tweetTime.hour, tweetTime.min, 0);
                     Log.Information($"Next tweet time is {date}");
                 }
                 catch (TaskCanceledException)
@@ -129,19 +128,45 @@ namespace CKLunchBot.Twitter
             return image;
         }
 
-        private async Task<(ConfigItem, TwitterClient)> Setup()
+        /// <summary>
+        /// Setup bot. If setup succeeds, return true and other setup results.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<(bool setupSuccess, ConfigItem config, TwitterClient twitter)> Setup()
         {
-            ConfigItem config = LoadConfig();
-            TwitterClient twitter = await ConnectToTwitter(config.TwitterTokens);
+            try
+            {
+                ConfigItem config = LoadConfig();
+                TwitterClient twitter = await ConnectToTwitter(config.TwitterTokens);
 
-            (int hour, int min) tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
+                (int hour, int min) tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
 
-            var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
-            var hour = tweetTime.hour > 12 ? tweetTime.hour - 12 : tweetTime.hour < 1 ? 12 : tweetTime.hour;
+                var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
+                var hour = tweetTime.hour > 12 ? tweetTime.hour - 12 : tweetTime.hour < 1 ? 12 : tweetTime.hour;
 
-            Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.min:D2} {ampm}");
+                Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.min:D2} {ampm}");
 
-            return (config, twitter);
+                return (true, config, twitter);
+            }
+            catch (ConfigCreatedException e)
+            {
+                string message = "Create a new config.json because ";
+                switch (e.Reason)
+                {
+                    case ConfigCreatedException.Reasons.ConfigDoesNotExist:
+                        message += "it does not exist. Please setup the config and start again.";
+                        break;
+                }
+
+                Log.Error(message);
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e.ToString());
+                Log.Information("The bot has stopped due to a startup error.");
+            }
+
+            return (false, null, null);
         }
 
         private ConfigItem LoadConfig()
@@ -272,11 +297,11 @@ namespace CKLunchBot.Twitter
         {
             while (true)
             {
+                await Task.Delay(500);
                 if (token.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
-                await Task.Delay(500);
                 var now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                 if (now.Hour == tweetTime.hour && now.Minute == tweetTime.minute)
                 {

@@ -19,11 +19,16 @@ namespace CKLunchBot.Twitter
 
             var bot = new BotService();
             Log.Information("Starting bot...");
+            var setup = await bot.Setup();
+
+            if (!setup.setupSuccess)
+            {
+                return;
+            }
 
             using var botCancel = new CancellationTokenSource();
 
-            var botTask = new BotService().Run(botCancel.Token);
-            //Log.Information("@ck_lunch_bot is now running.");
+            var botTask = new BotService().Run(botCancel.Token, setup.config, setup.twitter);
 
             var stopCommandTask = Task.Run(() =>
             {
