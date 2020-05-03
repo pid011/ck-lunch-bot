@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Requester
 {
-    public abstract class BaseRequester
+    public abstract class BaseRequester : IDisposable
     {
-        private static readonly HttpClient client = new HttpClient();
+        private readonly HttpClient client = new HttpClient();
 
         public abstract Task<JObject> RequestData();
 
@@ -37,8 +37,7 @@ namespace CKLunchBot.Core.Requester
                 }
             }
 
-            HttpResponseMessage response;
-            response = await client.SendAsync(request);
+            using HttpResponseMessage response = await client.SendAsync(request);
             return await response.Content.ReadAsStringAsync();
         }
 
@@ -48,5 +47,34 @@ namespace CKLunchBot.Core.Requester
             var jsonString = await GetResponseString(url, jsonContent, headers);
             return JObject.Parse(jsonString);
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+                client.Dispose();
+                disposedValue = true;
+            }
+        }
+
+        ~BaseRequester()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion IDisposable Support
     }
 }

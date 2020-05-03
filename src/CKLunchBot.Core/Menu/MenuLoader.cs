@@ -9,20 +9,22 @@ using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Menu
 {
-    public class MenuLoader
+    public class MenuLoader : IDisposable
     {
+        private readonly MenuRequester requester = new MenuRequester();
+
         public async Task<List<MenuItem>> GetWeekMenuFromAPIAsync()
         {
-            var jsonObj = await new MenuRequester().RequestData();
+            var jsonObj = await requester.RequestData();
             return MenuJsonParser(jsonObj);
         }
 
-        public List<MenuItem> GetWeekMenuFromJsonString(string json)
+        public static List<MenuItem> GetWeekMenuFromJsonString(string json)
         {
             return MenuJsonParser(JObject.Parse(json));
         }
 
-        private List<MenuItem> MenuJsonParser(JObject jsonObject)
+        private static List<MenuItem> MenuJsonParser(JObject jsonObject)
         {
             var success = (bool)jsonObject["success"];
             if (!success)
@@ -37,6 +39,35 @@ namespace CKLunchBot.Core.Menu
 
             return menuList;
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // 중복 호출을 검색하려면
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+                requester.Dispose();
+                disposedValue = true;
+            }
+        }
+
+        ~MenuLoader()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion IDisposable Support
     }
 }
 
@@ -44,7 +75,6 @@ namespace CKLunchBot.Core.Menu
 API response data examples
 
 [Wrong service name]
-
 {
   "success": false,
   "result": "Wrong Service Name.",
@@ -54,7 +84,6 @@ API response data examples
 ----------------------------------------------------------
 
 [Response success but nothing recieved]
-
 {
   "success": true,
   "result": [],
@@ -64,7 +93,6 @@ API response data examples
 ----------------------------------------------------------
 
 [Response success]
-
 {
   "success": true,
   "result": [

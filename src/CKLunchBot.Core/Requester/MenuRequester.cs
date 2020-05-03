@@ -20,14 +20,13 @@ namespace CKLunchBot.Core.Requester
                     CRUDF = "R"
                 }
             }).ToString();
+        private static readonly Dictionary<string, string> headers = new Dictionary<string, string>()
+        {
+            ["X-Dreamfactory-API-Key"] = ApiKey
+        };
 
         public override async Task<JObject> RequestData()
         {
-            var headers = new Dictionary<string, string>()
-            {
-                ["X-Dreamfactory-API-Key"] = ApiKey
-            };
-
             return await GetJsonFromUrl(ApiRequestUrl, MenuRequestContent, headers);
         }
     }

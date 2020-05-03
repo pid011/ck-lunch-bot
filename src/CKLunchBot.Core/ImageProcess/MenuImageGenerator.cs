@@ -14,16 +14,11 @@ namespace CKLunchBot.Core.ImageProcess
         private static readonly string menuTemplateImagePath =
             Path.Combine(Directory.GetCurrentDirectory(), "assets", "images", "menu_template.png");
 
-        private readonly List<MenuItem> menus;
+        private List<MenuItem> menus;
 
-        public MenuImageGenerator(List<MenuItem> menus) : base(menuTemplateImagePath)
+        public MenuImageGenerator() : base(menuTemplateImagePath)
         {
-            if (menus is null)
-            {
-                throw new ArgumentNullException(nameof(menus));
-            }
-
-            this.menus = menus;
+            menus = new List<MenuItem>();
             float titleFontEmSize = 32.0f;
             float contentFontEmSize = 24.0f;
 
@@ -31,8 +26,18 @@ namespace CKLunchBot.Core.ImageProcess
             AddFont("content", FontPath.ContentFontPath, contentFontEmSize, FontStyle.Regular);
         }
 
+        public void SetMenu(List<MenuItem> menus)
+        {
+            this.menus = menus;
+        }
+
         public override byte[] Generate()
         {
+            if (menus is null)
+            {
+                throw new ArgumentNullException(nameof(menus));
+            }
+
             (float x, float y) titlePosition = (405.0f, 37.0f);
 
             string titleText = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow);
@@ -68,7 +73,7 @@ namespace CKLunchBot.Core.ImageProcess
 
                 var todaysMenu = GetTodaysMenu(weekMenu);
 
-                if(todaysMenu != null)
+                if (todaysMenu != null)
                 {
                     var text = string.Empty;
                     foreach (var item in todaysMenu)
@@ -130,7 +135,7 @@ namespace CKLunchBot.Core.ImageProcess
 
             return ExportAsPng();
         }
-        
+
         private static string[] GetTodaysMenu(MenuItem menu)
         {
             string[] todaysMenu = null;
@@ -167,6 +172,22 @@ namespace CKLunchBot.Core.ImageProcess
             }
 
             return todaysMenu;
+        }
+
+        private bool disposed = false;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+            if (disposing)
+            {
+                menus = null;
+            }
+            base.Dispose(disposing);
+            disposed = true;
         }
     }
 }

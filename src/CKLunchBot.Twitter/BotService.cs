@@ -14,13 +14,22 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Tweetinvi;
+using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
 namespace CKLunchBot.Twitter
 {
-    public class BotService
+    public class BotService : IDisposable
     {
         private bool alreadyTweeted;
+
+        private (int hour, int minute) tweetTime;
+        private ConfigItem config;
+        private TwitterClient twitter;
+
+        private WeekendImageGenerator weekendImgGenerator;
+        private MenuImageGenerator menuImgGenerator;
+        private MenuLoader menuLoader;
 
         /// <summary>
         /// Bot running task.
@@ -29,22 +38,25 @@ namespace CKLunchBot.Twitter
         /// <param name="config">bot config</param>
         /// <param name="twitter"><see cref="TwitterClient"/> for tweet image.</param>
         /// <returns></returns>
-        public async Task Run(CancellationToken token, ConfigItem config, TwitterClient twitter)
+        public async Task Run(CancellationToken token)
         {
-            (int hour, int min) tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
-            tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
             while (true)
             {
+                if (disposedValue)
+                {
+                    return;
+                }
+
                 try
                 {
                     #region test code
 
                     for (int i = 0; i < 1; i++)
                     {
-                        tweetTime.min++;
-                        if (tweetTime.min > 59)
+                        tweetTime.minute++;
+                        if (tweetTime.minute > 59)
                         {
-                            tweetTime.min = 0;
+                            tweetTime.minute = 0;
                             tweetTime.hour++;
                             if (tweetTime.hour > 23)
                             {
@@ -54,18 +66,17 @@ namespace CKLunchBot.Twitter
                     }
 
                     #endregion test code
-                    
+
                     await WaitForTweetTime(token, tweetTime);
 
                     Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
-                    var image = await GenerateImageAsync();
 
-                    //await Tweet(twitter, image);
+                    await Tweet(await GenerateImageAsync());
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
-                    date = new DateTime(date.Year, date.Month, day, tweetTime.hour, tweetTime.min, 0);
+                    date = new DateTime(date.Year, date.Month, day, tweetTime.hour, tweetTime.minute, 0);
                     Log.Information($"Next tweet time is {date}");
                 }
                 catch (TaskCanceledException)
@@ -81,14 +92,17 @@ namespace CKLunchBot.Twitter
             }
         }
 
-        private async Task Tweet(TwitterClient client, byte[] image)
+        private async Task Tweet(byte[] image)
         {
             Log.Information("Uploading tweet image...");
-            var uploadedImage = await client.Upload.UploadTweetImage(image);
+            IMedia uploadedImage = await twitter.Upload.UploadTweetImage(image);
             Log.Information("Publishing tweet...");
-            var tweetText = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow) + " 오늘은...";
-            tweetText = "[청강대 학식] " + tweetText;
-            var tweetWithImage = await client.Tweets.PublishTweet(new PublishTweetParameters(tweetText)
+
+            var tweetText = new StringBuilder();
+            tweetText.Append("[청강대 학식] ");
+            tweetText.Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow));
+            tweetText.Append(" 오늘은...");
+            ITweet tweetWithImage = await twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString())
             {
                 Medias = { uploadedImage }
             });
@@ -104,25 +118,18 @@ namespace CKLunchBot.Twitter
                 case DayOfWeek.Sunday:
                 case DayOfWeek.Saturday:
                     Log.Information("Generating weekend image...");
-                    image = await Task.Run(() =>
-                    {
-                        using var generator = new WeekendImageGenerator();
-                        return generator.Generate();
-                    });
+                    image = weekendImgGenerator.Generate();
                     break;
 
                 default:
                     Log.Information("Requesting menu list...");
-                    var menuList = await new MenuLoader().GetWeekMenuFromAPIAsync();
+                    var menuList = await menuLoader.GetWeekMenuFromAPIAsync();
                     Log.Debug("Responsed menu list:");
                     Log.Debug(menuList.ToString()); // foreach문으로 ToString 구현
 
                     Log.Information("Generating menu image...");
-                    image = await Task.Run(() =>
-                    {
-                        using var generator = new MenuImageGenerator(menuList);
-                        return generator.Generate();
-                    });
+                    menuImgGenerator.SetMenu(menuList);
+                    image = menuImgGenerator.Generate();
                     break;
             }
             return image;
@@ -132,21 +139,28 @@ namespace CKLunchBot.Twitter
         /// Setup bot. If setup succeeds, return true and other setup results.
         /// </summary>
         /// <returns></returns>
-        public async Task<(bool setupSuccess, ConfigItem config, TwitterClient twitter)> Setup()
+        public async Task<bool> Setup()
         {
             try
             {
-                ConfigItem config = LoadConfig();
-                TwitterClient twitter = await ConnectToTwitter(config.TwitterTokens);
+                config = LoadConfig();
+                twitter = await ConnectToTwitter(config.TwitterTokens);
 
-                (int hour, int min) tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
+                tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
+
+                // test code
+                tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
+
+                weekendImgGenerator = new WeekendImageGenerator();
+                menuImgGenerator = new MenuImageGenerator();
+                menuLoader = new MenuLoader();
 
                 var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
                 var hour = tweetTime.hour > 12 ? tweetTime.hour - 12 : tweetTime.hour < 1 ? 12 : tweetTime.hour;
 
-                Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.min:D2} {ampm}");
+                Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.minute:D2} {ampm}");
 
-                return (true, config, twitter);
+                return true;
             }
             catch (ConfigCreatedException e)
             {
@@ -166,7 +180,7 @@ namespace CKLunchBot.Twitter
                 Log.Information("The bot has stopped due to a startup error.");
             }
 
-            return (false, null, null);
+            return false;
         }
 
         private ConfigItem LoadConfig()
@@ -319,5 +333,47 @@ namespace CKLunchBot.Twitter
                 }
             }
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // 중복 호출을 검색하려면
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    config = null;
+                    twitter = null;
+                }
+                if (menuImgGenerator != null)
+                {
+                    menuImgGenerator.Dispose();
+                }
+                if (weekendImgGenerator != null)
+                {
+                    weekendImgGenerator.Dispose();
+                }
+                if (menuLoader != null)
+                {
+                    menuLoader.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        ~BotService()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion IDisposable Support
     }
 }

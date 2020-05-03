@@ -17,18 +17,18 @@ namespace CKLunchBot.Twitter
                 .WriteTo.File(Path.Combine("logs", ".log"), rollingInterval: RollingInterval.Month)
                 .CreateLogger();
 
-            var bot = new BotService();
+            using var bot = new BotService();
             Log.Information("Starting bot...");
-            var setup = await bot.Setup();
+            var setupSuccess = await bot.Setup();
 
-            if (!setup.setupSuccess)
+            if (!setupSuccess)
             {
                 return;
             }
 
-            using var botCancel = new CancellationTokenSource();
+            var botCancel = new CancellationTokenSource();
 
-            var botTask = new BotService().Run(botCancel.Token, setup.config, setup.twitter);
+            var botTask = bot.Run(botCancel.Token);
 
             var stopCommandTask = Task.Run(() =>
             {

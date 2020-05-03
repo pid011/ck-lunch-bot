@@ -29,7 +29,8 @@ namespace CKLunchBot.ImageGenTest
 
             imageByte = await Task.Run(() =>
             {
-                using var generator = new MenuImageGenerator(menuList);
+                using var generator = new MenuImageGenerator();
+                generator.SetMenu(menuList);
                 return generator.Generate();
             });
 

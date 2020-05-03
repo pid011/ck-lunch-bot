@@ -72,13 +72,36 @@ namespace CKLunchBot.Core.ImageProcess
             return stream.ToArray();
         }
 
+        #region IDisposable Support
+
+        private bool disposedValue = false; // 중복 호출을 검색하려면
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+                if (image != null)
+                {
+                    image.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        ~ImageGenerator()
+        {
+            Dispose(false);
+        }
+
         public void Dispose()
         {
-            if (image.IsDisposed)
-            {
-                return;
-            }
-            image.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        #endregion IDisposable Support
     }
 }
