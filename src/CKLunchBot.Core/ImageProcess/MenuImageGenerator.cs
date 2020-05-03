@@ -41,6 +41,19 @@ namespace CKLunchBot.Core.ImageProcess
             var titleText2 = " 오늘의 점심메뉴는?";
             DrawText(titlePosition, Fonts["title"], CKLunchBotColors.Black, titleText2);
 
+            const string daban = "다반";
+            const string nankatsuNanUdong = "난카츠난우동";
+            const string tangAndJjigae = "탕&찌개차림";
+            const string yukHaeBab = "육해밥";
+
+            Dictionary<string, List<string>> menuTexts = new Dictionary<string, List<string>>()
+            {
+                [daban] = new List<string>(),
+                [nankatsuNanUdong] = new List<string>(),
+                [tangAndJjigae] = new List<string>(),
+                [yukHaeBab] = new List<string>(),
+            };
+
             foreach (var weekMenu in menus)
             {
                 if (weekMenu is null)
@@ -48,56 +61,71 @@ namespace CKLunchBot.Core.ImageProcess
                     continue;
                 }
 
+                if (!menuTexts.ContainsKey(weekMenu.RestaurantName))
+                {
+                    continue;
+                }
+
+                var todaysMenu = GetTodaysMenu(weekMenu);
+
+                if(todaysMenu != null)
+                {
+                    var text = string.Empty;
+                    foreach (var item in todaysMenu)
+                    {
+                        menuTexts[weekMenu.RestaurantName].Add($":: {item}");
+                    }
+                }
+            }
+
+            foreach (var textList in menuTexts)
+            {
                 (float x, float y) drawPosition = (0.0f, 193.0f);
                 var doDrawMenu = true;
 
-                switch (weekMenu.RestaurantName)
+                switch (textList.Key)
                 {
-                    case "다반":
+                    case daban:
                         drawPosition.x = 55.0f;
                         break;
 
-                    case "난카츠난우동":
+                    case nankatsuNanUdong:
                         drawPosition.x = 350.0f;
                         break;
 
-                    case "탕&찌개차림":
+                    case tangAndJjigae:
                         drawPosition.x = 642.0f;
                         break;
 
-                    case "육해밥":
+                    case yukHaeBab:
                         drawPosition.x = 935.0f;
                         break;
 
-                    case "아침":
-                    case "점심":
-                    case "저녁":
+                    default:
                         doDrawMenu = false;
                         break;
                 }
 
                 if (doDrawMenu)
                 {
-                    var todaysMenu = GetTodaysMenu(weekMenu);
-
-                    if (todaysMenu is null)
+                    if (textList.Value.Count == 0)
                     {
-                        DrawContentOnImage(drawPosition, "(오늘 제공한 메뉴 없음)");
+                        DrawContentOnImage(drawPosition, "(제공한 메뉴가 없음)");
                     }
                     else
                     {
-                        var text = string.Empty;
-                        foreach (var item in todaysMenu)
+                        foreach (var text in textList.Value)
                         {
-                            text = $":: {item}";
                             DrawContentOnImage(drawPosition, text);
                             drawPosition.y += 40.0f;
                         }
                     }
                 }
 
-                void DrawContentOnImage((float, float) position, string text) =>
+                void DrawContentOnImage((float, float) position, string text)
+                {
                     DrawText(position, Fonts["content"], CKLunchBotColors.Black, text);
+                }
             }
 
             return ExportAsPng();
@@ -107,6 +135,7 @@ namespace CKLunchBot.Core.ImageProcess
         {
             string[] todaysMenu = null;
 
+            // TODO: Change TimeUtils.GetKoreaTime(DateTime.UtcNow)
             switch (DateTime.Now.DayOfWeek)
             {
                 case DayOfWeek.Friday:

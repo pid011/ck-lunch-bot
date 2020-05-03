@@ -33,7 +33,9 @@ namespace CKLunchBot.Twitter
                 var client = startupResult.Client;
 
                 tweetTime = (startupResult.Config.TweetTime.Hour, startupResult.Config.TweetTime.Minute);
-                //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute); // test code
+
+                // test code
+                //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
 
                 while (true)
                 {
@@ -65,7 +67,6 @@ namespace CKLunchBot.Twitter
         {
             Log.Information("Uploading tweet image...");
             var uploadedImage = await client.Upload.UploadTweetImage(image);
-            //Log.Debug(uploadedImage.ToString());
             Log.Information("Publishing tweet...");
             var tweetText = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow) + " 오늘은...";
             tweetText = "[청강대 학식] " + tweetText;
@@ -106,7 +107,6 @@ namespace CKLunchBot.Twitter
                     });
                     break;
             }
-            //Log.Information("Generate completed.");
             return image;
         }
 

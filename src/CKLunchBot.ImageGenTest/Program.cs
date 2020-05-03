@@ -1,4 +1,4 @@
-﻿using CKLunchBot.Core.ImageProcess;
+using CKLunchBot.Core.ImageProcess;
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Utils;
 using System;
@@ -15,40 +15,28 @@ namespace CKLunchBot.ImageGenTest
         static async Task Main(string[] args)
         {
             var program = new Program();
-            var imageByte = await program.GenerateImageAsync();
+            byte[] imageByte;// = await program.GenerateImageAsync();
+
+            // weekend
+            //imageByte = await Task.Run(() =>
+            //{
+            //    using var generator = new WeekendImageGenerator();
+            //    return generator.Generate();
+            //});
+
+            // week
+            var menuList = await new MenuLoader().GetWeekMenuFromAPIAsync();
+
+            imageByte = await Task.Run(() =>
+            {
+                using var generator = new MenuImageGenerator(menuList);
+                return generator.Generate();
+            });
 
             using var memorystream = new MemoryStream(imageByte);
             using var filestream = new FileStream("image_test.png", FileMode.Create);
             using var image = Image.Load(memorystream);
             image.SaveAsPng(filestream);
-        }
-
-        private async Task<byte[]> GenerateImageAsync()
-        {
-            byte[] image;
-            switch (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek)
-            {
-                case DayOfWeek.Sunday:
-                case DayOfWeek.Saturday:
-                    image = await Task.Run(() =>
-                    {
-                        using var generator = new WeekendImageGenerator();
-                        return generator.Generate();
-                    });
-                    break;
-
-                default:
-                    var menuList = await new MenuLoader().GetWeekMenuFromAPIAsync();
-
-                    image = await Task.Run(() =>
-                    {
-                        using var generator = new MenuImageGenerator(menuList);
-                        return generator.Generate();
-                    });
-                    break;
-            }
-            //Log.Information("Generate completed.");
-            return image;
         }
     }
 }
