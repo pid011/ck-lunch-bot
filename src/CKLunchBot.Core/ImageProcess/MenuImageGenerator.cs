@@ -135,8 +135,7 @@ namespace CKLunchBot.Core.ImageProcess
         {
             string[] todaysMenu = null;
 
-            // TODO: Change TimeUtils.GetKoreaTime(DateTime.UtcNow)
-            switch (DateTime.Now.DayOfWeek)
+            switch (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek)
             {
                 case DayOfWeek.Friday:
                     todaysMenu = menu.FridayMenu;
