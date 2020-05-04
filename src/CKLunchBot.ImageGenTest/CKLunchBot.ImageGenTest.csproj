@@ -9,4 +9,10 @@
     <ProjectReference Include="..\CKLunchBot.Core\CKLunchBot.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="menu.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
