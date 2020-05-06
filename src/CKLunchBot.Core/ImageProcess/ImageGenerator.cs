@@ -9,13 +9,13 @@ using System.IO;
 
 namespace CKLunchBot.Core.ImageProcess
 {
-    public abstract class ImageGenerator : IDisposable
+    public class ImageGenerator : IDisposable
     {
         public Dictionary<string, Font> Fonts { get; } = new Dictionary<string, Font>();
 
         private readonly Image image;
 
-        protected ImageGenerator(string imagePath)
+        public ImageGenerator(string imagePath)
         {
             if (!File.Exists(imagePath))
             {
@@ -25,13 +25,7 @@ namespace CKLunchBot.Core.ImageProcess
             image = Image.Load(imagePath);
         }
 
-        /// <summary>
-        /// Generate an image and return it as a byte array.
-        /// </summary>
-        /// <returns>image as a byte array</returns>
-        public abstract byte[] Generate(); // TODO: Task<byte[]>로 반환타입 변경하고 사용 시 await ...으로 사용하기
-
-        protected void DrawText(
+        public ImageGenerator DrawText(
             (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
         {
             if (image.IsDisposed)
@@ -50,9 +44,11 @@ namespace CKLunchBot.Core.ImageProcess
 
             image.Mutate(x =>
                 x.DrawText(options, text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
+
+            return this;
         }
 
-        protected void AddFont(string name, string path, float size, FontStyle style)
+        public ImageGenerator AddFont(string name, string path, float size, FontStyle style)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -63,9 +59,11 @@ namespace CKLunchBot.Core.ImageProcess
             FontFamily family = collection.Install(path);
             Font font = family.CreateFont(size, style);
             Fonts.Add(name, font);
+
+            return this;
         }
 
-        protected byte[] ExportAsPng()
+        public byte[] ExportAsPng()
         {
             using var stream = new MemoryStream();
             image.SaveAsPng(stream);

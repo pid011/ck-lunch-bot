@@ -25,7 +25,6 @@ namespace CKLunchBot.Twitter
     {
         private bool alreadyTweeted;
 
-        private (int hour, int minute) tweetTime;
         private ConfigItem config;
         private TwitterClient twitter;
         private MenuLoader menuLoader;
@@ -46,7 +45,7 @@ namespace CKLunchBot.Twitter
 
                 try
                 {
-                    //#region test code
+                    #region test code
 
                     //for (int i = 0; i < 1; i++)
                     //{
@@ -62,9 +61,9 @@ namespace CKLunchBot.Twitter
                     //    }
                     //}
 
-                    //#endregion test code
+                    #endregion test code
 
-                    await WaitForTweetTime(token, tweetTime);
+                    await WaitForTweetTime(token, LunchTweetTime);
 
                     Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
@@ -82,7 +81,7 @@ namespace CKLunchBot.Twitter
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
-                    date = new DateTime(date.Year, date.Month, day, tweetTime.hour, tweetTime.minute, 0);
+                    date = new DateTime(date.Year, date.Month, day, LunchTweetTime.hour, LunchTweetTime.minute, 0);
                     Log.Information($"Next tweet time is {date}");
                 }
                 catch (TaskCanceledException)
@@ -126,7 +125,7 @@ namespace CKLunchBot.Twitter
                     Log.Information("Generating weekend image...");
                     using (var weekendImgGenerator = new WeekendImageGenerator())
                     {
-                        image = weekendImgGenerator.Generate();
+                        image = await weekendImgGenerator.GenerateAsync();
                     }
                     break;
 
@@ -152,7 +151,7 @@ namespace CKLunchBot.Twitter
                     using (var menuImgGenerator = new MenuImageGenerator())
                     {
                         menuImgGenerator.SetMenu(menuList);
-                        image = menuImgGenerator.Generate();
+                        image = await menuImgGenerator.GenerateAsync();
                     }
                     break;
             }
@@ -171,8 +170,6 @@ namespace CKLunchBot.Twitter
                 config = LoadConfig();
                 twitter = await ConnectToTwitter(config.TwitterTokens);
 
-                tweetTime = (config.TweetTime.Hour, config.TweetTime.Minute);
-
                 // test code
                 //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
                 menuLoader = new MenuLoader();
@@ -182,10 +179,10 @@ namespace CKLunchBot.Twitter
                 SaveLogImage(testImage);
                 Log.Information("Complete.");
 
-                var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
-                var hour = tweetTime.hour > 12 ? tweetTime.hour - 12 : tweetTime.hour < 1 ? 12 : tweetTime.hour;
+                var ampm = LunchTweetTime.hour < 12 ? "a.m." : "p.m.";
+                var hour = LunchTweetTime.hour > 12 ? LunchTweetTime.hour - 12 : LunchTweetTime.hour < 1 ? 12 : LunchTweetTime.hour;
 
-                Log.Information($"This bot is tweet image always {hour:D2}:{tweetTime.minute:D2} {ampm}");
+                Log.Information($"This bot is tweet image always {hour:D2}:{LunchTweetTime.minute:D2} {ampm}");
 
                 return true;
             }
@@ -261,7 +258,7 @@ namespace CKLunchBot.Twitter
             var faildList = new List<string>();
             if (time is null)
             {
-                faildList.Add(ConfigItem.TweetTimePropertyName);
+                faildList.Add(ConfigItem.LunchTweetTimePropertyName);
             }
 
             if (time.Hour > 23)

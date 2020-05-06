@@ -42,7 +42,7 @@ namespace CKLunchBot.Core.Menu
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // 중복 호출을 검색하려면
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {

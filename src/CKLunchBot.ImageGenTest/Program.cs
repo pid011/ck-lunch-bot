@@ -15,29 +15,16 @@ namespace CKLunchBot.ImageGenTest
     {
         static async Task Main(string[] args)
         {
-            //var program = new Program();
-            byte[] imageByte;// = await program.GenerateImageAsync();
-
-            // weekend
-            //imageByte = await Task.Run(() =>
-            //{
-            //    using var generator = new WeekendImageGenerator();
-            //    return generator.Generate();
-            //});
-
-            // week
             using var menuLoader = new MenuLoader();
             var menuList = await menuLoader.GetWeekMenuFromAPIAsync();
 
             //var jobj = JObject.Parse(await File.ReadAllTextAsync("menu.json"));
             //var menuList = MenuJsonParser(jobj);
 
-            imageByte = await Task.Run(() =>
-            {
-                using var generator = new MenuImageGenerator();
-                generator.SetMenu(menuList);
-                return generator.Generate();
-            });
+            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormBreakfast, menuList);
+            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormLunch, menuList);
+            byte[] imageByte = await MenuImageGenerator.GenerateTodayLunchMenuImageAsync(menuList);
+            //byte[] imageByte = await WeekendImageGenerator.GenerateAsync();
 
             using var memorystream = new MemoryStream(imageByte);
             using var filestream = new FileStream("image_test.png", FileMode.Create);

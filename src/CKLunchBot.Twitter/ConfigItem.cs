@@ -4,16 +4,23 @@ namespace CKLunchBot.Twitter
 {
     public class ConfigItem
     {
-        public const string TweetTimePropertyName = "tweet_time";
-        public const string TwitterTokensName = "twitter_tokens";
+        public const string LunchTweetTimePropertyName = "lunch_tweet_time";
+        public const string DormBreakfastTweetTimePropertyName = "breackfast_tweet_time";
+        public const string DormDinnerTweetTimePropertyName = "dinner_tweet_time";
+        public const string TwitterTokensPropertyName = "twitter_tokens";
 
-        [JsonProperty(TweetTimePropertyName)]
-        public Time TweetTime { get; set; }
+        [JsonProperty(LunchTweetTimePropertyName)]
+        public Time LunchTweetTime { get; set; }
 
-        [JsonProperty(TwitterTokensName)]
+        [JsonProperty(DormBreakfastTweetTimePropertyName)]
+        public Time DormBreakfastTweetTime { get; set; }
+
+        [JsonProperty(DormDinnerTweetTimePropertyName)]
+        public Time DormDinnerTweetTime { get; set; }
+
+        [JsonProperty(TwitterTokensPropertyName)]
         public TwitterToken TwitterTokens { get; set; }
 
-        //[JsonObject(TweetTimePropertyName)]
         public class Time
         {
             public const string HourPropertyName = "hour24";
