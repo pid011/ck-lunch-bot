@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 
 using Serilog;
 
+using SixLabors.ImageSharp;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,17 +28,12 @@ namespace CKLunchBot.Twitter
         private (int hour, int minute) tweetTime;
         private ConfigItem config;
         private TwitterClient twitter;
-
-        private WeekendImageGenerator weekendImgGenerator;
-        private MenuImageGenerator menuImgGenerator;
         private MenuLoader menuLoader;
 
         /// <summary>
         /// Bot running task.
         /// </summary>
         /// <param name="token">task cancel token</param>
-        /// <param name="config">bot config</param>
-        /// <param name="twitter"><see cref="TwitterClient"/> for tweet image.</param>
         /// <returns></returns>
         public async Task Run(CancellationToken token)
         {
@@ -81,6 +78,14 @@ namespace CKLunchBot.Twitter
 #if RELEASE
                     await Tweet(menuImage);
 #endif
+                    const string logImagesDirName = "log_images";
+                    Directory.CreateDirectory(logImagesDirName);
+                    using (var memorystream = new MemoryStream(menuImage))
+                    using (var filestream = new FileStream(Path.Combine(logImagesDirName, $"{TimeUtils.GetKoreaNowTime(DateTime.UtcNow):yyyy-MM-dd-HH-mm-ss}.png"), FileMode.Create))
+                    using (var image = Image.Load(memorystream))
+                    {
+                        image.SaveAsPng(filestream);
+                    };
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
@@ -126,7 +131,10 @@ namespace CKLunchBot.Twitter
                 case DayOfWeek.Sunday:
                 case DayOfWeek.Saturday:
                     Log.Information("Generating weekend image...");
-                    image = weekendImgGenerator.Generate();
+                    using (var weekendImgGenerator = new WeekendImageGenerator())
+                    {
+                        image = weekendImgGenerator.Generate();
+                    }
                     break;
 
                 default:
@@ -148,10 +156,14 @@ namespace CKLunchBot.Twitter
                     }
 
                     Log.Information("Generating menu image...");
-                    menuImgGenerator.SetMenu(menuList);
-                    image = menuImgGenerator.Generate();
+                    using (var menuImgGenerator = new MenuImageGenerator())
+                    {
+                        menuImgGenerator.SetMenu(menuList);
+                        image = menuImgGenerator.Generate();
+                    }
                     break;
             }
+
             return image;
         }
 
@@ -170,9 +182,6 @@ namespace CKLunchBot.Twitter
 
                 // test code
                 //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
-
-                weekendImgGenerator = new WeekendImageGenerator();
-                menuImgGenerator = new MenuImageGenerator();
                 menuLoader = new MenuLoader();
 
                 var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
@@ -366,14 +375,6 @@ namespace CKLunchBot.Twitter
                 {
                     config = null;
                     twitter = null;
-                }
-                if (menuImgGenerator != null)
-                {
-                    menuImgGenerator.Dispose();
-                }
-                if (weekendImgGenerator != null)
-                {
-                    weekendImgGenerator.Dispose();
                 }
                 if (menuLoader != null)
                 {
