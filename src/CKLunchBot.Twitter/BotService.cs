@@ -70,6 +70,7 @@ namespace CKLunchBot.Twitter
                     Log.Information("Starting image generate...");
 
                     var menuImage = await GenerateImageAsync();
+                    SaveLogImage(menuImage);
 
 #if DEBUG
                     Log.Information("The bot didn't tweet because it's Debug mode.");
@@ -78,14 +79,6 @@ namespace CKLunchBot.Twitter
 #if RELEASE
                     await Tweet(menuImage);
 #endif
-                    const string logImagesDirName = "log_images";
-                    Directory.CreateDirectory(logImagesDirName);
-                    using (var memorystream = new MemoryStream(menuImage))
-                    using (var filestream = new FileStream(Path.Combine(logImagesDirName, $"{TimeUtils.GetKoreaNowTime(DateTime.UtcNow):yyyy-MM-dd-HH-mm-ss}.png"), FileMode.Create))
-                    using (var image = Image.Load(memorystream))
-                    {
-                        image.SaveAsPng(filestream);
-                    };
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
@@ -183,6 +176,11 @@ namespace CKLunchBot.Twitter
                 // test code
                 //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
                 menuLoader = new MenuLoader();
+
+                Log.Information("Testing image generate...");
+                var testImage = await GenerateImageAsync();
+                SaveLogImage(testImage);
+                Log.Information("Complete.");
 
                 var ampm = tweetTime.hour < 12 ? "a.m." : "p.m.";
                 var hour = tweetTime.hour > 12 ? tweetTime.hour - 12 : tweetTime.hour < 1 ? 12 : tweetTime.hour;
@@ -320,6 +318,16 @@ namespace CKLunchBot.Twitter
             }
 
             return config;
+        }
+
+        private void SaveLogImage(byte[] imageByte)
+        {
+            const string logImagesDirName = "log_images";
+            Directory.CreateDirectory(logImagesDirName);
+            using var memorystream = new MemoryStream(imageByte);
+            using var filestream = new FileStream(Path.Combine(logImagesDirName, $"{TimeUtils.GetKoreaNowTime(DateTime.UtcNow):yyyy-MM-dd-HH-mm-ss}.png"), FileMode.Create);
+            using var image = Image.Load(memorystream);
+            image.SaveAsPng(filestream);
         }
 
         private async Task<TwitterClient> ConnectToTwitter(ConfigItem.TwitterToken tokens)
