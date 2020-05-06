@@ -27,10 +27,10 @@ namespace CKLunchBot.ImageGenTest
 
             // week
             using var menuLoader = new MenuLoader();
-            //var menuList = await menuLoader.GetWeekMenuFromAPIAsync();
+            var menuList = await menuLoader.GetWeekMenuFromAPIAsync();
 
-            var jobj = JObject.Parse(await File.ReadAllTextAsync("menu.json"));
-            var menuList = MenuJsonParser(jobj);
+            //var jobj = JObject.Parse(await File.ReadAllTextAsync("menu.json"));
+            //var menuList = MenuJsonParser(jobj);
 
             imageByte = await Task.Run(() =>
             {

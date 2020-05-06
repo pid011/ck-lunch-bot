@@ -38,22 +38,39 @@ namespace CKLunchBot.Core.Menu
 
         public override string ToString()
         {
+            string nullStr = "null";
+            string[] nullStrArr = new string[1] { nullStr };
             var menuText = new StringBuilder();
-            menuText.AppendLine($"[{RestaurantName}]");
-            menuText.Append($"Monday: ");
-            menuText.AppendJoin(", ", MondayMenu);
-            menuText.Append($"Tuesday: ");
-            menuText.AppendJoin(", ", TuesdayMenu);
-            menuText.Append($"Wednesday: ");
-            menuText.AppendJoin(", ", WednesdayMenu);
-            menuText.Append($"Thursday: ");
-            menuText.AppendJoin(", ", ThursdayMenu);
-            menuText.Append($"Friday: ");
-            menuText.AppendJoin(", ", FridayMenu);
-            menuText.Append($"Saturday: ");
-            menuText.AppendJoin(", ", SaturdayMenu);
-            menuText.Append($"Sunday: ");
-            menuText.AppendJoin(", ", SundayMenu);
+            menuText.AppendLine($"[{RestaurantName ?? nullStr}]");
+            menuText.AppendLine();
+
+            menuText.Append($"{"Monday", -12}: ");
+            menuText.AppendJoin(", ", MondayMenu ?? nullStrArr);
+            menuText.AppendLine();
+
+            menuText.Append($"{"Tuesday", -12}: ");
+            menuText.AppendJoin(", ", TuesdayMenu ?? nullStrArr);
+            menuText.AppendLine();
+
+            menuText.Append($"{"Wednesday", -12}: ");
+            menuText.AppendJoin(", ", WednesdayMenu ?? nullStrArr);
+            menuText.AppendLine();
+
+            menuText.Append($"{"Thursday", -12}: ");
+            menuText.AppendJoin(", ", ThursdayMenu ?? nullStrArr);
+            menuText.AppendLine();
+
+            menuText.Append($"{"Friday", -12}: ");
+            menuText.AppendJoin(", ", FridayMenu ?? nullStrArr);
+            menuText.AppendLine();
+
+            menuText.Append($"{"Saturday", -12}: ");
+            menuText.AppendJoin(", ", SaturdayMenu ?? nullStrArr);
+            menuText.AppendLine();
+
+            menuText.Append($"{"Sunday", -12}: ");
+            menuText.AppendJoin(", ", SundayMenu ?? nullStrArr);
+            menuText.AppendLine();
 
             return menuText.ToString();
         }

@@ -72,7 +72,15 @@ namespace CKLunchBot.Twitter
                     Log.Information("--- Image tweet start ---");
                     Log.Information("Starting image generate...");
 
-                    await Tweet(await GenerateImageAsync());
+                    var menuImage = await GenerateImageAsync();
+
+#if DEBUG
+                    Log.Information("The bot didn't tweet because it's Debug mode.");
+#endif
+
+#if RELEASE
+                    await Tweet(menuImage);
+#endif
 
                     DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
                     int day = date.AddDays(1).Day;
@@ -138,7 +146,6 @@ namespace CKLunchBot.Twitter
                     {
                         Log.Error(e.ToString());
                     }
-                    
 
                     Log.Information("Generating menu image...");
                     menuImgGenerator.SetMenu(menuList);
