@@ -23,11 +23,17 @@ namespace CKLunchBot.Twitter
 {
     public class BotService : IDisposable
     {
-        private bool alreadyTweeted;
+        private enum MealTimeFlags
+        {
+            Breakfast, Lunch, Dinner
+        }
 
-        private ConfigItem config;
-        private TwitterClient twitter;
-        private MenuLoader menuLoader;
+        private ConfigItem m_config;
+        private TwitterClient m_twitter;
+        private MenuLoader m_menuLoader;
+
+        private (MealTimeFlags flag, DateTime nextTweetTime)[] m_nextTweetTimes;
+        private DateTime m_lastTweetedTime;
 
         /// <summary>
         /// Bot running task.
@@ -63,26 +69,47 @@ namespace CKLunchBot.Twitter
 
                     #endregion test code
 
-                    await WaitForTweetTime(token, LunchTweetTime);
+                    Log.Information("Waiting for next tweet time...");
+                    var flag = await WaitForTweetTime(token);
 
                     Log.Information("--- Image tweet start ---");
-                    Log.Information("Starting image generate...");
 
-                    var menuImage = await GenerateImageAsync();
+                    Log.Information("Requesting menu list...");
+                    var menus = await GetWeekMenu();
+
+                    Log.Information("Generating menu image...");
+                    byte[] menuImage = await GenerateImageAsync(flag, menus);
+
                     SaveLogImage(menuImage);
 
+                    Log.Information("Publishing tweet...");
+                    var tweetText = new StringBuilder();
+                    tweetText.Append("청강대 ");
+                    tweetText.Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow));
+                    tweetText.Append("오늘의 ");
+                    switch (flag)
+                    {
+                        case MealTimeFlags.Breakfast:
+                            tweetText.Append("아침");
+                            break;
+
+                        case MealTimeFlags.Lunch:
+                            tweetText.Append("점심");
+                            break;
+
+                        case MealTimeFlags.Dinner:
+                            tweetText.Append("저녁");
+                            break;
+                    }
+                    tweetText.Append("메뉴는...");
 #if DEBUG
                     Log.Information("The bot didn't tweet because it's Debug mode.");
 #endif
-
 #if RELEASE
-                    await Tweet(menuImage);
+                    var tweet = await PublishTweet(tweetText.ToString(), menuImage);
+                    Log.Debug($"tweet: {tweet}");
+                    Log.Information("Tweet publish completed.");
 #endif
-
-                    DateTime date = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
-                    int day = date.AddDays(1).Day;
-                    date = new DateTime(date.Year, date.Month, day, LunchTweetTime.hour, LunchTweetTime.minute, 0);
-                    Log.Information($"Next tweet time is {date}");
                 }
                 catch (TaskCanceledException)
                 {
@@ -97,92 +124,151 @@ namespace CKLunchBot.Twitter
             }
         }
 
-        private async Task Tweet(byte[] image)
+        private async Task<List<MenuItem>> GetWeekMenu()
         {
-            Log.Information("Uploading tweet image...");
-            IMedia uploadedImage = await twitter.Upload.UploadTweetImage(image);
-            Log.Information("Publishing tweet...");
-
-            var tweetText = new StringBuilder();
-            tweetText.Append("[청강대 학식] ");
-            tweetText.Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow));
-            tweetText.Append(" 오늘은...");
-            ITweet tweetWithImage = await twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString())
+            List<MenuItem> menuList = await m_menuLoader.GetWeekMenuFromAPIAsync();
+            Log.Debug($"Responsed menu list count: {menuList.Count}");
+            foreach (var menu in menuList)
             {
-                Medias = { uploadedImage }
-            });
-            Log.Debug($"tweet: {tweetWithImage}");
-            Log.Information("Tweet publish completed.");
+                Log.Debug(menu.ToString());
+            }
+
+            return menuList;
         }
 
-        private async Task<byte[]> GenerateImageAsync()
+        private async Task<ITweet> PublishTweet(string tweetText, byte[] image = null)
         {
-            byte[] image;
+            ITweet tweet;
+
+            if (image is null)
+            {
+                tweet = await m_twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString()));
+            }
+            else
+            {
+                IMedia uploadedImage = await m_twitter.Upload.UploadTweetImage(image);
+                tweet = await m_twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString())
+                {
+                    Medias = { uploadedImage }
+                });
+            }
+
+            return tweet;
+        }
+
+        private async Task<byte[]> GenerateImageAsync(MealTimeFlags flag, List<MenuItem> menuList)
+        {
+            byte[] byteImage = null;
+
+            async Task CreateWeekMenuAsync()
+            {
+                switch (flag)
+                {
+                    case MealTimeFlags.Breakfast:
+                        byteImage = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormBreakfast, menuList);
+                        break;
+
+                    case MealTimeFlags.Lunch:
+                        byteImage = await MenuImageGenerator.GenerateTodayLunchMenuImageAsync(menuList);
+                        break;
+
+                    case MealTimeFlags.Dinner:
+                        byteImage = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormDinner, menuList);
+                        break;
+                }
+            }
+
+            async Task CreateWeekendMenuAsync()
+            {
+                switch (flag)
+                {
+                    case MealTimeFlags.Breakfast:
+                        byteImage = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormBreakfast, menuList);
+                        break;
+
+                    case MealTimeFlags.Lunch:
+                        byteImage = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormLunch, menuList);
+                        break;
+
+                    case MealTimeFlags.Dinner:
+                        byteImage = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormDinner, menuList);
+                        break;
+                }
+            }
+
             switch (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek)
             {
                 case DayOfWeek.Sunday:
                 case DayOfWeek.Saturday:
-                    Log.Information("Generating weekend image...");
-                    using (var weekendImgGenerator = new WeekendImageGenerator())
-                    {
-                        image = await weekendImgGenerator.GenerateAsync();
-                    }
+                    await CreateWeekendMenuAsync();
                     break;
 
                 default:
-                    Log.Information("Requesting menu list...");
-                    var menuList = await menuLoader.GetWeekMenuFromAPIAsync();
-                    Log.Debug($"Responsed menu list count: {menuList.Count}");
-
-                    try
-                    {
-                        // Tostring()이 검증되지 않음. 만약을 위해 예외처리
-                        foreach (var menu in menuList)
-                        {
-                            Log.Debug(menu.ToString());
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e.ToString());
-                    }
-
-                    Log.Information("Generating menu image...");
-                    using (var menuImgGenerator = new MenuImageGenerator())
-                    {
-                        menuImgGenerator.SetMenu(menuList);
-                        image = await menuImgGenerator.GenerateAsync();
-                    }
+                    await CreateWeekMenuAsync();
                     break;
             }
 
-            return image;
+            return byteImage;
         }
 
         /// <summary>
-        /// Setup bot. If setup succeeds, return true and other setup results.
+        /// Setup bot.
         /// </summary>
         /// <returns></returns>
         public async Task<bool> Setup()
         {
             try
             {
-                config = LoadConfig();
-                twitter = await ConnectToTwitter(config.TwitterTokens);
+                m_config = LoadConfig();
+
+                static DateTime GetNextDateTime(DateTime now, DateTime target)
+                {
+                    int t1 = target.Hour - now.Hour;
+                    int t2 = target.Minute - now.Minute;
+                    //만약 target이 now보다 이전이거나 같으면 AddDays(1)
+                    return (t1 < 0 || (t1 == 0 && t2 <= 0)) ? target.AddDays(1) : target;
+                }
+
+                var now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
+
+                var nextBreakfastTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
+                                                                               m_config.BreakfastTweetTime.Hour,
+                                                                               m_config.BreakfastTweetTime.Minute, 0));
+
+                var nextLunchTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
+                                                                           m_config.LunchTweetTime.Hour,
+                                                                           m_config.LunchTweetTime.Minute, 0));
+
+                var nextDinnerTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
+                                                                            m_config.DinnerTweetTime.Hour,
+                                                                            m_config.DinnerTweetTime.Minute, 0));
+
+                m_nextTweetTimes = new (MealTimeFlags, DateTime)[]
+                {
+                    (MealTimeFlags.Breakfast, nextBreakfastTweetTime),
+                    (MealTimeFlags.Lunch, nextLunchTweetTime),
+                    (MealTimeFlags.Dinner, nextDinnerTweetTime)
+                };
+                m_lastTweetedTime = now;
+
+                m_twitter = await ConnectToTwitter(m_config.TwitterTokens);
 
                 // test code
                 //tweetTime = (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Hour, TimeUtils.GetKoreaNowTime(DateTime.UtcNow).Minute);
-                menuLoader = new MenuLoader();
+                m_menuLoader = new MenuLoader();
 
                 Log.Information("Testing image generate...");
-                var testImage = await GenerateImageAsync();
+                var menus = await GetWeekMenu();
+                var testImage = await GenerateImageAsync(MealTimeFlags.Lunch, menus);
                 SaveLogImage(testImage);
                 Log.Information("Complete.");
 
-                var ampm = LunchTweetTime.hour < 12 ? "a.m." : "p.m.";
-                var hour = LunchTweetTime.hour > 12 ? LunchTweetTime.hour - 12 : LunchTweetTime.hour < 1 ? 12 : LunchTweetTime.hour;
-
-                Log.Information($"This bot is tweet image always {hour:D2}:{LunchTweetTime.minute:D2} {ampm}");
+                Log.Information(
+                    $"Dormitory breakfast menu image tweet time: {m_config.BreakfastTweetTime.Hour:D2}:{m_config.BreakfastTweetTime.Minute:D2}");
+                Log.Information(
+                    $"School cafeteria lunch menu image tweet time: {m_config.LunchTweetTime.Hour:D2}:{m_config.LunchTweetTime.Minute:D2}");
+                Log.Information(
+                    $"Dormitory dinner menu image tweet time: {m_config.DinnerTweetTime.Hour:D2}:{m_config.DinnerTweetTime.Minute:D2}");
 
                 return true;
             }
@@ -218,9 +304,19 @@ namespace CKLunchBot.Twitter
             {
                 var newConfig = new ConfigItem()
                 {
-                    TweetTime = new ConfigItem.Time()
+                    BreakfastTweetTime = new ConfigItem.Time()
+                    {
+                        Hour = 7,
+                        Minute = 50
+                    },
+                    LunchTweetTime = new ConfigItem.Time()
                     {
                         Hour = 11,
+                        Minute = 50
+                    },
+                    DinnerTweetTime = new ConfigItem.Time()
+                    {
+                        Hour = 17,
                         Minute = 50
                     },
                     TwitterTokens = new ConfigItem.TwitterToken()
@@ -251,23 +347,47 @@ namespace CKLunchBot.Twitter
                 throw new JsonException("All configs are could not be retrieved.");
             }
 
+            var faildList = new List<string>();
+
             #region tweet time
 
-            var time = config.TweetTime;
+            if (config.BreakfastTweetTime is null)
+            {
+                faildList.Add(ConfigItem.BreakfastTweetTimePropertyName);
+            }
+            else
+            {
+                CheckTimeInstance(config.BreakfastTweetTime);
+            }
 
-            var faildList = new List<string>();
-            if (time is null)
+            if (config.LunchTweetTime is null)
             {
                 faildList.Add(ConfigItem.LunchTweetTimePropertyName);
             }
-
-            if (time.Hour > 23)
+            else
             {
-                throw new JsonException("The hour value is must be 23 or less.");
+                CheckTimeInstance(config.LunchTweetTime);
             }
-            if (time.Minute > 59)
+
+            if (config.DinnerTweetTime is null)
             {
-                throw new JsonException("The minute value is must be 59 or less.");
+                faildList.Add(ConfigItem.DinnerTweetTimePropertyName);
+            }
+            else
+            {
+                CheckTimeInstance(config.DinnerTweetTime);
+            }
+
+            static void CheckTimeInstance(ConfigItem.Time time)
+            {
+                if (time.Hour > 23)
+                {
+                    throw new JsonException("The hour value is must be 23 or less.");
+                }
+                if (time.Minute > 59)
+                {
+                    throw new JsonException("The minute value is must be 59 or less.");
+                }
             }
 
             #endregion tweet time
@@ -341,36 +461,41 @@ namespace CKLunchBot.Twitter
             return client;
         }
 
-        private async Task WaitForTweetTime(CancellationToken token, (int hour, int minute) tweetTime)
+        private async Task<MealTimeFlags> WaitForTweetTime(CancellationToken token)
         {
             while (true)
             {
-                await Task.Delay(500);
+                await Task.Delay(1000);
+
                 if (token.IsCancellationRequested)
                 {
                     throw new TaskCanceledException();
                 }
                 var now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
-                if (now.Hour == tweetTime.hour && now.Minute == tweetTime.minute)
+
+                if (now.Hour == m_lastTweetedTime.Hour && now.Minute == m_lastTweetedTime.Hour && now.Second != 0)
                 {
-                    if (alreadyTweeted)
+                    continue;
+                }
+
+                for (int i = 0; i < m_nextTweetTimes.Length; i++)
+                {
+                    var (flag, nextTweetTime) = m_nextTweetTimes[i];
+
+                    if (now.Hour != nextTweetTime.Hour || now.Minute != nextTweetTime.Minute)
                     {
                         continue;
                     }
 
-                    alreadyTweeted = true;
-                    break;
-                }
-                else
-                {
-                    alreadyTweeted = false;
+                    m_lastTweetedTime = nextTweetTime;
+                    m_nextTweetTimes[i].nextTweetTime = nextTweetTime.AddDays(1);
+
+                    return flag;
                 }
             }
         }
 
-        #region IDisposable Support
-
-        private bool disposedValue = false; // 중복 호출을 검색하려면
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -378,20 +503,15 @@ namespace CKLunchBot.Twitter
             {
                 if (disposing)
                 {
-                    config = null;
-                    twitter = null;
+                    m_config = null;
+                    m_twitter = null;
                 }
-                if (menuLoader != null)
+                if (m_menuLoader != null)
                 {
-                    menuLoader.Dispose();
+                    m_menuLoader.Dispose();
                 }
                 disposedValue = true;
             }
-        }
-
-        ~BotService()
-        {
-            Dispose(false);
         }
 
         public void Dispose()
@@ -400,6 +520,9 @@ namespace CKLunchBot.Twitter
             GC.SuppressFinalize(this);
         }
 
-        #endregion IDisposable Support
+        ~BotService()
+        {
+            Dispose(false);
+        }
     }
 }

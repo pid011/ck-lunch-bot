@@ -41,6 +41,7 @@ namespace CKLunchBot.Core.ImageProcess
             return await Task.Run(() => GenerateTodayDormMenuImage(mealTime, menus));
         }
 
+        //TODO: WeekMenu클래스를 만들면 List<MenuItem>가 아닌 MenuItem 매개변수로 받기
         public static byte[] GenerateTodayLunchMenuImage(List<MenuItem> menus)
         {
             if (menus is null)
@@ -187,6 +188,7 @@ namespace CKLunchBot.Core.ImageProcess
             return contentPosXStart + contentPosXInterval * n;
         }
 
+        // TODO: WeekMenu 클래스를 새로 만들고 인덱서를 구현해서 이 부분 추가하기.
         private static string[] GetTodaysMenu(MenuItem menu)
         {
             if (menu is null)
