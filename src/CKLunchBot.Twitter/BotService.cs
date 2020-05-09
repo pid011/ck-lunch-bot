@@ -29,7 +29,6 @@ namespace CKLunchBot.Twitter
             Breakfast, Lunch, DormLunch, Dinner
         }
 
-        //private ConfigItem m_config;
         private TwitterClient m_twitter;
 
         private MenuRequester m_menuRequester;

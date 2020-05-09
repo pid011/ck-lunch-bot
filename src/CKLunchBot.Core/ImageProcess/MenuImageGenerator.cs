@@ -80,9 +80,7 @@ namespace CKLunchBot.Core.ImageProcess
                     continue;
                 }
 
-                // bot test code
-                string[] todaysMenu = weekMenu.Value[DayOfWeek.Thursday];
-                //string[] todaysMenu = weekMenu.Value[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
+                string[] todaysMenu = weekMenu.Value[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
 
                 foreach (var item in todaysMenu)
                 {
@@ -155,8 +153,6 @@ namespace CKLunchBot.Core.ImageProcess
 
             List<string> menuTexts = new List<string>();
 
-            // bot test code
-            //string[] todaysMenu = weekMenu[DayOfWeek.Thursday];
             string[] todaysMenu = weekMenu[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
 
             if (todaysMenu.Length == 0)
