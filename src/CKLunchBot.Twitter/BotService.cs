@@ -97,6 +97,16 @@ namespace CKLunchBot.Twitter
                         Log.Information("Generating menu image...");
                         byte[] menuImage = await GenerateImageAsync(flag, menus);
                         SaveLogImage(menuImage);
+
+                        Log.Information("Publishing tweet...");
+#if DEBUG
+                        Log.Information("The bot didn't tweet because it's Debug mode.");
+#endif
+#if RELEASE
+                        var tweet = await PublishTweet(tweetText.ToString(), menuImage);
+                        Log.Debug($"tweet: {tweet}");
+                        Log.Information("Tweet publish completed.");
+#endif
                     }
                     catch (NoProvidedMenuException e)
                     {
@@ -114,16 +124,6 @@ namespace CKLunchBot.Twitter
                         tmpStrBuilder.Clear();
                         continue;
                     }
-
-                    Log.Information("Publishing tweet...");
-#if DEBUG
-                    Log.Information("The bot didn't tweet because it's Debug mode.");
-#endif
-#if RELEASE
-                    var tweet = await PublishTweet(tweetText.ToString(), menuImage);
-                    Log.Debug($"tweet: {tweet}");
-                    Log.Information("Tweet publish completed.");
-#endif
                 }
                 catch (TaskCanceledException)
                 {
