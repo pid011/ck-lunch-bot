@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -8,16 +11,28 @@ namespace CKLunchBot.Core.Menu
         public MenuItem(RawMenuItem raw)
         {
             RestaurantName = StringToRestaurants(raw.RestaurantName);
-            SundayMenu     = SplitMenu(raw.SundayMenuRawText);
-            MondayMenu     = SplitMenu(raw.MondayMenuRawText);
-            TuesdayMenu    = SplitMenu(raw.TuesdayMenuRawText);
-            WednesdayMenu  = SplitMenu(raw.WednesdayMenuRawText);
-            ThursdayMenu   = SplitMenu(raw.ThursdayMenuRawText);
-            FridayMenu     = SplitMenu(raw.FridayMenuRawText);
-            SaturdayMenu   = SplitMenu(raw.SaturdayMenuRawText);
+            SundayMenu = SplitMenu(raw.SundayMenuRawText);
+            MondayMenu = SplitMenu(raw.MondayMenuRawText);
+            TuesdayMenu = SplitMenu(raw.TuesdayMenuRawText);
+            WednesdayMenu = SplitMenu(raw.WednesdayMenuRawText);
+            ThursdayMenu = SplitMenu(raw.ThursdayMenuRawText);
+            FridayMenu = SplitMenu(raw.FridayMenuRawText);
+            SaturdayMenu = SplitMenu(raw.SaturdayMenuRawText);
 
             RawMenu = raw;
         }
+
+        public string[] this[DayOfWeek dayOfWeek] => dayOfWeek switch
+        {
+            DayOfWeek.Monday => MondayMenu,
+            DayOfWeek.Tuesday => TuesdayMenu,
+            DayOfWeek.Wednesday => WednesdayMenu,
+            DayOfWeek.Thursday => ThursdayMenu,
+            DayOfWeek.Friday => FridayMenu,
+            DayOfWeek.Saturday => SaturdayMenu,
+            DayOfWeek.Sunday => SundayMenu,
+            _ => throw new ArgumentException()
+        };
 
         public RawMenuItem RawMenu { get; }
 
@@ -44,29 +59,31 @@ namespace CKLunchBot.Core.Menu
         /// <returns>splited menus</returns>
         private string[] SplitMenu(string rawMenuText)
         {
-            return Regex.Split(rawMenuText ?? string.Empty, "\r\n");
+            var regexResult = Regex.Split(rawMenuText ?? string.Empty, "\r\n").ToList();
+            regexResult.RemoveAll(x => string.IsNullOrWhiteSpace(x));
+            return regexResult.ToArray();
         }
 
         private Restaurants StringToRestaurants(string name)
         {
-            const string daban            = "다반";
+            const string daban = "다반";
             const string nankatsuNanUdong = "난카츠난우동";
-            const string tangAndJjigae    = "탕&찌개차림";
-            const string yukHaeBab        = "육해밥";
-            const string dormBreakfast    = "아침";
-            const string dormLunch        = "점심";
-            const string dormDinner       = "저녁";
+            const string tangAndJjigae = "탕&찌개차림";
+            const string yukHaeBab = "육해밥";
+            const string dormBreakfast = "아침";
+            const string dormLunch = "점심";
+            const string dormDinner = "저녁";
 
             Restaurants result = name switch
             {
-                daban            => Restaurants.Daban,
+                daban => Restaurants.Daban,
                 nankatsuNanUdong => Restaurants.NankatsuNanUdong,
-                tangAndJjigae    => Restaurants.TangAndJjigae,
-                yukHaeBab        => Restaurants.YukHaeBab,
-                dormBreakfast    => Restaurants.DormBreakfast,
-                dormLunch        => Restaurants.DormLunch,
-                dormDinner       => Restaurants.DormDinner,
-                _                => Restaurants.Unknown
+                tangAndJjigae => Restaurants.TangAndJjigae,
+                yukHaeBab => Restaurants.YukHaeBab,
+                dormBreakfast => Restaurants.DormBreakfast,
+                dormLunch => Restaurants.DormLunch,
+                dormDinner => Restaurants.DormDinner,
+                _ => Restaurants.Unknown
             };
 
             return result;
@@ -81,31 +98,31 @@ namespace CKLunchBot.Core.Menu
             menuText.AppendLine($"[{RestaurantName}]");
             menuText.AppendLine();
 
-            menuText.Append($"{"Monday", -12}: ");
+            menuText.Append($"{"Monday",-12}: ");
             menuText.AppendJoin(", ", MondayMenu ?? nullStrArr);
             menuText.AppendLine();
 
-            menuText.Append($"{"Tuesday", -12}: ");
+            menuText.Append($"{"Tuesday",-12}: ");
             menuText.AppendJoin(", ", TuesdayMenu ?? nullStrArr);
             menuText.AppendLine();
 
-            menuText.Append($"{"Wednesday", -12}: ");
+            menuText.Append($"{"Wednesday",-12}: ");
             menuText.AppendJoin(", ", WednesdayMenu ?? nullStrArr);
             menuText.AppendLine();
 
-            menuText.Append($"{"Thursday", -12}: ");
+            menuText.Append($"{"Thursday",-12}: ");
             menuText.AppendJoin(", ", ThursdayMenu ?? nullStrArr);
             menuText.AppendLine();
 
-            menuText.Append($"{"Friday", -12}: ");
+            menuText.Append($"{"Friday",-12}: ");
             menuText.AppendJoin(", ", FridayMenu ?? nullStrArr);
             menuText.AppendLine();
 
-            menuText.Append($"{"Saturday", -12}: ");
+            menuText.Append($"{"Saturday",-12}: ");
             menuText.AppendJoin(", ", SaturdayMenu ?? nullStrArr);
             menuText.AppendLine();
 
-            menuText.Append($"{"Sunday", -12}: ");
+            menuText.Append($"{"Sunday",-12}: ");
             menuText.AppendJoin(", ", SundayMenu ?? nullStrArr);
             menuText.AppendLine();
 

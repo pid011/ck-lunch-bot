@@ -18,11 +18,11 @@ namespace CKLunchBot.Core.ImageProcess
         private const float contentPosXInterval = 290.0f;
         private const float contentPosXStart = 60.0f;
         private const float contentPosY = 193.0f;
-        private const float defaultLineHeight = 40.0f;
+        private const float defaultLineHeight = 50.0f;
 
         private const int maxLengthOfMenuText = 12;
 
-        private const string noMenuProvidedText = "제공한 메뉴 없음";
+        private const string noMenuProvidedText = "(제공한 메뉴 없음)";
         private const string menuPrefix = "::";
 
         private static readonly string menuTemplateImagePath =
@@ -31,22 +31,25 @@ namespace CKLunchBot.Core.ImageProcess
         private static readonly string dormMenuTemplateImagePath =
             Path.Combine(Directory.GetCurrentDirectory(), "assets", "images", "dorm_menu_template.png");
 
-        public static async Task<byte[]> GenerateTodayLunchMenuImageAsync(List<MenuItem> menus)
+        public static async Task<byte[]> GenerateTodayLunchMenuImageAsync(RestaurantsWeekMenu menus)
         {
             return await Task.Run(() => GenerateTodayLunchMenuImage(menus));
         }
 
-        public static async Task<byte[]> GenerateTodayDormMenuImageAsync(Restaurants mealTime, List<MenuItem> menus)
+        public static async Task<byte[]> GenerateTodayDormMenuImageAsync(MenuItem weekMenu)
         {
-            return await Task.Run(() => GenerateTodayDormMenuImage(mealTime, menus));
+            return await Task.Run(() => GenerateTodayDormMenuImage(weekMenu));
         }
 
-        //TODO: WeekMenu클래스를 만들면 List<MenuItem>가 아닌 MenuItem 매개변수로 받기
-        public static byte[] GenerateTodayLunchMenuImage(List<MenuItem> menus)
+        /// <summary>
+        /// Generate todays lunch menu image
+        /// </summary>
+        /// <returns>byte image</returns>
+        public static byte[] GenerateTodayLunchMenuImage(RestaurantsWeekMenu menus)
         {
             if (menus is null)
             {
-                throw new ArgumentNullException(nameof(menus));
+                menus = new RestaurantsWeekMenu(null);
             }
 
             using var generator = new ImageGenerator(menuTemplateImagePath)
@@ -61,7 +64,7 @@ namespace CKLunchBot.Core.ImageProcess
             var titleText2 = " 오늘의 점심메뉴는?";
             generator.DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.Black, titleText2);
 
-            Dictionary<Restaurants, List<string>> menuTexts = new Dictionary<Restaurants, List<string>>()
+            Dictionary<Restaurants, List<string>> menuTexts = new Dictionary<Restaurants, List<string>>(new RestautrantsComparer())
             {
                 [Restaurants.Daban] = new List<string>(),
                 [Restaurants.NankatsuNanUdong] = new List<string>(),
@@ -71,24 +74,37 @@ namespace CKLunchBot.Core.ImageProcess
 
             foreach (var weekMenu in menus)
             {
-                if (weekMenu is null || !menuTexts.ContainsKey(weekMenu.RestaurantName))
+                if (!menuTexts.ContainsKey(weekMenu.Key))
                 {
                     continue;
                 }
 
-                string[] todaysMenu = GetTodaysMenu(weekMenu);
+                // bot test code
+                //string[] todaysMenu = weekMenu.Value[DayOfWeek.Thursday];
+                string[] todaysMenu = weekMenu.Value[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
 
                 foreach (var item in todaysMenu)
                 {
                     if (!string.IsNullOrWhiteSpace(item))
                     {
-                        menuTexts[weekMenu.RestaurantName].Add(SplitLine($"{menuPrefix} {item}", maxLengthOfMenuText + menuPrefix.Length + 1));
+                        menuTexts[weekMenu.Key].Add(SplitLine($"{menuPrefix} {item}", maxLengthOfMenuText + menuPrefix.Length + 1));
                     }
                 }
-                if (menuTexts.Count == 0)
+            }
+
+            bool allMenusWereNotProvided = false;
+            foreach (var item in menuTexts)
+            {
+                if (item.Value.Count != 0)
                 {
-                    menuTexts[weekMenu.RestaurantName].Add(noMenuProvidedText);
+                    continue;
                 }
+                allMenusWereNotProvided = true;
+            }
+            if (allMenusWereNotProvided)
+            {
+                throw new NoProvidedMenuException(Restaurants.Daban, Restaurants.NankatsuNanUdong,
+                                                  Restaurants.TangAndJjigae, Restaurants.YukHaeBab);
             }
 
             foreach (var textList in menuTexts)
@@ -104,6 +120,11 @@ namespace CKLunchBot.Core.ImageProcess
                     _ => 0.0f // Never used because it is filtered out before running this code.
                 };
 
+                if (textList.Value.Count == 0)
+                {
+                    textList.Value.Add(noMenuProvidedText);
+                }
+
                 foreach (var text in textList.Value)
                 {
                     generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, text);
@@ -114,10 +135,10 @@ namespace CKLunchBot.Core.ImageProcess
             return generator.ExportAsPng();
         }
 
-        public static byte[] GenerateTodayDormMenuImage(Restaurants mealTime, List<MenuItem> menus)
+        public static byte[] GenerateTodayDormMenuImage(MenuItem weekMenu)
         {
             string titleText2 = " 오늘의 기숙사 ";
-            titleText2 += mealTime switch
+            titleText2 += weekMenu.RestaurantName switch
             {
                 Restaurants.DormBreakfast => "아침메뉴는?",
                 Restaurants.DormDinner => "저녁메뉴는?",
@@ -137,8 +158,14 @@ namespace CKLunchBot.Core.ImageProcess
 
             List<string> menuTexts = new List<string>();
 
-            MenuItem weekMenu = menus.Find(menu => menu.RestaurantName == mealTime);
-            string[] todaysMenu = GetTodaysMenu(weekMenu);
+            // bot test code
+            //string[] todaysMenu = weekMenu[DayOfWeek.Thursday];
+            string[] todaysMenu = weekMenu[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
+
+            if (todaysMenu.Length == 0)
+            {
+                throw new NoProvidedMenuException(weekMenu.RestaurantName);
+            }
 
             foreach (var item in todaysMenu)
             {
@@ -186,50 +213,6 @@ namespace CKLunchBot.Core.ImageProcess
         private static float GetContentPositionX(float n)
         {
             return contentPosXStart + contentPosXInterval * n;
-        }
-
-        // TODO: WeekMenu 클래스를 새로 만들고 인덱서를 구현해서 이 부분 추가하기.
-        private static string[] GetTodaysMenu(MenuItem menu)
-        {
-            if (menu is null)
-            {
-                throw new ArgumentNullException(nameof(menu));
-            }
-
-            string[] todaysMenu = null;
-
-            switch (TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek)
-            {
-                case DayOfWeek.Friday:
-                    todaysMenu = menu.FridayMenu;
-                    break;
-
-                case DayOfWeek.Monday:
-                    todaysMenu = menu.MondayMenu;
-                    break;
-
-                case DayOfWeek.Saturday:
-                    todaysMenu = menu.SaturdayMenu;
-                    break;
-
-                case DayOfWeek.Sunday:
-                    todaysMenu = menu.SundayMenu;
-                    break;
-
-                case DayOfWeek.Thursday:
-                    todaysMenu = menu.ThursdayMenu;
-                    break;
-
-                case DayOfWeek.Tuesday:
-                    todaysMenu = menu.TuesdayMenu;
-                    break;
-
-                case DayOfWeek.Wednesday:
-                    todaysMenu = menu.WednesdayMenu;
-                    break;
-            }
-
-            return todaysMenu;
         }
     }
 }

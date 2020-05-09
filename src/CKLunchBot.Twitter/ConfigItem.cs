@@ -1,19 +1,21 @@
 using Newtonsoft.Json;
 
+using System;
+
 namespace CKLunchBot.Twitter
 {
     public class ConfigItem
     {
         public const string LunchTweetTimePropertyName = "lunch_tweet_time";
-        public const string BreakfastTweetTimePropertyName = "breackfast_tweet_time";
+        public const string BreakfastTweetTimePropertyName = "breakfast_tweet_time";
         public const string DinnerTweetTimePropertyName = "dinner_tweet_time";
         public const string TwitterTokensPropertyName = "twitter_tokens";
 
-        [JsonProperty(LunchTweetTimePropertyName)]
-        public Time LunchTweetTime { get; set; }
-
         [JsonProperty(BreakfastTweetTimePropertyName)]
         public Time BreakfastTweetTime { get; set; }
+        
+        [JsonProperty(LunchTweetTimePropertyName)]
+        public Time LunchTweetTime { get; set; }
 
         [JsonProperty(DinnerTweetTimePropertyName)]
         public Time DinnerTweetTime { get; set; }
@@ -21,7 +23,7 @@ namespace CKLunchBot.Twitter
         [JsonProperty(TwitterTokensPropertyName)]
         public TwitterToken TwitterTokens { get; set; }
 
-        public class Time
+        public class Time : IEquatable<Time>
         {
             public const string HourPropertyName = "hour24";
             public const string MinutePropertyName = "minute";
@@ -31,6 +33,48 @@ namespace CKLunchBot.Twitter
 
             [JsonProperty(MinutePropertyName)]
             public int Minute { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Time)
+                {
+                    return Equals((Time)obj);
+                }
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public bool Equals(Time other)
+            {
+                return (Hour == other.Minute && Minute == other.Minute);
+            }
+
+            public static bool operator ==(Time a, Time b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(Time a, Time b)
+            {
+                return !a.Equals(b);
+            }
+
+            public static bool operator >(Time a, Time b)
+            {
+                var t1 = new TimeSpan(a.Hour, a.Minute, 0);
+                var t2 = new TimeSpan(b.Hour, b.Minute, 0);
+
+                return t1 > t2;
+            }
+
+            public static bool operator <(Time a, Time b)
+            {
+                return !(a > b);
+            }
         }
 
         public class TwitterToken
