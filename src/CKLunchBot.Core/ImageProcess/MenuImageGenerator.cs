@@ -6,6 +6,7 @@ using SixLabors.Fonts;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.ImageProcess
@@ -64,12 +65,12 @@ namespace CKLunchBot.Core.ImageProcess
             var titleText2 = " 오늘의 점심메뉴는?";
             generator.DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.Black, titleText2);
 
-            Dictionary<Restaurants, List<string>> menuTexts = new Dictionary<Restaurants, List<string>>(new RestautrantsComparer())
+            Dictionary<Restaurants, StringBuilder> menuTexts = new Dictionary<Restaurants, StringBuilder>(new RestautrantsComparer())
             {
-                [Restaurants.Daban] = new List<string>(),
-                [Restaurants.NankatsuNanUdong] = new List<string>(),
-                [Restaurants.TangAndJjigae] = new List<string>(),
-                [Restaurants.YukHaeBab] = new List<string>(),
+                [Restaurants.Daban] = new StringBuilder(),
+                [Restaurants.NankatsuNanUdong] = new StringBuilder(),
+                [Restaurants.TangAndJjigae] = new StringBuilder(),
+                [Restaurants.YukHaeBab] = new StringBuilder()
             };
 
             foreach (var weekMenu in menus)
@@ -80,14 +81,14 @@ namespace CKLunchBot.Core.ImageProcess
                 }
 
                 // bot test code
-                //string[] todaysMenu = weekMenu.Value[DayOfWeek.Thursday];
-                string[] todaysMenu = weekMenu.Value[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
+                string[] todaysMenu = weekMenu.Value[DayOfWeek.Thursday];
+                //string[] todaysMenu = weekMenu.Value[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
 
                 foreach (var item in todaysMenu)
                 {
                     if (!string.IsNullOrWhiteSpace(item))
                     {
-                        menuTexts[weekMenu.Key].Add(SplitLine($"{menuPrefix} {item}", maxLengthOfMenuText + menuPrefix.Length + 1));
+                        menuTexts[weekMenu.Key].AppendLine(SplitLine($"{menuPrefix} {item}\n", maxLengthOfMenuText + menuPrefix.Length + 1));
                     }
                 }
             }
@@ -95,7 +96,7 @@ namespace CKLunchBot.Core.ImageProcess
             bool allMenusWereNotProvided = false;
             foreach (var item in menuTexts)
             {
-                if (item.Value.Count != 0)
+                if (item.Value.Length != 0)
                 {
                     continue;
                 }
@@ -120,16 +121,12 @@ namespace CKLunchBot.Core.ImageProcess
                     _ => 0.0f // Never used because it is filtered out before running this code.
                 };
 
-                if (textList.Value.Count == 0)
+                if (textList.Value.Length == 0)
                 {
-                    textList.Value.Add(noMenuProvidedText);
+                    textList.Value.AppendLine(noMenuProvidedText);
                 }
 
-                foreach (var text in textList.Value)
-                {
-                    generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, text);
-                    drawPosition.y += defaultLineHeight;
-                }
+                generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, textList.Value.ToString());
             }
 
             return generator.ExportAsPng();
