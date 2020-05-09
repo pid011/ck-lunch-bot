@@ -1,34 +1,39 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CKLunchBot.Core.Requester
 {
-    public abstract class BaseRequester : IDisposable
+    public class BaseRequester : IDisposable
     {
         private readonly HttpClient client = new HttpClient();
 
-        public abstract Task<JObject> RequestData();
-
-        protected async Task<string> GetResponseString(
+        /// <summary>
+        /// Return <see cref="JObject"/> from the URL requests result.
+        /// </summary>
+        /// <param name="url">request url</param>
+        /// <param name="jsonContent">request json content</param>
+        /// <param name="headers">request headers</param>
+        /// <returns></returns>
+        protected async Task<JObject> GetJsonFromUrl(
             string url, string jsonContent = null, Dictionary<string, string> headers = null)
         {
             if (string.IsNullOrEmpty(url))
             {
-                throw new ArgumentException("요청받을 url이 null을 참조하고 있거나 비어있습니다", nameof(url));
+                throw new ArgumentNullException(nameof(url));
             }
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-
             if (jsonContent != null)
             {
                 request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
             }
-
             if (headers != null)
             {
                 foreach (var header in headers)
@@ -38,14 +43,36 @@ namespace CKLunchBot.Core.Requester
             }
 
             using HttpResponseMessage response = await client.SendAsync(request);
-            return await response.Content.ReadAsStringAsync();
+            using Stream s = response.Content.ReadAsStreamAsync().Result;
+            using StreamReader sr = new StreamReader(s);
+            using JsonReader reader = new JsonTextReader(sr);
+
+            return JObject.Load(reader);
         }
 
-        protected async Task<JObject> GetJsonFromUrl(
-            string url, string jsonContent = null, Dictionary<string, string> headers = null)
+        protected async Task<string> GetStringFromUrl(string url, string jsonContent = null, Dictionary<string, string> headers = null)
         {
-            var jsonString = await GetResponseString(url, jsonContent, headers);
-            return JObject.Parse(jsonString);
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            if (jsonContent != null)
+            {
+                request.Content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            }
+            if (headers != null)
+            {
+                foreach (var header in headers)
+                {
+                    request.Headers.Add(header.Key, header.Value);
+                }
+            }
+
+            using HttpResponseMessage response = await client.SendAsync(request);
+
+            return await response.Content.ReadAsStringAsync();
         }
 
         #region IDisposable Support

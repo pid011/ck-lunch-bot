@@ -29,6 +29,9 @@
     <None Update="assets\fonts\Maplestory Light.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\images\dorm_menu_template.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\menu_template.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
