@@ -108,7 +108,7 @@ namespace CKLunchBot.Twitter
                     }
                     catch (NoProvidedMenuException e)
                     {
-                        Log.Information($"The bot has faild to tweet because menu data is not exist.");
+                        Log.Information($"The bot didn't tweet because menu data doesn't exist.");
                         tmpStrBuilder.Append("No provided menu name: ");
                         for (int i = 0; i < e.RestaurantsName.Length; i++)
                         {
