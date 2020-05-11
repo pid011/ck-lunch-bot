@@ -70,9 +70,8 @@ namespace CKLunchBot.Twitter
                     Log.Information("Requesting menu list...");
                     var menus = await GetWeekMenu();
 
-                    tmpStrBuilder.Append("청강대 ");
                     tmpStrBuilder.Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow));
-                    tmpStrBuilder.Append("오늘의 ");
+                    tmpStrBuilder.Append(" 오늘의 청강대 ");
                     switch (flag)
                     {
                         case MealTimeFlags.Breakfast:
