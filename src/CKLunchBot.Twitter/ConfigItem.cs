@@ -13,7 +13,7 @@ namespace CKLunchBot.Twitter
 
         [JsonProperty(BreakfastTweetTimePropertyName)]
         public Time BreakfastTweetTime { get; set; }
-        
+
         [JsonProperty(LunchTweetTimePropertyName)]
         public Time LunchTweetTime { get; set; }
 
