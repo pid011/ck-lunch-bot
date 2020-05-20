@@ -1,11 +1,14 @@
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
+﻿// Copyright (c) Sepi. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 
 namespace CKLunchBot.Core.ImageProcess
 {
@@ -13,7 +16,7 @@ namespace CKLunchBot.Core.ImageProcess
     {
         public Dictionary<string, Font> Fonts { get; } = new Dictionary<string, Font>();
 
-        private readonly Image image;
+        private readonly Image _image;
 
         public ImageGenerator(string imagePath)
         {
@@ -22,15 +25,15 @@ namespace CKLunchBot.Core.ImageProcess
                 throw new FileNotFoundException($"Image file does not exist. path: {imagePath}");
             }
 
-            image = Image.Load(imagePath);
+            _image = Image.Load(imagePath);
         }
 
         public ImageGenerator DrawText(
             (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
         {
-            if (image.IsDisposed)
+            if (_image.IsDisposed)
             {
-                throw new ObjectDisposedException(nameof(image));
+                throw new ObjectDisposedException(nameof(_image));
             }
 
             TextGraphicsOptions options = new TextGraphicsOptions()
@@ -42,7 +45,7 @@ namespace CKLunchBot.Core.ImageProcess
                 //WrapTextWidth = 100
             };
 
-            image.Mutate(x =>
+            _image.Mutate(x =>
                 x.DrawText(options, text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
 
             return this;
@@ -66,26 +69,26 @@ namespace CKLunchBot.Core.ImageProcess
         public byte[] ExportAsPng()
         {
             using var stream = new MemoryStream();
-            image.SaveAsPng(stream);
+            _image.SaveAsPng(stream);
             return stream.ToArray();
         }
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // 중복 호출을 검색하려면
+        private bool _disposedValue = false; // 중복 호출을 검색하려면
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                 }
-                if (image != null)
+                if (_image != null)
                 {
-                    image.Dispose();
+                    _image.Dispose();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

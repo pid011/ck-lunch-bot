@@ -1,3 +1,6 @@
+﻿// Copyright (c) Sepi. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections;
 using System.Collections.Generic;
 
@@ -5,22 +8,22 @@ namespace CKLunchBot.Core.Menu
 {
     public class RestaurantsWeekMenu : IReadOnlyDictionary<Restaurants, MenuItem>
     {
-        private readonly Dictionary<Restaurants, MenuItem> menus;
+        private readonly Dictionary<Restaurants, MenuItem> _menus;
 
         public RestaurantsWeekMenu(List<MenuItem> items)
         {
-            menus = new Dictionary<Restaurants, MenuItem>(new RestautrantsComparer());
+            _menus = new Dictionary<Restaurants, MenuItem>(new RestautrantsComparer());
             if (items is null)
             {
                 return;
             }
-            foreach (var item in items)
+            foreach (MenuItem item in items)
             {
                 if (item is null)
                 {
                     continue;
                 }
-                menus.TryAdd(item.RestaurantName, item);
+                _menus.TryAdd(item.RestaurantName, item);
             }
         }
 
@@ -30,7 +33,7 @@ namespace CKLunchBot.Core.Menu
             {
                 try
                 {
-                    return menus[key];
+                    return _menus[key];
                 }
                 catch (KeyNotFoundException)
                 {
@@ -39,30 +42,30 @@ namespace CKLunchBot.Core.Menu
             }
         }
 
-        public IEnumerable<Restaurants> Keys => menus.Keys;
+        public IEnumerable<Restaurants> Keys => _menus.Keys;
 
-        public IEnumerable<MenuItem> Values => menus.Values;
+        public IEnumerable<MenuItem> Values => _menus.Values;
 
-        public int Count => menus.Count;
+        public int Count => _menus.Count;
 
         public bool ContainsKey(Restaurants key)
         {
-            return menus.ContainsKey(key);
+            return _menus.ContainsKey(key);
         }
 
         public IEnumerator<KeyValuePair<Restaurants, MenuItem>> GetEnumerator()
         {
-            return menus.GetEnumerator();
+            return _menus.GetEnumerator();
         }
 
         public bool TryGetValue(Restaurants key, out MenuItem value)
         {
-            return menus.TryGetValue(key, out value);
+            return _menus.TryGetValue(key, out value);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return menus.GetEnumerator();
+            return _menus.GetEnumerator();
         }
     }
 }

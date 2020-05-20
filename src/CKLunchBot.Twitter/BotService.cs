@@ -1,3 +1,13 @@
+﻿// Copyright (c) Sepi. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
 using CKLunchBot.Core.ImageProcess;
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Requester;
@@ -8,13 +18,6 @@ using Newtonsoft.Json;
 using Serilog;
 
 using SixLabors.ImageSharp;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -29,14 +32,14 @@ namespace CKLunchBot.Twitter
             Breakfast, Lunch, DormLunch, Dinner
         }
 
-        private TwitterClient m_twitter;
+        private TwitterClient _twitter;
 
-        private MenuRequester m_menuRequester;
+        private MenuRequester _menuRequester;
 
-        private (MealTimeFlags flag, DateTime nextTweetTime)[] m_nextTweetTimes;
-        private DateTime m_lastTweetedTime;
+        private (MealTimeFlags flag, DateTime nextTweetTime)[] _nextTweetTimes;
+        private DateTime _lastTweetedTime;
 
-        private readonly StringBuilder tmpStrBuilder = new StringBuilder();
+        private readonly StringBuilder _tmpStrBuilder = new StringBuilder();
 
         /// <summary>
         /// Bot running task.
@@ -47,48 +50,48 @@ namespace CKLunchBot.Twitter
         {
             while (true)
             {
-                if (disposedValue)
+                if (_disposedValue)
                 {
                     return;
                 }
 
                 try
                 {
-                    tmpStrBuilder.AppendLine("Next tweet time list:");
-                    foreach (var tweetTime in m_nextTweetTimes)
+                    _tmpStrBuilder.AppendLine("Next tweet time list:");
+                    foreach ((MealTimeFlags flag, DateTime nextTweetTime) tweetTime in _nextTweetTimes)
                     {
-                        tmpStrBuilder.AppendLine($"{tweetTime.flag}: {tweetTime.nextTweetTime}");
+                        _tmpStrBuilder.AppendLine($"{tweetTime.flag}: {tweetTime.nextTweetTime}");
                     }
-                    Log.Debug(tmpStrBuilder.ToString());
-                    tmpStrBuilder.Clear();
+                    Log.Debug(_tmpStrBuilder.ToString());
+                    _tmpStrBuilder.Clear();
 
                     Log.Information("Waiting for next tweet time...");
-                    var flag = await WaitForTweetTime(token);
+                    MealTimeFlags flag = await WaitForTweetTime(token);
                     Log.Information($"Tweet target: {flag}");
                     Log.Information("--- Image tweet start ---");
 
                     Log.Information("Requesting menu list...");
-                    var menus = await GetWeekMenu();
+                    RestaurantsWeekMenu menus = await GetWeekMenu();
 
-                    tmpStrBuilder.Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow));
-                    tmpStrBuilder.Append(" 오늘의 청강대 ");
+                    _tmpStrBuilder.Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow));
+                    _tmpStrBuilder.Append(" 오늘의 청강대 ");
                     switch (flag)
                     {
                         case MealTimeFlags.Breakfast:
-                            tmpStrBuilder.Append("아침");
+                            _tmpStrBuilder.Append("아침");
                             break;
 
                         case MealTimeFlags.Lunch:
-                            tmpStrBuilder.Append("점심");
+                            _tmpStrBuilder.Append("점심");
                             break;
 
                         case MealTimeFlags.Dinner:
-                            tmpStrBuilder.Append("저녁");
+                            _tmpStrBuilder.Append("저녁");
                             break;
                     }
-                    tmpStrBuilder.Append("메뉴는...");
-                    string tweetText = tmpStrBuilder.ToString();
-                    tmpStrBuilder.Clear();
+                    _tmpStrBuilder.Append("메뉴는...");
+                    string tweetText = _tmpStrBuilder.ToString();
+                    _tmpStrBuilder.Clear();
 
                     try
                     {
@@ -109,17 +112,17 @@ namespace CKLunchBot.Twitter
                     catch (NoProvidedMenuException e)
                     {
                         Log.Information($"The bot didn't tweet because menu data doesn't exist.");
-                        tmpStrBuilder.Append("No provided menu name: ");
+                        _tmpStrBuilder.Append("No provided menu name: ");
                         for (int i = 0; i < e.RestaurantsName.Length; i++)
                         {
-                            tmpStrBuilder.Append(e.RestaurantsName[i].ToString());
+                            _tmpStrBuilder.Append(e.RestaurantsName[i].ToString());
                             if (i < e.RestaurantsName.Length - 1)
                             {
-                                tmpStrBuilder.Append(", ");
+                                _tmpStrBuilder.Append(", ");
                             }
                         }
-                        Log.Debug(tmpStrBuilder.ToString());
-                        tmpStrBuilder.Clear();
+                        Log.Debug(_tmpStrBuilder.ToString());
+                        _tmpStrBuilder.Clear();
                         continue;
                     }
                 }
@@ -139,9 +142,9 @@ namespace CKLunchBot.Twitter
 
         private async Task<RestaurantsWeekMenu> GetWeekMenu()
         {
-            RestaurantsWeekMenu menuList = await m_menuRequester.RequestWeekMenuAsync();
+            RestaurantsWeekMenu menuList = await _menuRequester.RequestWeekMenuAsync();
             Log.Debug($"Responsed menu list count: {menuList.Count}");
-            foreach (var menu in menuList.Values)
+            foreach (MenuItem menu in menuList.Values)
             {
                 Log.Debug(menu.ToString());
             }
@@ -149,18 +152,19 @@ namespace CKLunchBot.Twitter
             return menuList;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         private async Task<ITweet> PublishTweet(string tweetText, byte[] image = null)
         {
             ITweet tweet;
 
             if (image is null)
             {
-                tweet = await m_twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString()));
+                tweet = await _twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString()));
             }
             else
             {
-                IMedia uploadedImage = await m_twitter.Upload.UploadTweetImage(image);
-                tweet = await m_twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString())
+                IMedia uploadedImage = await _twitter.Upload.UploadTweetImage(image);
+                tweet = await _twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString())
                 {
                     Medias = { uploadedImage }
                 });
@@ -213,21 +217,21 @@ namespace CKLunchBot.Twitter
                     return (t1 < 0 || (t1 == 0 && t2 <= 0)) ? target.AddDays(1) : target;
                 }
 
-                var now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
+                DateTime now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
 
-                var nextBreakfastTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
+                DateTime nextBreakfastTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
                                                                                config.BreakfastTweetTime.Hour,
                                                                                config.BreakfastTweetTime.Minute, 0));
 
-                var nextLunchTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
+                DateTime nextLunchTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
                                                                            config.LunchTweetTime.Hour,
                                                                            config.LunchTweetTime.Minute, 0));
 
-                var nextDinnerTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
+                DateTime nextDinnerTweetTime = GetNextDateTime(now, new DateTime(now.Year, now.Month, now.Day,
                                                                             config.DinnerTweetTime.Hour,
                                                                             config.DinnerTweetTime.Minute, 0));
 
-                m_nextTweetTimes = new (MealTimeFlags, DateTime)[]
+                _nextTweetTimes = new (MealTimeFlags, DateTime)[]
                 {
                     (MealTimeFlags.Breakfast, nextBreakfastTweetTime),
                     (MealTimeFlags.Lunch, nextLunchTweetTime),
@@ -245,16 +249,16 @@ namespace CKLunchBot.Twitter
                 //    (MealTimeFlags.Dinner, now.AddSeconds(60))
                 //};
 
-                m_lastTweetedTime = now;
+                _lastTweetedTime = now;
 
-                m_twitter = await ConnectToTwitter(config.TwitterTokens);
+                _twitter = await ConnectToTwitter(config.TwitterTokens);
 
-                m_menuRequester = new MenuRequester();
+                _menuRequester = new MenuRequester();
 
                 Log.Information("Testing image generate...");
                 try
                 {
-                    var menus = await GetWeekMenu();
+                    RestaurantsWeekMenu menus = await GetWeekMenu();
                     var testImage = await GenerateImageAsync(MealTimeFlags.Lunch, menus);
                     SaveLogImage(testImage);
                 }
@@ -321,7 +325,7 @@ namespace CKLunchBot.Twitter
                     }
                 };
 
-                using var stream = File.CreateText(configFileName);
+                using StreamWriter stream = File.CreateText(configFileName);
                 using var jsonWriter = new JsonTextWriter(stream)
                 {
                     Formatting = Formatting.Indented
@@ -386,7 +390,7 @@ namespace CKLunchBot.Twitter
                 CheckTimeInstance(config.DinnerTweetTime);
             }
 
-            var tokens = config.TwitterTokens;
+            ConfigItem.TwitterToken tokens = config.TwitterTokens;
 
             if (tokens is null)
             {
@@ -412,17 +416,17 @@ namespace CKLunchBot.Twitter
 
             if (faildList.Count != 0)
             {
-                tmpStrBuilder.Append("Faild to loaded tokens: ");
+                _tmpStrBuilder.Append("Faild to loaded tokens: ");
                 for (int i = 0; i < faildList.Count; i++)
                 {
-                    tmpStrBuilder.Append(faildList[i]);
+                    _tmpStrBuilder.Append(faildList[i]);
                     if (i < faildList.Count - 1)
                     {
-                        tmpStrBuilder.Append(", ");
+                        _tmpStrBuilder.Append(", ");
                     }
                 }
-                var error = tmpStrBuilder.ToString();
-                tmpStrBuilder.Clear();
+                var error = _tmpStrBuilder.ToString();
+                _tmpStrBuilder.Clear();
                 throw new JsonException(error);
             }
 
@@ -455,12 +459,12 @@ namespace CKLunchBot.Twitter
         {
             // TwitterClient를 만들고 토큰이 제대로 된건지 테스트 과정 필요
             var client = new TwitterClient(tokens.ConsumerApiKey, tokens.ConsumerSecretKey, tokens.AccessToken, tokens.AccessTokenSecret);
-            var authenticatedUser = await client.Users.GetAuthenticatedUser();
-            tmpStrBuilder.AppendLine("---Bot information---");
-            tmpStrBuilder.AppendLine($"Bot name: {authenticatedUser.Name}");
-            tmpStrBuilder.AppendLine($"Bot description: {authenticatedUser.Description}");
-            Log.Debug(tmpStrBuilder.ToString());
-            tmpStrBuilder.Clear();
+            IAuthenticatedUser authenticatedUser = await client.Users.GetAuthenticatedUser();
+            _tmpStrBuilder.AppendLine("---Bot information---");
+            _tmpStrBuilder.AppendLine($"Bot name: {authenticatedUser.Name}");
+            _tmpStrBuilder.AppendLine($"Bot description: {authenticatedUser.Description}");
+            Log.Debug(_tmpStrBuilder.ToString());
+            _tmpStrBuilder.Clear();
             return client;
         }
 
@@ -480,44 +484,44 @@ namespace CKLunchBot.Twitter
                 }
                 now = TimeUtils.GetKoreaNowTime(DateTime.UtcNow);
 
-                if (now - m_lastTweetedTime == TimeSpan.Zero)
+                if (now - _lastTweetedTime == TimeSpan.Zero)
                 {
                     continue;
                 }
 
-                for (int i = 0; i < m_nextTweetTimes.Length; i++)
+                for (int i = 0; i < _nextTweetTimes.Length; i++)
                 {
-                    (flag, nextTweetTime) = m_nextTweetTimes[i];
+                    (flag, nextTweetTime) = _nextTweetTimes[i];
 
                     if (now.Hour != nextTweetTime.Hour || now.Minute != nextTweetTime.Minute || now.Second != nextTweetTime.Second)
                     {
                         continue;
                     }
 
-                    m_lastTweetedTime = nextTweetTime;
-                    m_nextTweetTimes[i].nextTweetTime = nextTweetTime.AddDays(1);
+                    _lastTweetedTime = nextTweetTime;
+                    _nextTweetTimes[i].nextTweetTime = nextTweetTime.AddDays(1);
 
                     return flag;
                 }
             }
         }
 
-        private bool disposedValue = false;
+        private bool _disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     //m_config = null;
-                    m_twitter = null;
+                    _twitter = null;
                 }
-                if (m_menuRequester != null)
+                if (_menuRequester != null)
                 {
-                    m_menuRequester.Dispose();
+                    _menuRequester.Dispose();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

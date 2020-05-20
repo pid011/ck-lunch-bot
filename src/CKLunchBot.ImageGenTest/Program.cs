@@ -1,21 +1,24 @@
+﻿// Copyright (c) Sepi. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.IO;
+using System.Threading.Tasks;
+
 using CKLunchBot.Core.ImageProcess;
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Requester;
 
 using SixLabors.ImageSharp;
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
-
 namespace CKLunchBot.ImageGenTest
 {
     internal class Program
     {
-        private static async Task Main(string[] args)
+        private static async Task Main(string[] _)
         {
             using var requester = new MenuRequester();
-            var menuList = await requester.RequestWeekMenuAsync();
+            RestaurantsWeekMenu menuList = await requester.RequestWeekMenuAsync();
 
             //var jobj = JObject.Parse(await File.ReadAllTextAsync("menu.json"));
             //var menuList = MenuJsonParser(jobj);

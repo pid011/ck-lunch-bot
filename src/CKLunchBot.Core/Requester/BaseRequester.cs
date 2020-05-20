@@ -1,5 +1,5 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿// Copyright (c) Sepi. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
@@ -8,11 +8,14 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace CKLunchBot.Core.Requester
 {
     public class BaseRequester : IDisposable
     {
-        private readonly HttpClient client = new HttpClient();
+        private readonly HttpClient _client = new HttpClient();
 
         /// <summary>
         /// Return <see cref="JObject"/> from the URL requests result.
@@ -36,13 +39,13 @@ namespace CKLunchBot.Core.Requester
             }
             if (headers != null)
             {
-                foreach (var header in headers)
+                foreach (KeyValuePair<string, string> header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
             }
 
-            using HttpResponseMessage response = await client.SendAsync(request);
+            using HttpResponseMessage response = await _client.SendAsync(request);
             using Stream s = response.Content.ReadAsStreamAsync().Result;
             using StreamReader sr = new StreamReader(s);
             using JsonReader reader = new JsonTextReader(sr);
@@ -64,30 +67,30 @@ namespace CKLunchBot.Core.Requester
             }
             if (headers != null)
             {
-                foreach (var header in headers)
+                foreach (KeyValuePair<string, string> header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
             }
 
-            using HttpResponseMessage response = await client.SendAsync(request);
+            using HttpResponseMessage response = await _client.SendAsync(request);
 
             return await response.Content.ReadAsStringAsync();
         }
 
         #region IDisposable Support
 
-        private bool disposedValue = false;
+        private bool _disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                 }
-                client.Dispose();
-                disposedValue = true;
+                _client.Dispose();
+                _disposedValue = true;
             }
         }
 

@@ -1,21 +1,24 @@
-using CKLunchBot.Core.Menu;
-
-using Newtonsoft.Json.Linq;
+﻿// Copyright (c) Sepi. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using CKLunchBot.Core.Menu;
+
+using Newtonsoft.Json.Linq;
+
 namespace CKLunchBot.Core.Requester
 {
     public class MenuRequester : BaseRequester
     {
-        private static readonly string ApiKey = "852f99ba1fd20a2b5f662467635f58d55dd18ae9ee16e635123dd187d8179738";
+        private static readonly string _apiKey = "852f99ba1fd20a2b5f662467635f58d55dd18ae9ee16e635123dd187d8179738";
 
-        private static readonly string ApiRequestUrl = @"https://api.ck.ac.kr/api/v2/router_main/";
+        private static readonly string _apiRequestUrl = @"https://api.ck.ac.kr/api/v2/router_main/";
 
-        private static readonly string MenuRequestContent =
+        private static readonly string _menuRequestContent =
             JObject.FromObject(new
             {
                 resource = new
@@ -25,20 +28,20 @@ namespace CKLunchBot.Core.Requester
                 }
             }).ToString();
 
-        private static readonly Dictionary<string, string> headers = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> _headers = new Dictionary<string, string>()
         {
-            ["X-Dreamfactory-API-Key"] = ApiKey
+            ["X-Dreamfactory-API-Key"] = _apiKey
         };
 
         public async Task<RestaurantsWeekMenu> RequestWeekMenuAsync()
         {
-            var jobj = await GetJsonFromUrl(ApiRequestUrl, MenuRequestContent, headers);
+            JObject jobj = await GetJsonFromUrl(_apiRequestUrl, _menuRequestContent, _headers);
             return ParseJson(jobj);
         }
 
         public async Task<string> RequestString()
         {
-            return await GetStringFromUrl(ApiRequestUrl, MenuRequestContent, headers);
+            return await GetStringFromUrl(_apiRequestUrl, _menuRequestContent, _headers);
         }
 
         private RestaurantsWeekMenu ParseJson(JObject jsonObject)
