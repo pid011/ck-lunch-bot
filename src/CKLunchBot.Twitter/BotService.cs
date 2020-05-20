@@ -104,7 +104,7 @@ namespace CKLunchBot.Twitter
                         Log.Information("The bot didn't tweet because it's Debug mode.");
 #endif
 #if RELEASE
-                        var tweet = await PublishTweet(tweetText.ToString(), menuImage);
+                        ITweet tweet = await PublishTweet(tweetText.ToString(), menuImage);
                         Log.Debug($"tweet: {tweet}");
                         Log.Information("Tweet publish completed.");
 #endif
