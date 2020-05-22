@@ -20,12 +20,19 @@ namespace CKLunchBot.ImageGenTest
             using var requester = new MenuRequester();
             RestaurantsWeekMenu menuList = await requester.RequestWeekMenuAsync();
 
-            //var jobj = JObject.Parse(await File.ReadAllTextAsync("menu.json"));
-            //var menuList = MenuJsonParser(jobj);
+            // Dorm breakfast
+            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormBreakfast]);
 
-            byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormBreakfast]);
-            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(Restaurants.DormLunch, menuList);
-            //byte[] imageByte = await MenuImageGenerator.GenerateTodayLunchMenuImageAsync(menuList);
+            // Dorm lunch
+            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormLunch]);
+
+            // Dorm dinner
+            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormDinner]);
+
+            // School lunch
+            byte[] imageByte = await MenuImageGenerator.GenerateTodayLunchMenuImageAsync(menuList);
+
+            // Weekend image
             //byte[] imageByte = await WeekendImageGenerator.GenerateAsync();
 
             using var memorystream = new MemoryStream(imageByte);
