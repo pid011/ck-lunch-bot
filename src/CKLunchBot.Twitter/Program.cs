@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
 
 using Figgle;
 
@@ -23,7 +24,7 @@ namespace CKLunchBot.Twitter
                 .CreateLogger();
 
             Log.Information($"\n{FiggleFonts.Small.Render("CKLunchBot")}");
-            var assembly = typeof(Program).Assembly.GetName();
+            AssemblyName assembly = typeof(Program).Assembly.GetName();
             Log.Information($"[{assembly.Name} v{assembly.Version.ToString(3)}]");
 
             using var bot = new BotService();
@@ -37,7 +38,7 @@ namespace CKLunchBot.Twitter
 
             var botCancel = new CancellationTokenSource();
 
-            var botTask = bot.Run(botCancel.Token);
+            Task botTask = bot.Run(botCancel.Token);
 
             var stopCommandTask = Task.Run(() =>
             {
