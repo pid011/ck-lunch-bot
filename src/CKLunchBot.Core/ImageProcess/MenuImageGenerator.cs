@@ -94,16 +94,20 @@ namespace CKLunchBot.Core.ImageProcess
                 }
             }
 
-            bool allMenusWereNotProvided = false;
+            Dictionary<Restaurants, bool> menuProvides = new Dictionary<Restaurants, bool>();
+
             foreach (KeyValuePair<Restaurants, StringBuilder> item in menuTexts)
             {
-                if (item.Value.Length != 0)
+                bool provide = true;
+                if (item.Value.Length == 0)
                 {
-                    continue;
+                    provide = false;
+                    menuTexts[item.Key].AppendLine(NoMenuProvidedText);
                 }
-                allMenusWereNotProvided = true;
+                menuProvides.TryAdd(item.Key, provide);
             }
-            if (allMenusWereNotProvided)
+
+            if (!menuProvides.ContainsValue(true))
             {
                 throw new NoProvidedMenuException(Restaurants.Daban, Restaurants.NankatsuNanUdong,
                                                   Restaurants.TangAndJjigae, Restaurants.YukHaeBab);

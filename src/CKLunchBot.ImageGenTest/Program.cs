@@ -20,26 +20,34 @@ namespace CKLunchBot.ImageGenTest
             using var requester = new MenuRequester();
             RestaurantsWeekMenu menuList = await requester.RequestWeekMenuAsync();
 
-            // Dorm breakfast
-            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormBreakfast]);
+            try
+            {
+                // Dorm breakfast
+                //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormBreakfast]);
 
-            // Dorm lunch
-            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormLunch]);
+                // Dorm lunch
+                //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormLunch]);
 
-            // Dorm dinner
-            //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormDinner]);
+                // Dorm dinner
+                //byte[] imageByte = await MenuImageGenerator.GenerateTodayDormMenuImageAsync(menuList[Restaurants.DormDinner]);
 
-            // School lunch
-            byte[] imageByte = await MenuImageGenerator.GenerateTodayLunchMenuImageAsync(menuList);
+                // School lunch
+                byte[] imageByte = await MenuImageGenerator.GenerateTodayLunchMenuImageAsync(menuList);
 
-            // Weekend image
-            //byte[] imageByte = await WeekendImageGenerator.GenerateAsync();
+                // Weekend image
+                //byte[] imageByte = await WeekendImageGenerator.GenerateAsync();
 
-            using var memorystream = new MemoryStream(imageByte);
-            using var filestream = new FileStream("image_test.png", FileMode.Create);
-            using var image = Image.Load(memorystream);
-            image.SaveAsPng(filestream);
-            Console.WriteLine("Done.");
+                using var memorystream = new MemoryStream(imageByte);
+                using var filestream = new FileStream("image_test.png", FileMode.Create);
+                using var image = Image.Load(memorystream);
+                image.SaveAsPng(filestream);
+                Console.WriteLine("Done.");
+
+            }
+            catch (NoProvidedMenuException)
+            {
+                Console.WriteLine("제공되는 메뉴가 없음.");
+            }
         }
     }
 }
