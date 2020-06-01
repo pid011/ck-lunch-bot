@@ -24,8 +24,12 @@ namespace CKLunchBot.Twitter
                 .CreateLogger();
 
             Log.Information($"\n{FiggleFonts.Small.Render("CKLunchBot")}");
-            AssemblyName assembly = typeof(Program).Assembly.GetName();
-            Log.Information($"[{assembly.Name} v{assembly.Version.ToString(3)}]");
+
+            AssemblyName botInfo = typeof(Program).Assembly.GetName();
+            Log.Information($"[{botInfo.Name} v{botInfo.Version.ToString(3)}]");
+
+            AssemblyName coreInfo = Assembly.LoadFrom("CKLunchBot.Core.dll").GetName();
+            Log.Information($"[{coreInfo.Name} v{coreInfo.Version.ToString(3)}]");
 
             using var bot = new BotService();
             Log.Information("Starting bot...");
