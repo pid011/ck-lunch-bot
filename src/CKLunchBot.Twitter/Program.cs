@@ -3,12 +3,10 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
-
 using Figgle;
-
 using Serilog;
 
 namespace CKLunchBot.Twitter
