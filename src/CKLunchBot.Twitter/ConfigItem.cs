@@ -42,6 +42,7 @@ namespace CKLunchBot.Twitter
                 return (obj is Time time) && Equals(time);
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0070:Use 'System.HashCode'", Justification = "<Pending>")]
             public override int GetHashCode()
             {
                 return base.GetHashCode();
