@@ -8,7 +8,8 @@ using System.IO;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace CKLunchBot.Core.ImageProcess
 {
@@ -31,18 +32,18 @@ namespace CKLunchBot.Core.ImageProcess
         public ImageGenerator DrawText(
             (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
         {
-            if (_image.IsDisposed)
-            {
-                throw new ObjectDisposedException(nameof(_image));
-            }
-
             TextGraphicsOptions options = new TextGraphicsOptions()
             {
-                Antialias = true,
-                ApplyKerning = true,
-                HorizontalAlignment = align,
-                VerticalAlignment = VerticalAlignment.Top,
-                //WrapTextWidth = 100
+                GraphicsOptions = new GraphicsOptions
+                {
+                    Antialias = true
+                },
+                TextOptions = new TextOptions
+                {
+                    ApplyKerning = true,
+                    HorizontalAlignment = align,
+                    VerticalAlignment = VerticalAlignment.Top
+                }
             };
 
             _image.Mutate(x =>

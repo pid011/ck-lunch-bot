@@ -159,12 +159,12 @@ namespace CKLunchBot.Twitter
 
             if (image is null)
             {
-                tweet = await _twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString()));
+                tweet = await _twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString()));
             }
             else
             {
-                IMedia uploadedImage = await _twitter.Upload.UploadTweetImage(image);
-                tweet = await _twitter.Tweets.PublishTweet(new PublishTweetParameters(tweetText.ToString())
+                IMedia uploadedImage = await _twitter.Upload.UploadTweetImageAsync(image);
+                tweet = await _twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString())
                 {
                     Medias = { uploadedImage }
                 });
@@ -459,7 +459,7 @@ namespace CKLunchBot.Twitter
         {
             // TwitterClient를 만들고 토큰이 제대로 된건지 테스트 과정 필요
             var client = new TwitterClient(tokens.ConsumerApiKey, tokens.ConsumerSecretKey, tokens.AccessToken, tokens.AccessTokenSecret);
-            IAuthenticatedUser authenticatedUser = await client.Users.GetAuthenticatedUser();
+            IAuthenticatedUser authenticatedUser = await client.Users.GetAuthenticatedUserAsync();
             _tmpStrBuilder.AppendLine("---Bot information---");
             _tmpStrBuilder.AppendLine($"Bot name: {authenticatedUser.Name}");
             _tmpStrBuilder.AppendLine($"Bot description: {authenticatedUser.Description}");
