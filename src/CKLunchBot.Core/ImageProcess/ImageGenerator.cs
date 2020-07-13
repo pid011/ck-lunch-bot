@@ -55,7 +55,7 @@ namespace CKLunchBot.Core.ImageProcess
         {
             if (string.IsNullOrEmpty(name))
             {
-                throw new Exception("Thefont name is cannot be empty or null.");
+                throw new Exception("Font name is cannot be empty or null.");
             }
 
             var collection = new FontCollection();
