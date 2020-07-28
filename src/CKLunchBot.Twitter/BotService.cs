@@ -259,7 +259,7 @@ namespace CKLunchBot.Twitter
                 try
                 {
                     RestaurantsWeekMenu menus = await GetWeekMenu();
-                    var testImage = await GenerateImageAsync(MealTimeFlags.Lunch, menus);
+                    byte[] testImage = await GenerateImageAsync(MealTimeFlags.Lunch, menus);
                     SaveLogImage(testImage);
                 }
                 catch (NoProvidedMenuException)
@@ -425,7 +425,7 @@ namespace CKLunchBot.Twitter
                         _tmpStrBuilder.Append(", ");
                     }
                 }
-                var error = _tmpStrBuilder.ToString();
+                string error = _tmpStrBuilder.ToString();
                 _tmpStrBuilder.Clear();
                 throw new JsonException(error);
             }
