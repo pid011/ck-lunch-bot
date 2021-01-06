@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -173,7 +173,7 @@ namespace CKLunchBot.Server
             return tweet;
         }
 
-        private async Task<byte[]> GenerateImageAsync(MealTimeFlags flag, RestaurantsWeekMenu menuList)
+        private static async Task<byte[]> GenerateImageAsync(MealTimeFlags flag, RestaurantsWeekMenu menuList)
         {
             byte[] byteImage = null;
 
@@ -292,12 +292,12 @@ namespace CKLunchBot.Server
 
         private ConfigItem LoadConfig()
         {
-            const string configFileName = "config.json";
+            const string ConfigFileName = "config.json";
             ConfigItem config;
 
             JsonSerializer serializer = new JsonSerializer();
 
-            if (!File.Exists(configFileName))
+            if (!File.Exists(ConfigFileName))
             {
                 var newConfig = new ConfigItem()
                 {
@@ -325,7 +325,7 @@ namespace CKLunchBot.Server
                     }
                 };
 
-                using StreamWriter stream = File.CreateText(configFileName);
+                using StreamWriter stream = File.CreateText(ConfigFileName);
                 using var jsonWriter = new JsonTextWriter(stream)
                 {
                     Formatting = Formatting.Indented
@@ -335,7 +335,7 @@ namespace CKLunchBot.Server
                 throw new ConfigCreatedException(ConfigCreatedException.Reasons.ConfigDoesNotExist);
             }
 
-            using StreamReader configReader = File.OpenText(configFileName);
+            using StreamReader configReader = File.OpenText(ConfigFileName);
             using JsonReader configJsonReader = new JsonTextReader(configReader);
             config = serializer.Deserialize<ConfigItem>(configJsonReader);
 
@@ -440,17 +440,17 @@ namespace CKLunchBot.Server
             return config;
         }
 
-        private void SaveLogImage(byte[] imageByte)
+        private static void SaveLogImage(byte[] imageByte)
         {
             if (imageByte is null)
             {
                 throw new ArgumentNullException(nameof(imageByte));
             }
 
-            const string logImagesDirName = "log_images";
-            Directory.CreateDirectory(logImagesDirName);
+            const string LogImagesDirName = "log_images";
+            Directory.CreateDirectory(LogImagesDirName);
             using var memorystream = new MemoryStream(imageByte);
-            using var filestream = new FileStream(Path.Combine(logImagesDirName, $"{TimeUtils.GetKoreaNowTime(DateTime.UtcNow):yyyy-MM-dd-HH-mm-ss}.png"), FileMode.Create);
+            using var filestream = new FileStream(Path.Combine(LogImagesDirName, $"{TimeUtils.GetKoreaNowTime(DateTime.UtcNow):yyyy-MM-dd-HH-mm-ss}.png"), FileMode.Create);
             using var image = Image.Load(memorystream);
             image.SaveAsPng(filestream);
         }
@@ -476,7 +476,7 @@ namespace CKLunchBot.Server
 
             while (true)
             {
-                await Task.Delay(1000);
+                await Task.Delay(1000, token);
 
                 if (token.IsCancellationRequested)
                 {

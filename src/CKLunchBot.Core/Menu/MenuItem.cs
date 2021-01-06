@@ -33,7 +33,7 @@ namespace CKLunchBot.Core.Menu
             DayOfWeek.Friday => FridayMenu,
             DayOfWeek.Saturday => SaturdayMenu,
             DayOfWeek.Sunday => SundayMenu,
-            _ => throw new ArgumentException()
+            _ => throw new ArgumentException(null, nameof(dayOfWeek))
         };
 
         public RawMenuItem RawMenu { get; }
@@ -59,32 +59,32 @@ namespace CKLunchBot.Core.Menu
         /// </summary>
         /// <param name="rawMenuText">raw menu text. example: "rise\r\nkimchi"</param>
         /// <returns>splited menus</returns>
-        private string[] SplitMenu(string rawMenuText)
+        private static string[] SplitMenu(string rawMenuText)
         {
             var regexResult = Regex.Split(rawMenuText ?? string.Empty, "\r\n").ToList();
             regexResult.RemoveAll(x => string.IsNullOrWhiteSpace(x));
             return regexResult.ToArray();
         }
 
-        private Restaurants StringToRestaurants(string name)
+        private static Restaurants StringToRestaurants(string name)
         {
-            const string daban = "다반";
-            const string nankatsuNanUdong = "난카츠난우동";
-            const string tangAndJjigae = "탕&찌개차림";
-            const string yukHaeBab = "육해밥";
-            const string dormBreakfast = "아침";
-            const string dormLunch = "점심";
-            const string dormDinner = "저녁";
+            const string Daban = "다반";
+            const string NankatsuNanUdong = "난카츠난우동";
+            const string TangAndJjigae = "탕&찌개차림";
+            const string YukHaeBab = "육해밥";
+            const string DormBreakfast = "아침";
+            const string DormLunch = "점심";
+            const string DormDinner = "저녁";
 
-            Restaurants result = name switch
+            var result = name switch
             {
-                daban => Restaurants.Daban,
-                nankatsuNanUdong => Restaurants.NankatsuNanUdong,
-                tangAndJjigae => Restaurants.TangAndJjigae,
-                yukHaeBab => Restaurants.YukHaeBab,
-                dormBreakfast => Restaurants.DormBreakfast,
-                dormLunch => Restaurants.DormLunch,
-                dormDinner => Restaurants.DormDinner,
+                Daban => Restaurants.Daban,
+                NankatsuNanUdong => Restaurants.NankatsuNanUdong,
+                TangAndJjigae => Restaurants.TangAndJjigae,
+                YukHaeBab => Restaurants.YukHaeBab,
+                DormBreakfast => Restaurants.DormBreakfast,
+                DormLunch => Restaurants.DormLunch,
+                DormDinner => Restaurants.DormDinner,
                 _ => Restaurants.Unknown
             };
 
@@ -93,8 +93,8 @@ namespace CKLunchBot.Core.Menu
 
         public override string ToString()
         {
-            string nullStr = "null";
-            string[] nullStrArr = new string[1] { nullStr };
+            var nullStr = "null";
+            var nullStrArr = new string[1] { nullStr };
 
             var menuText = new StringBuilder();
             menuText.AppendLine($"[{RestaurantName}]");

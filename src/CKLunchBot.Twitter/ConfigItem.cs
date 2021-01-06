@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -42,7 +42,6 @@ namespace CKLunchBot.Server
                 return (obj is Time time) && Equals(time);
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0070:Use 'System.HashCode'", Justification = "<Pending>")]
             public override int GetHashCode()
             {
                 return base.GetHashCode();

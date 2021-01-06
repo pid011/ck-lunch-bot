@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -14,11 +14,11 @@ namespace CKLunchBot.Core.Requester
 {
     public class MenuRequester : BaseRequester
     {
-        private static readonly string _apiKey = "852f99ba1fd20a2b5f662467635f58d55dd18ae9ee16e635123dd187d8179738";
+        private static readonly string s_apiKey = "852f99ba1fd20a2b5f662467635f58d55dd18ae9ee16e635123dd187d8179738";
 
-        private static readonly string _apiRequestUrl = @"https://api.ck.ac.kr/api/v2/router_main/";
+        private static readonly string s_apiRequestUrl = @"https://api.ck.ac.kr/api/v2/router_main/";
 
-        private static readonly string _menuRequestContent =
+        private static readonly string s_menuRequestContent =
             JObject.FromObject(new
             {
                 resource = new
@@ -28,23 +28,23 @@ namespace CKLunchBot.Core.Requester
                 }
             }).ToString();
 
-        private static readonly Dictionary<string, string> _headers = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> s_headers = new Dictionary<string, string>()
         {
-            ["X-Dreamfactory-API-Key"] = _apiKey
+            ["X-Dreamfactory-API-Key"] = s_apiKey
         };
 
         public async Task<RestaurantsWeekMenu> RequestWeekMenuAsync()
         {
-            JObject jobj = await GetJsonFromUrl(_apiRequestUrl, _menuRequestContent, _headers);
+            JObject jobj = await GetJsonFromUrl(s_apiRequestUrl, s_menuRequestContent, s_headers);
             return ParseJson(jobj);
         }
 
         public async Task<string> RequestString()
         {
-            return await GetStringFromUrl(_apiRequestUrl, _menuRequestContent, _headers);
+            return await GetStringFromUrl(s_apiRequestUrl, s_menuRequestContent, s_headers);
         }
 
-        private RestaurantsWeekMenu ParseJson(JObject jsonObject)
+        private static RestaurantsWeekMenu ParseJson(JObject jsonObject)
         {
             var success = (bool)jsonObject["success"];
             if (!success)

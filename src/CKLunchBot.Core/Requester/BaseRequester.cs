@@ -39,7 +39,7 @@ namespace CKLunchBot.Core.Requester
             }
             if (headers != null)
             {
-                foreach (KeyValuePair<string, string> header in headers)
+                foreach (var header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
