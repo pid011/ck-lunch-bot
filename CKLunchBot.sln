@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1ABB630C-7631-4109-8CFC-008FCE238FAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Twitter", "src\CKLunchBot.Twitter\CKLunchBot.Twitter.csproj", "{A3559CDD-18AB-48ED-8BD6-0D15F9FE9063}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Server", "src\CKLunchBot.Twitter\CKLunchBot.Server.csproj", "{A3559CDD-18AB-48ED-8BD6-0D15F9FE9063}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Core", "src\CKLunchBot.Core\CKLunchBot.Core.csproj", "{98E066BD-5136-4EA9-8EAB-8D1C51FC2BE5}"
 EndProject
@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CKLunchBot.ImageGenTest", "src\CKLunchBot.ImageGenTest\CKLunchBot.ImageGenTest.csproj", "{DACCCA22-570D-4019-96A1-9FD163813790}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.ImageGenTest", "src\CKLunchBot.ImageGenTest\CKLunchBot.ImageGenTest.csproj", "{DACCCA22-570D-4019-96A1-9FD163813790}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

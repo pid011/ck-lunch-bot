@@ -5,7 +5,7 @@ using System;
 
 using Newtonsoft.Json;
 
-namespace CKLunchBot.Twitter
+namespace CKLunchBot.Server
 {
     public class ConfigItem
     {

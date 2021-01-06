@@ -23,7 +23,7 @@ using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
-namespace CKLunchBot.Twitter
+namespace CKLunchBot.Server
 {
     public class BotService : IDisposable
     {

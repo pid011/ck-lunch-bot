@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Figgle;
 using Serilog;
 
-namespace CKLunchBot.Twitter
+namespace CKLunchBot.Server
 {
     internal class Program
     {

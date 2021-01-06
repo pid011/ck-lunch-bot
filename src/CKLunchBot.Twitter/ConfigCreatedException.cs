@@ -3,7 +3,7 @@
 
 using System;
 
-namespace CKLunchBot.Twitter
+namespace CKLunchBot.Server
 {
     [Serializable]
     public class ConfigCreatedException : Exception
