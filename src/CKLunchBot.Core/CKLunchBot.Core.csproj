@@ -4,6 +4,8 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Version>1.1.2</Version>
     <RepositoryUrl>https://github.com/pid011/ck-lunch-bot</RepositoryUrl>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>

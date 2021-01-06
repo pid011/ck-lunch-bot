@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>CKLunchBot.Server</RootNamespace>
     <AssemblyName>CKLunchBot.Server</AssemblyName>
     <RepositoryUrl>https://github.com/pid011/ck-lunch-bot</RepositoryUrl>
     <Version>1.1.2</Version>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
