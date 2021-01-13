@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -24,8 +24,7 @@ namespace CKLunchBot.Core.Requester
         /// <param name="jsonContent">request json content</param>
         /// <param name="headers">request headers</param>
         /// <returns></returns>
-        protected async Task<JObject> GetJsonFromUrl(
-            string url, string jsonContent = null, Dictionary<string, string> headers = null)
+        protected async Task<JObject> GetJsonFromUrl(string url, string jsonContent = null, Dictionary<string, string> headers = null)
         {
             if (string.IsNullOrEmpty(url))
             {

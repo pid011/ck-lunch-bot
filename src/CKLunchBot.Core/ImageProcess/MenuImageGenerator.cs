@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -29,11 +29,11 @@ namespace CKLunchBot.Core.ImageProcess
         private const string NoMenuProvidedText = "(제공한 메뉴 없음)";
         private const string MenuPrefix = "::";
 
-        private static readonly string _menuTemplateImagePath =
-            Path.Combine(Directory.GetCurrentDirectory(), "assets", "images", "menu_template.png");
+        private static readonly string s_menuTemplateImagePath =
+            Path.Combine(AppContext.BaseDirectory, "assets", "images", "menu_template.png");
 
-        private static readonly string _dormMenuTemplateImagePath =
-            Path.Combine(Directory.GetCurrentDirectory(), "assets", "images", "dorm_menu_template.png");
+        private static readonly string s_dormMenuTemplateImagePath =
+            Path.Combine(AppContext.BaseDirectory, "assets", "images", "dorm_menu_template.png");
 
         public static async Task<byte[]> GenerateTodayLunchMenuImageAsync(RestaurantsWeekMenu menus)
         {
@@ -56,7 +56,7 @@ namespace CKLunchBot.Core.ImageProcess
                 menus = new RestaurantsWeekMenu(null);
             }
 
-            using ImageGenerator generator = new ImageGenerator(_menuTemplateImagePath)
+            using ImageGenerator generator = new ImageGenerator(s_menuTemplateImagePath)
                 .AddFont("title", FontPath.TitleFontPath, TitleFontSize, FontStyle.Regular)
                 .AddFont("content", FontPath.ContentFontPath, ContentFontSize, FontStyle.Regular);
 
@@ -148,7 +148,7 @@ namespace CKLunchBot.Core.ImageProcess
                 _ => throw new ArgumentException("Argument value is not dormitory meal menu."),
             };
 
-            using ImageGenerator generator = new ImageGenerator(_dormMenuTemplateImagePath)
+            using ImageGenerator generator = new ImageGenerator(s_dormMenuTemplateImagePath)
                .AddFont("title", FontPath.TitleFontPath, TitleFontSize, FontStyle.Regular)
                .AddFont("content", FontPath.ContentFontPath, ContentFontSize, FontStyle.Regular);
 

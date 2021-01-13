@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Newtonsoft.Json;

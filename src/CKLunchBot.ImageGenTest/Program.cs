@@ -1,4 +1,4 @@
-﻿// Copyright (c) Sepi. All rights reserved.
+// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -17,7 +17,8 @@ namespace CKLunchBot.ImageGenTest
     {
         private static async Task Main(string[] _)
         {
-            using var requester = new MenuRequester();
+            var apiKey = Environment.GetEnvironmentVariable("API_KEY", EnvironmentVariableTarget.Process);
+            using var requester = new MenuRequester(apiKey);
             RestaurantsWeekMenu menuList = await requester.RequestWeekMenuAsync();
 
             try

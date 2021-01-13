@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -152,7 +153,7 @@ namespace CKLunchBot.Server
             return menuList;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
+        [SuppressMessage("CodeQuality", "IDE0051", Justification = "<Pending>")]
         private async Task<ITweet> PublishTweet(string tweetText, byte[] image = null)
         {
             ITweet tweet;
@@ -253,7 +254,10 @@ namespace CKLunchBot.Server
 
                 _twitter = await ConnectToTwitter(config.TwitterTokens);
 
-                _menuRequester = new MenuRequester();
+                var apiKey = Environment.GetEnvironmentVariable("API_KEY", EnvironmentVariableTarget.Process)
+                    ?? throw new Exception("Cannot find api key.");
+
+                _menuRequester = new MenuRequester(apiKey);
 
                 Log.Information("Testing image generate...");
                 try
