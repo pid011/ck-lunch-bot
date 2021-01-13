@@ -56,7 +56,7 @@ try
     if (args.Length < 1)
     {
         Log.Warning("Need argument about meal time flag.");
-        return;
+        return 1;
     }
 
     switch (args[0])
@@ -79,12 +79,15 @@ try
 
         default:
             Log.Warning("Invalid flag name.");
-            return;
+            return 1;
     }
 
     await bot.Run(flag);
+
+    return 0;
 }
 catch (Exception e)
 {
     Log.Fatal(e.ToString());
+    return 1;
 }
