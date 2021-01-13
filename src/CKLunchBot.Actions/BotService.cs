@@ -39,40 +39,38 @@ namespace CKLunchBot.Actions
         /// <summary>
         /// Start the tweet process.
         /// </summary>
-        public async Task Run(MealTimeFlags flag)
+        public async Task<int> Run(MealTimeFlags flag)
         {
+            Log.Information("Loading bot twitter account...");
+            TwitterClient twitter = await ConnectToTwitter(_config.TwitterConfig);
+
+            Log.Information("Requesting menu list...");
+            var menuRequester = new MenuRequester(_config.MealApiKey);
+            RestaurantsWeekMenu menus = await GetWeekMenu(menuRequester);
+
+            var tweetText = new StringBuilder()
+                .Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow))
+                .Append(" 오늘의 청강대 ")
+                .Append(flag switch
+                {
+                    MealTimeFlags.Breakfast => "아침",
+                    MealTimeFlags.Lunch => "점심",
+                    MealTimeFlags.DormLunch => "기숙사 점심",
+                    MealTimeFlags.Dinner => "저녁",
+                    _ => throw new Exception()
+                })
+                .Append(" 메뉴는!")
+                .ToString();
+
             try
             {
-                Log.Information("Loading bot twitter account...");
-                TwitterClient twitter = await ConnectToTwitter(_config.TwitterConfig);
+                Log.Information("Generating menu image...");
+                byte[] menuImage = await GenerateImageAsync(flag, menus);
 
-                Log.Information("Requesting menu list...");
-                var menuRequester = new MenuRequester(_config.MealApiKey);
-                RestaurantsWeekMenu menus = await GetWeekMenu(menuRequester);
-
-                var tweetText = new StringBuilder()
-                    .Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow))
-                    .Append(" 오늘의 청강대 ")
-                    .Append(flag switch
-                    {
-                        MealTimeFlags.Breakfast => "아침",
-                        MealTimeFlags.Lunch => "점심",
-                        MealTimeFlags.DormLunch => "기숙사 점심",
-                        MealTimeFlags.Dinner => "저녁",
-                        _ => throw new Exception()
-                    })
-                    .Append(" 메뉴는!")
-                    .ToString();
-
-                try
-                {
-                    Log.Information("Generating menu image...");
-                    byte[] menuImage = await GenerateImageAsync(flag, menus);
-
-                    Log.Information("Publishing tweet...");
+                Log.Information("Publishing tweet...");
 
 #if DEBUG
-                    Log.Warning("The bot didn't tweet because it's Debug mode.");
+                Log.Warning("The bot didn't tweet because it's Debug mode.");
 #endif
 
 #if RELEASE
@@ -80,29 +78,25 @@ namespace CKLunchBot.Actions
                     Log.Debug($"tweet: {tweet}");
                     Log.Information("Tweet publish completed.");
 #endif
-                }
-                catch (NoProvidedMenuException e)
-                {
-                    Log.Information($"The bot didn't tweet because menu data doesn't exist.");
-
-                    var sb = new StringBuilder();
-                    sb.Append("No provided menu name: ");
-                    for (int i = 0; i < e.RestaurantsName.Length; i++)
-                    {
-                        sb.Append(e.RestaurantsName[i].ToString());
-                        if (i < e.RestaurantsName.Length - 1)
-                        {
-                            sb.Append(", ");
-                        }
-                    }
-                    Log.Debug(sb.ToString());
-                }
             }
-            catch (Exception e)
+            catch (NoProvidedMenuException e)
             {
-                Log.Fatal(e.ToString());
-                Log.Warning("Bot has stopped due to an error.");
+                Log.Information($"The bot didn't tweet because menu data doesn't exist.");
+
+                var sb = new StringBuilder();
+                sb.Append("No provided menu name: ");
+                for (int i = 0; i < e.RestaurantsName.Length; i++)
+                {
+                    sb.Append(e.RestaurantsName[i].ToString());
+                    if (i < e.RestaurantsName.Length - 1)
+                    {
+                        sb.Append(", ");
+                    }
+                }
+                Log.Debug(sb.ToString());
             }
+
+            return 0;
         }
 
         private static async Task<RestaurantsWeekMenu> GetWeekMenu(MenuRequester requester)

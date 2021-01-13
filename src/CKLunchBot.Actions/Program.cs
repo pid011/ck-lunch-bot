@@ -82,9 +82,7 @@ try
             return 1;
     }
 
-    await bot.Run(flag);
-
-    return 0;
+    return await bot.Run(flag);
 }
 catch (Exception e)
 {
