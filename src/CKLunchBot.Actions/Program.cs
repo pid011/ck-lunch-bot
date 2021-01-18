@@ -89,7 +89,7 @@ command.Handler = CommandHandler.Create<string>(async time =>
     Target("get-keys", () =>
     {
         var consumerApiKey = Environment.GetEnvironmentVariable(ConsumerApiKeyName, EnvironmentVariableTarget.Process)
-        ?? throw new TargetFailedException($"Faild to get enviroment value name of {ConsumerApiKeyName}");
+            ?? throw new TargetFailedException($"Faild to get enviroment value name of {ConsumerApiKeyName}");
 
         var consumerSecretKey = Environment.GetEnvironmentVariable(ConsumerSecretKeyName, EnvironmentVariableTarget.Process)
             ?? throw new TargetFailedException($"Faild to get enviroment value name of {ConsumerSecretKeyName}");
