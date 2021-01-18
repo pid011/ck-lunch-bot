@@ -25,4 +25,4 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
           TWITTER_CONSUMER_API_KEY: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
           TWITTER_CONSUMER_SECRET_KEY: ${{ secrets.TWITTER_CONSUMER_SECRET_KEY }}
-        run: dotnet run --project ./src/CKLunchBot.Actions --no-build -- lunch
+        run: dotnet run --project ./src/CKLunchBot.Actions --no-build -- publish-tweet --time lunch
