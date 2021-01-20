@@ -5,7 +5,7 @@ on:
     - cron: "50 2 * * MON-FRI"
 
 jobs:
-  build:
+  build-and-run:
     runs-on: ubuntu-latest
     environment: api_keys
     steps:
