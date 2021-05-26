@@ -1,4 +1,4 @@
-// Copyright (c) Sepi. All rights reserved.
+﻿// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -30,7 +30,7 @@ namespace CKLunchBot.Core.ImageProcess
         public ImageGenerator DrawText(
             (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
         {
-            TextGraphicsOptions options = new TextGraphicsOptions()
+            DrawingOptions options = new DrawingOptions
             {
                 GraphicsOptions = new GraphicsOptions
                 {
@@ -45,7 +45,7 @@ namespace CKLunchBot.Core.ImageProcess
             };
 
             _image.Mutate(x =>
-                x.DrawText(options, text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
+                x.DrawText(text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
 
             return this;
         }
