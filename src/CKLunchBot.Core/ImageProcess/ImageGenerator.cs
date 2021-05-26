@@ -45,7 +45,7 @@ namespace CKLunchBot.Core.ImageProcess
             };
 
             _image.Mutate(x =>
-                x.DrawText(text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
+                x.DrawText(options, text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
 
             return this;
         }
