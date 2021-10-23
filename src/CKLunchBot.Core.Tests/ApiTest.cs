@@ -1,4 +1,4 @@
-// Copyright (c) Sepi. All rights reserved.
+﻿// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace CKLunchBot.Core.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class ApiTest
     {
         [TestMethod]
         public void TestMethod1()
