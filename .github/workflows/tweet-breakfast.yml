@@ -1,8 +1,8 @@
-name: Tweet lunch menu
+name: Tweet breakfast menu
 
 on:
   schedule:
-    - cron: "00 2 * * *" # KST 11:00
+    - cron: "00 23 * * *" # KST 08:00
 
 jobs:
   build-and-run:
@@ -24,4 +24,4 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
           TWITTER_CONSUMER_API_KEY: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
           TWITTER_CONSUMER_SECRET_KEY: ${{ secrets.TWITTER_CONSUMER_SECRET_KEY }}
-        run: dotnet run --project ./src/CKLunchBot.Actions --no-build -- lunch
+        run: dotnet run --project ./src/CKLunchBot.Actions --no-build -- breakfast
