@@ -11,7 +11,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace CKLunchBot.Core.ImageProcess
 {
-    public class ImageGenerator : IDisposable
+    internal class ImageGenerator : IDisposable
     {
         public Dictionary<string, Font> Fonts { get; } = new Dictionary<string, Font>();
 
@@ -30,7 +30,7 @@ namespace CKLunchBot.Core.ImageProcess
         public ImageGenerator DrawText(
             (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
         {
-            DrawingOptions options = new DrawingOptions
+            DrawingOptions options = new()
             {
                 GraphicsOptions = new GraphicsOptions
                 {
@@ -74,7 +74,7 @@ namespace CKLunchBot.Core.ImageProcess
 
         #region IDisposable Support
 
-        private bool _disposedValue = false; // 중복 호출을 검색하려면
+        private bool _disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {

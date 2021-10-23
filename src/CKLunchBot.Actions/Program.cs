@@ -1,190 +1,215 @@
-// Copyright (c) Sepi. All rights reserved.
+﻿// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using Bullseye;
-using CKLunchBot.Actions;
+using System.Threading.Tasks;
 using CKLunchBot.Core.Menu;
-using CKLunchBot.Core.Requester;
 using CKLunchBot.Core.Utils;
+using Serilog;
 using Tweetinvi;
+using Tweetinvi.Models;
+using Tweetinvi.Parameters;
 
 #if RELEASE
 using Tweetinvi.Models;
 #endif
 
-using static System.Console;
-using static Bullseye.Targets;
-using static CKLunchBot.Actions.BotService;
-
-const string ConsumerApiKeyName = "TWITTER_CONSUMER_API_KEY";
-const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
-const string AccessTokenName = "TWITTER_ACCESS_TOKEN";
-const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
-const string MealApiKeyName = "MEAL_API_KEY";
-
-var command = new RootCommand
+namespace CKLunchBot.Actions
 {
-    new Option(new[]{"--time"}, "Meal time")
+    internal record TwitterApiKeys(
+        string ConsumerApiKey,
+        string ConsumerSecretKey,
+        string AccessToken,
+        string AccessTokenSecret);
+    internal record BotConfig(
+        TwitterApiKeys TwitterConfig);
+
+    internal class Program
     {
-        Argument = new Argument<string>()
-    }
-};
+        private const string ConsumerApiKeyName = "TWITTER_CONSUMER_API_KEY";
+        private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
+        private const string AccessTokenName = "TWITTER_ACCESS_TOKEN";
+        private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
 
-command.Add(new Argument("targets") { Arity = ArgumentArity.ZeroOrMore });
-foreach (var option in Options.Definitions)
-{
-    command.Add(
-        new Option(
-            new[] { option.ShortName, option.LongName }.Where(n => !string.IsNullOrWhiteSpace(n)).ToArray(),
-            option.Description));
-}
-
-command.Handler = CommandHandler.Create<string>(async time =>
-{
-    var commandline = command.Parse(args);
-    var targets = commandline.CommandResult.Tokens.Select(token => token.Value);
-    var options = new Bullseye.Options(Options.Definitions.Select(o => (o.LongName, commandline.ValueForOption<bool>(o.LongName))));
-
-    MealTimeFlags flag;
-    switch (time)
-    {
-        case "breakfast":
-            flag = MealTimeFlags.Breakfast;
-            break;
-
-        case "lunch":
-            flag = MealTimeFlags.Lunch;
-            break;
-
-        case "dorm_lunch":
-            flag = MealTimeFlags.DormLunch;
-            break;
-
-        case "dinner":
-            flag = MealTimeFlags.Dinner;
-            break;
-
-        default:
-            WriteLine("Invalid flag name.");
-            return;
-    }
-
-    AssemblyName botInfo = Assembly.GetExecutingAssembly().GetName();
-    WriteLine($"[{botInfo.Name} v{botInfo.Version.ToString(3)}]");
-
-    string coreDllPath = Path.Combine(AppContext.BaseDirectory, "CKLunchBot.Core.dll");
-    AssemblyName coreInfo = Assembly.LoadFrom(coreDllPath).GetName();
-    WriteLine($"[{coreInfo.Name} v{coreInfo.Version.ToString(3)}]");
-
-    WriteLine($"\nAction started time: {DateTime.UtcNow.AddHours(9)} KST\n");
-
-    BotConfig config = null;
-    Target("get-keys", () =>
-    {
-        var consumerApiKey = Environment.GetEnvironmentVariable(ConsumerApiKeyName, EnvironmentVariableTarget.Process)
-            ?? throw new TargetFailedException($"Faild to get enviroment value name of {ConsumerApiKeyName}");
-
-        var consumerSecretKey = Environment.GetEnvironmentVariable(ConsumerSecretKeyName, EnvironmentVariableTarget.Process)
-            ?? throw new TargetFailedException($"Faild to get enviroment value name of {ConsumerSecretKeyName}");
-
-        var accessToken = Environment.GetEnvironmentVariable(AccessTokenName, EnvironmentVariableTarget.Process)
-            ?? throw new TargetFailedException($"Faild to get enviroment value name of {AccessTokenName}");
-
-        var accessTokenSecret = Environment.GetEnvironmentVariable(AccessTokenSecretName, EnvironmentVariableTarget.Process)
-            ?? throw new TargetFailedException($"Faild to get enviroment value name of {AccessTokenSecretName}");
-
-        var twitterKeys = new TwitterApiKeys(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
-
-        var mealApiKey = Environment.GetEnvironmentVariable(MealApiKeyName, EnvironmentVariableTarget.Process)
-            ?? throw new TargetFailedException($"Faild to get enviroment value name of {MealApiKeyName}");
-
-        config = new BotConfig(mealApiKey, twitterKeys);
-    });
-
-    RestaurantsWeekMenu menus = null;
-    Target("request-menu", DependsOn("get-keys"), async () =>
-    {
-        WriteLine("Requesting menu list...");
-        var menuRequester = new MenuRequester(config.MealApiKey);
-        menus = await GetWeekMenu(menuRequester);
-
-        if (menus.Count == 0)
+        private static async Task<int> Main(string[] args)
         {
-            throw new TargetFailedException("There is no requested menu.");
-        }
-    });
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .CreateLogger();
 
-    byte[] image = null;
-    Target("generate-image", DependsOn("request-menu"), async () =>
-    {
-        WriteLine("Generating menu image...");
-
-        try
-        {
-            image = await GenerateImageAsync(flag, menus);
-        }
-        catch (NoProvidedMenuException e)
-        {
-            var sb = new StringBuilder();
-            sb.Append("No provided menu name: ");
-            for (int i = 0; i < e.RestaurantsName.Length; i++)
+            var rootCommand = new RootCommand
             {
-                sb.Append(e.RestaurantsName[i].ToString());
-                if (i < e.RestaurantsName.Length - 1)
+                new Argument<MenuType>("menuType"),
+                new Option<int>(new string[]{"--day"}, () => 0, "Day to get menu")
+            };
+
+            rootCommand.Handler = CommandHandler.Create<MenuType, int>(Run);
+
+            try
+            {
+                return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+                return -1;
+            }
+        }
+
+        private static async Task Run(MenuType menuType, int day)
+        {
+            AssemblyName botInfo = Assembly.GetExecutingAssembly().GetName();
+            Log.Information($"[{botInfo.Name} v{botInfo.Version.ToString(3)}]");
+
+            string coreDllPath = Path.Combine(AppContext.BaseDirectory, "CKLunchBot.Core.dll");
+            AssemblyName coreInfo = Assembly.LoadFrom(coreDllPath).GetName();
+            Log.Information($"[{coreInfo.Name} v{coreInfo.Version.ToString(3)}]");
+
+            Log.Information($"\nAction started time: {DateTime.UtcNow.AddHours(9)} KST\n");
+
+            BotConfig config = null;
+            try
+            {
+                var consumerApiKey = GetEnvVariable(ConsumerApiKeyName);
+                var consumerSecretKey = GetEnvVariable(ConsumerSecretKeyName);
+                var accessToken = GetEnvVariable(AccessTokenName);
+                var accessTokenSecret = GetEnvVariable(AccessTokenSecretName);
+                var twitterKeys = new TwitterApiKeys(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
+                config = new BotConfig(twitterKeys);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return;
+            }
+
+            Log.Information("Requesting menu list...");
+            var weekMenu = await GetWeekMenuAsync();
+
+            Log.Debug($"Responsed menu list:\n{weekMenu}");
+
+            TodayMenu todayMenu = null;
+            try
+            {
+                if (day is 0)
                 {
-                    sb.Append(", ");
+                    Log.Information("Selecting todays menu...");
+                    todayMenu = SelectTodayMenu(weekMenu);
+                    Log.Debug($"Selected today menu:\n{todayMenu}");
+                }
+                else
+                {
+                    Log.Information($"Selecting menu for {day}");
+                    todayMenu = SelectMenu(weekMenu, day);
+                    Log.Debug($"Selected menu for {day}:\n{todayMenu}");
                 }
             }
-            WriteLine(sb.ToString());
-
-            throw new TargetFailedException("There is no provided menu.");
-        }
-    });
-
-    Target("publish-tweet", DependsOn("get-keys", "generate-image"), async () =>
-    {
-        WriteLine("Publishing tweet...");
-        var tweetText = new StringBuilder()
-            .Append(TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow))
-            .Append(" 오늘의 청강대 ")
-            .Append(flag switch
+            catch (NoProvidedMenuException e)
             {
-                MealTimeFlags.Breakfast => "아침",
-                MealTimeFlags.Lunch => "점심",
-                MealTimeFlags.DormLunch => "기숙사 점심",
-                MealTimeFlags.Dinner => "저녁",
-                _ => throw new TargetFailedException()
-            })
-            .Append(" 메뉴는!")
-            .ToString();
+                Log.Error(e.Message);
+                return;
+            }
 
-        TwitterClient twitter = await ConnectToTwitter(config.TwitterConfig);
+            Log.Information("Generating menu image...");
+            byte[] image = await todayMenu.MakeImageAsync(menuType);
+
+            Log.Information("Publishing tweet...");
+            var tweetText = new StringBuilder()
+                .Append(TimeUtils.GetFormattedKoreaTime(todayMenu.Date))
+                .Append(" 오늘의 청강대 ")
+                .Append(menuType switch
+                {
+                    MenuType.Breakfast => "아침",
+                    MenuType.Lunch => "점심",
+                    MenuType.Dinner => "저녁",
+                    _ => string.Empty
+                })
+                .Append(" 메뉴는!")
+                .ToString();
+            Log.Debug($"tweetText: {tweetText}");
+            TwitterClient twitter = await ConnectToTwitterAsync(config.TwitterConfig);
 
 #if DEBUG
-        WriteLine("The bot didn't tweet because it's Debug mode.");
+            Log.Information("The bot didn't tweet because it's Debug mode.");
 #endif
 
 #if RELEASE
-        if (image is null)
-        {
-            throw new TargetFailedException("Tweet image is null");
-        }
-        ITweet tweet = await PublishTweet(twitter, tweetText.ToString(), image);
-        WriteLine($"tweet: {tweet}");
-        WriteLine("Tweet publish completed.");
+            if (image is null)
+            {
+                Log.Error("Tweet image is null");
+                return;
+            }
+            ITweet tweet = await PublishTweetAsync(twitter, tweetText.ToString(), image);
+            Log.Information($"tweet: {tweet}");
+            Log.Information("Tweet publish completed.");
 #endif
-    });
+        }
 
-    Target("default", DependsOn("publish-tweet"));
+        private static string GetEnvVariable(string key)
+        {
+            return Environment.GetEnvironmentVariable(key, EnvironmentVariableTarget.Process)
+                ?? throw new Exception($"Faild to get enviroment value name of {key}");
+        }
 
-    await RunTargetsAndExitAsync(targets, options);
-});
+        public static async Task<WeekMenu> GetWeekMenuAsync()
+        {
+            return await WeekMenu.LoadAsync();
+        }
 
-return await command.InvokeAsync(args);
+        public static TodayMenu SelectTodayMenu(WeekMenu weekMenu)
+        {
+            var today = TimeUtils.KSTNow;
+            return SelectMenu(weekMenu, today.Day);
+        }
+
+        public static TodayMenu SelectMenu(WeekMenu weekMenu, int day)
+        {
+            var todayMenu = weekMenu.FindMenu(day);
+            return todayMenu;
+        }
+
+        public static async Task<byte[]> GenerateImageAsync(TodayMenu menu, MenuType type)
+        {
+            return await menu.MakeImageAsync(type);
+        }
+
+        public static async Task<TwitterClient> ConnectToTwitterAsync(TwitterApiKeys keys)
+        {
+            var client = new TwitterClient(keys.ConsumerApiKey, keys.ConsumerSecretKey, keys.AccessToken, keys.AccessTokenSecret);
+            IAuthenticatedUser authenticatedUser = await client.Users.GetAuthenticatedUserAsync();
+
+            Log.Debug("------------ Bot information ------------");
+            Log.Debug($"Name: {authenticatedUser.Name} @{authenticatedUser.ScreenName}");
+            Log.Debug($"ID:   {authenticatedUser.Id}");
+            Log.Debug("-----------------------------------------");
+
+            return client;
+        }
+
+        public static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[] image = null)
+        {
+            ITweet tweet;
+
+            if (image is null)
+            {
+                tweet = await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString()));
+            }
+            else
+            {
+                IMedia uploadedImage = await twitter.Upload.UploadTweetImageAsync(image);
+                tweet = await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString())
+                {
+                    Medias = { uploadedImage }
+                });
+            }
+
+            return tweet;
+        }
+    }
+}

@@ -1,11 +1,9 @@
-// Copyright (c) Sepi. All rights reserved.
+﻿// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq;
 
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Utils;
@@ -14,7 +12,7 @@ using SixLabors.Fonts;
 
 namespace CKLunchBot.Core.ImageProcess
 {
-    public static class MenuImageGenerator
+    internal static class MenuImageGenerator
     {
         private const float TitleFontSize = 32.0f;
         private const float ContentFontSize = 24.0f;
@@ -26,175 +24,76 @@ namespace CKLunchBot.Core.ImageProcess
 
         private const int MaxLengthOfMenuText = 12;
 
-        private const string NoMenuProvidedText = "(제공한 메뉴 없음)";
+        private const string NoMenuProvidedText = "(메뉴 없음)";
         private const string MenuPrefix = "::";
 
         private static readonly string s_menuTemplateImagePath =
             Path.Combine(AppContext.BaseDirectory, "assets", "images", "menu_template.png");
 
-        private static readonly string s_dormMenuTemplateImagePath =
-            Path.Combine(AppContext.BaseDirectory, "assets", "images", "dorm_menu_template.png");
-
-        public static async Task<byte[]> GenerateTodayLunchMenuImageAsync(RestaurantsWeekMenu menus)
-        {
-            return await Task.Run(() => GenerateTodayLunchMenuImage(menus));
-        }
-
-        public static async Task<byte[]> GenerateTodayDormMenuImageAsync(MenuItem weekMenu)
-        {
-            return await Task.Run(() => GenerateTodayDormMenuImage(weekMenu));
-        }
-
         /// <summary>
-        /// Generate todays lunch menu image
+        /// Generate menu image
         /// </summary>
-        /// <returns>byte image</returns>
-        public static byte[] GenerateTodayLunchMenuImage(RestaurantsWeekMenu menus)
+        /// <param name="menu"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="MenuImageGenerateException"></exception>
+        public static byte[] GenerateMenuImage(TodayMenu menu, MenuType type)
         {
-            if (menus is null)
-            {
-                menus = new RestaurantsWeekMenu(null);
-            }
-
             using ImageGenerator generator = new ImageGenerator(s_menuTemplateImagePath)
-                .AddFont("title", FontPath.TitleFontPath, TitleFontSize, FontStyle.Regular)
-                .AddFont("content", FontPath.ContentFontPath, ContentFontSize, FontStyle.Regular);
-
-            (float x, float y) titlePosition = (405.0f, 37.0f);
-
-            var titleText1 = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow);
-            generator.DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.White, titleText1, HorizontalAlignment.Right);
-
-            var titleText2 = " 오늘의 점심메뉴는?";
-            generator.DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.Black, titleText2);
-
-            var menuTexts = new Dictionary<Restaurants, StringBuilder>(new RestautrantsComparer())
-            {
-                [Restaurants.Daban] = new StringBuilder(),
-                [Restaurants.NankatsuNanUdong] = new StringBuilder(),
-                [Restaurants.TangAndJjigae] = new StringBuilder(),
-                [Restaurants.YukHaeBab] = new StringBuilder()
-            };
-
-            foreach (KeyValuePair<Restaurants, MenuItem> weekMenu in menus)
-            {
-                if (!menuTexts.ContainsKey(weekMenu.Key))
-                {
-                    continue;
-                }
-
-                string[] todaysMenu = weekMenu.Value[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
-
-                foreach (var item in todaysMenu)
-                {
-                    if (!string.IsNullOrWhiteSpace(item))
-                    {
-                        menuTexts[weekMenu.Key].AppendLine(SplitLine($"{MenuPrefix} {item}\n", MaxLengthOfMenuText + MenuPrefix.Length + 1));
-                    }
-                }
-            }
-
-            Dictionary<Restaurants, bool> menuProvides = new Dictionary<Restaurants, bool>();
-
-            foreach (KeyValuePair<Restaurants, StringBuilder> item in menuTexts)
-            {
-                bool provide = true;
-                if (item.Value.Length == 0)
-                {
-                    provide = false;
-                    menuTexts[item.Key].AppendLine(NoMenuProvidedText);
-                }
-                menuProvides.TryAdd(item.Key, provide);
-            }
-
-            if (!menuProvides.ContainsValue(true))
-            {
-                throw new NoProvidedMenuException(Restaurants.Daban, Restaurants.NankatsuNanUdong,
-                                                  Restaurants.TangAndJjigae, Restaurants.YukHaeBab);
-            }
-
-            foreach (KeyValuePair<Restaurants, StringBuilder> textList in menuTexts)
-            {
-                (float x, float y) drawPosition = (0.0f, ContentPosY);
-
-                drawPosition.x = textList.Key switch
-                {
-                    Restaurants.Daban => GetContentPositionX(0),
-                    Restaurants.NankatsuNanUdong => GetContentPositionX(1),
-                    Restaurants.TangAndJjigae => GetContentPositionX(2),
-                    Restaurants.YukHaeBab => GetContentPositionX(3),
-                    _ => 0.0f // Never used because it is filtered out before running this code.
-                };
-
-                if (textList.Value.Length == 0)
-                {
-                    textList.Value.AppendLine(NoMenuProvidedText);
-                }
-
-                generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, textList.Value.ToString());
-            }
-
-            return generator.ExportAsPng();
-        }
-
-        public static byte[] GenerateTodayDormMenuImage(MenuItem weekMenu)
-        {
-            string titleText2 = " 오늘의 기숙사 ";
-            titleText2 += weekMenu.RestaurantName switch
-            {
-                Restaurants.DormBreakfast => "아침메뉴는?",
-                Restaurants.DormDinner => "저녁메뉴는?",
-                Restaurants.DormLunch => "점심메뉴는?",
-                _ => throw new ArgumentException("Argument value is not dormitory meal menu."),
-            };
-
-            using ImageGenerator generator = new ImageGenerator(s_dormMenuTemplateImagePath)
                .AddFont("title", FontPath.TitleFontPath, TitleFontSize, FontStyle.Regular)
                .AddFont("content", FontPath.ContentFontPath, ContentFontSize, FontStyle.Regular);
 
             (float x, float y) titlePosition = (405.0f, 37.0f); // change
 
-            string titleText1 = TimeUtils.GetFormattedKoreaTime(DateTime.UtcNow);
-            generator.DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.White, titleText1, HorizontalAlignment.Right);
-            generator.DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.Black, titleText2);
-
-            List<string> menuTexts = new List<string>();
-
-            string[] todaysMenu = weekMenu[TimeUtils.GetKoreaNowTime(DateTime.UtcNow).DayOfWeek];
-
-            if (todaysMenu.Length == 0)
+            string titleText1 = TimeUtils.GetFormattedKoreaTime(menu.Date);
+            string titleText2 = " 오늘의 ";
+            titleText2 += type switch
             {
-                throw new NoProvidedMenuException(weekMenu.RestaurantName);
-            }
+                MenuType.Breakfast => "아침메뉴는?",
+                MenuType.Lunch => "저녁메뉴는?",
+                MenuType.Dinner => "점심메뉴는?",
+                _ => "메뉴는?",
+            };
 
-            foreach (var item in todaysMenu)
+            generator
+                .DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.White, titleText1, HorizontalAlignment.Right)
+                .DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.Black, titleText2);
+
+            var items = type switch
             {
-                if (!string.IsNullOrWhiteSpace(item))
-                {
-                    menuTexts.Add(SplitLine($"{MenuPrefix} {item}", MaxLengthOfMenuText + MenuPrefix.Length + 1));
-                }
-            }
-            if (menuTexts.Count == 0)
-            {
-                menuTexts.Add("(제공한 메뉴가 없음)");
-            }
+                MenuType.Breakfast => menu.Breakfast,
+                MenuType.Lunch => menu.Lunch,
+                MenuType.Dinner => menu.Dinner,
+                _ => throw new MenuImageGenerateException($"No data found matching {type}")
+            };
 
             (float x, float y) drawPosition = (ContentPosXStart, ContentPosY);
 
-            int i = 0;
-            foreach (var text in menuTexts)
+            var texts = items?
+                .SkipWhile(item => string.IsNullOrWhiteSpace(item))
+                .Select(item => SplitLine($"{MenuPrefix} {item}", MaxLengthOfMenuText + MenuPrefix.Length + 1)) ?? null;
+
+            if (texts is null || !texts.Any())
             {
-                generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, text);
-                if (i == 3)
+                generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, NoMenuProvidedText);
+            }
+            else
+            {
+                int i = 0;
+                foreach (var text in texts)
                 {
-                    drawPosition.y += DefaultLineHeight * 2;
-                    i = 0;
+                    generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, text);
+                    if (i == 3)
+                    {
+                        drawPosition.y += DefaultLineHeight * 2;
+                        i = 0;
+                    }
+                    else
+                    {
+                        i++;
+                    }
+                    drawPosition.x = GetContentPositionX(i);
                 }
-                else
-                {
-                    i++;
-                }
-                drawPosition.x = GetContentPositionX(i);
             }
 
             return generator.ExportAsPng();
@@ -210,9 +109,9 @@ namespace CKLunchBot.Core.ImageProcess
             return text;
         }
 
-        private static float GetContentPositionX(float n)
+        private static float GetContentPositionX(int n)
         {
-            return ContentPosXStart + ContentPosXInterval * n;
+            return ContentPosXStart + (ContentPosXInterval * n);
         }
     }
 }
