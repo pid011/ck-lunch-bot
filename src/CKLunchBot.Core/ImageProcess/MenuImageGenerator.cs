@@ -50,8 +50,8 @@ namespace CKLunchBot.Core.ImageProcess
             titleText2 += type switch
             {
                 MenuType.Breakfast => "아침메뉴는?",
-                MenuType.Lunch => "저녁메뉴는?",
-                MenuType.Dinner => "점심메뉴는?",
+                MenuType.Lunch => "점심메뉴는?",
+                MenuType.Dinner => "저녁메뉴는?",
                 _ => "메뉴는?",
             };
 
