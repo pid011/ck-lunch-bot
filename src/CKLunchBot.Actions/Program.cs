@@ -15,10 +15,6 @@ using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
-#if RELEASE
-using Tweetinvi.Models;
-#endif
-
 namespace CKLunchBot.Actions
 {
     internal record TwitterApiKeys(
