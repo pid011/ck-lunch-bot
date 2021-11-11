@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta15" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
