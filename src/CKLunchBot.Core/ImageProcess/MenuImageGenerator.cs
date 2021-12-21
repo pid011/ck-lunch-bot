@@ -82,6 +82,11 @@ namespace CKLunchBot.Core.ImageProcess
                 int i = 0;
                 foreach (var text in texts)
                 {
+                    if (string.IsNullOrWhiteSpace(text))
+                    {
+                        continue;
+                    }
+
                     generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, text);
                     if (i == 3)
                     {
