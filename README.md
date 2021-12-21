@@ -10,4 +10,4 @@
 
 ## Requirements
 
-.NET 5
+.NET 6
