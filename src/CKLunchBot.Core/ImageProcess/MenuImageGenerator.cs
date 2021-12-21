@@ -75,7 +75,8 @@ namespace CKLunchBot.Core.ImageProcess
 
             if (texts is null || !texts.Any())
             {
-                generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, NoMenuProvidedText);
+                // generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, NoMenuProvidedText);
+                throw new MenuImageGenerateException($"No menu found matching {type}");
             }
             else
             {

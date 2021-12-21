@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using CKLunchBot.Core.ImageProcess;
 using CKLunchBot.Core.Menu;
 using CKLunchBot.Core.Utils;
 using Serilog;
@@ -47,18 +48,21 @@ namespace CKLunchBot.Actions
 
             rootCommand.Handler = CommandHandler.Create<MenuType, int>(Run);
 
-            try
+            var result = await rootCommand.InvokeAsync(args).ConfigureAwait(false);
+
+            if (result == 0)
             {
-                return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
+                Log.Information("Action done.");
             }
-            catch (Exception e)
+            else
             {
-                Log.Error(e.ToString());
-                return -1;
+                Log.Warning("Action faild.");
             }
+
+            return result;
         }
 
-        private static async Task Run(MenuType menuType, int day)
+        private static async Task<int> Run(MenuType menuType, int day)
         {
             AssemblyName botInfo = Assembly.GetExecutingAssembly().GetName();
             Log.Information($"[{botInfo.Name} v{botInfo.Version.ToString(3)}]");
@@ -82,7 +86,7 @@ namespace CKLunchBot.Actions
             catch (Exception e)
             {
                 Log.Error(e.Message);
-                return;
+                return 1;
             }
 
             Log.Information("Requesting menu list...");
@@ -109,11 +113,21 @@ namespace CKLunchBot.Actions
             catch (NoProvidedMenuException e)
             {
                 Log.Error(e.Message);
-                return;
+                return 1;
             }
 
             Log.Information("Generating menu image...");
-            byte[] image = await todayMenu.MakeImageAsync(menuType);
+
+            byte[] image;
+            try
+            {
+                image = await todayMenu.MakeImageAsync(menuType);
+            }
+            catch (MenuImageGenerateException e)
+            {
+                Log.Error(e.Message);
+                return 1;
+            }
 
             Log.Information("Publishing tweet...");
             var tweetText = new StringBuilder()
@@ -139,12 +153,24 @@ namespace CKLunchBot.Actions
             if (image is null)
             {
                 Log.Error("Tweet image is null");
-                return;
+                return 1;
             }
-            ITweet tweet = await PublishTweetAsync(twitter, tweetText.ToString(), image);
-            Log.Information($"tweet: {tweet}");
-            Log.Information("Tweet publish completed.");
+
+            try
+            {
+                ITweet tweet = await PublishTweetAsync(twitter, tweetText.ToString(), image);
+                Log.Information($"tweet: {tweet}");
+                Log.Information("Tweet publish completed.");
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Faild to tweet menu.");
+                Log.Error($"{e}");
+                return 1;
+            }
 #endif
+
+            return 0;
         }
 
         private static string GetEnvVariable(string key)
