@@ -30,22 +30,26 @@ namespace CKLunchBot.Core.ImageProcess
         public ImageGenerator DrawText(
             (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
         {
-            DrawingOptions options = new()
+            DrawingOptions drawingOptions = new()
             {
                 GraphicsOptions = new GraphicsOptions
                 {
                     Antialias = true
-                },
-                TextOptions = new TextOptions
-                {
-                    ApplyKerning = true,
-                    HorizontalAlignment = align,
-                    VerticalAlignment = VerticalAlignment.Top
                 }
             };
 
-            _image.Mutate(x =>
-                x.DrawText(options, text, font, Color.FromRgb(color.r, color.g, color.b), new PointF(position.x, position.y)));
+            TextOptions textOptions = new(font)
+            {
+                HorizontalAlignment = align,
+                VerticalAlignment = VerticalAlignment.Top,
+                Origin = new System.Numerics.Vector2(position.x, position.y),
+                ApplyHinting = true
+            };
+
+            Color textColor = Color.FromRgb(color.r, color.g, color.b);
+            PointF textLocation = new(position.x, position.y);
+
+            _image.Mutate(x => x.DrawText(drawingOptions, textOptions, text, Brushes.Solid(textColor), null));
 
             return this;
         }
@@ -58,7 +62,7 @@ namespace CKLunchBot.Core.ImageProcess
             }
 
             var collection = new FontCollection();
-            FontFamily family = collection.Install(path);
+            FontFamily family = collection.Add(path);
             Font font = family.CreateFont(size, style);
             Fonts.Add(name, font);
 

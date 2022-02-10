@@ -19,6 +19,11 @@ namespace CKLunchBot.ImageGenTest
                 var outputDir = $"Test_{DateTime.Now:yyyy-MM-dd-HH-mm-ss}";
 
                 var weekMenu = await WeekMenu.LoadAsync();
+
+                var todayMenu = weekMenu.FindMenu(10);
+                await SaveMenuImage(outputDir, todayMenu, MenuType.Lunch);
+
+                /*
                 foreach (var menu in weekMenu)
                 {
                     Console.WriteLine(menu.ToString());
@@ -32,6 +37,7 @@ namespace CKLunchBot.ImageGenTest
                     await SaveMenuImage(outputDir, menu, MenuType.Dinner);
                     Console.WriteLine();
                 }
+                */
                 Console.WriteLine("Done.");
             }
             catch (NoProvidedMenuException)
