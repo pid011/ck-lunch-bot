@@ -112,8 +112,8 @@ namespace CKLunchBot.Actions
             }
             catch (NoProvidedMenuException e)
             {
-                Log.Error(e.Message);
-                return 1;
+                Log.Warning(e.Message);
+                return 0;
             }
 
             Log.Information("Generating menu image...");
@@ -125,8 +125,8 @@ namespace CKLunchBot.Actions
             }
             catch (MenuImageGenerateException e)
             {
-                Log.Error(e.Message);
-                return 1;
+                Log.Warning(e.Message);
+                return 0;
             }
 
             Log.Information("Publishing tweet...");
