@@ -5,9 +5,9 @@ using System.Net.Http;
 
 namespace CKLunchBot.Core.Requester
 {
-    internal class BaseRequester
+    internal static class WebClient
     {
-        // https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient?view=net-6.0#remarks
-        protected static readonly HttpClient Client = new();
+        // https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient#remarks
+        public static readonly HttpClient Client = new();
     }
 }
