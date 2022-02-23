@@ -11,9 +11,14 @@ namespace CKLunchBot.Core.Requester
     {
         private const string MenuUrl = @"https://www.ck.ac.kr/univ-life/menu";
 
-        public static async Task<HtmlDocument> RequestMenuHtmlAsync(CancellationToken cancelToken = default)
+        public async static Task<HtmlDocument> RequestMenuHtmlAsync(CancellationToken cancelToken = default)
         {
-            return await Web.LoadFromWebAsync(MenuUrl, cancelToken);
+            using var htmlStream = await Client.GetStreamAsync(MenuUrl, cancelToken);
+
+            var html = new HtmlDocument();
+            html.Load(htmlStream);
+
+            return html;
         }
     }
 }

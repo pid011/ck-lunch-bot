@@ -20,7 +20,7 @@ namespace CKLunchBot.ImageGenTest
 
                 var weekMenu = await WeekMenu.LoadAsync();
 
-                var todayMenu = weekMenu.FindMenu(TimeUtils.KSTNow.Day);
+                var todayMenu = weekMenu.FindMenu(KST.Now.Day);
                 await SaveMenuImage(outputDir, todayMenu, MenuType.Lunch);
 
                 /*

@@ -131,7 +131,7 @@ namespace CKLunchBot.Actions
 
             Log.Information("Publishing tweet...");
             var tweetText = new StringBuilder()
-                .Append(TimeUtils.GetFormattedKoreaTime(todayMenu.Date))
+                .Append(todayMenu.Date.GetFormattedKoreanTimeString())
                 .Append(" 오늘의 청강대 ")
                 .Append(menuType switch
                 {
@@ -186,7 +186,7 @@ namespace CKLunchBot.Actions
 
         public static TodayMenu SelectTodayMenu(WeekMenu weekMenu)
         {
-            var today = TimeUtils.KSTNow;
+            var today = KST.Now;
             return SelectMenu(weekMenu, today.Day);
         }
 

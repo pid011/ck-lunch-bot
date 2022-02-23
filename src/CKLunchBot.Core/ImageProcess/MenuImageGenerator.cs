@@ -40,7 +40,7 @@ namespace CKLunchBot.Core.ImageProcess
 
             (float x, float y) titlePosition = (405.0f, 37.0f); // changeable
 
-            string titleText1 = TimeUtils.GetFormattedKoreaTime(menu.Date);
+            string titleText1 = menu.Date.GetFormattedKoreanTimeString();
             string titleText2 = " 오늘의 ";
             titleText2 += type switch
             {
