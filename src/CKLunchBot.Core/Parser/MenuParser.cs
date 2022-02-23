@@ -40,9 +40,9 @@ namespace CKLunchBot.Core.Parser
 
                     var todayMenu = new TodayMenu(date)
                     {
-                        Breakfast = breakfast,
-                        Lunch = lunch,
-                        Dinner = dinner
+                        Breakfast = breakfast.ToList(),
+                        Lunch = lunch.ToList(),
+                        Dinner = dinner.ToList()
                     };
                     weekMenu.Add(todayMenu);
                 }
@@ -69,9 +69,9 @@ namespace CKLunchBot.Core.Parser
             return new DateTime(DateTime.Now.Year, month, day);
         }
 
-        private static string[] ParseMenuText(string menuText)
+        private static IEnumerable<string> ParseMenuText(string menuText)
         {
-            return menuText.Split("<br>");
+            return menuText.Split("<br>").Where(s => !string.IsNullOrWhiteSpace(s));
         }
     }
 }
