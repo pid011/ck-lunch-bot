@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
 using System.Linq;
 
 using CKLunchBot.Core.Menu;
@@ -27,9 +25,6 @@ namespace CKLunchBot.Core.ImageProcess
         // private const string NoMenuProvidedText = "(메뉴 없음)";
         private const string MenuPrefix = "::";
 
-        private static readonly string s_menuTemplateImagePath =
-            Path.Combine(AppContext.BaseDirectory, "assets", "images", "menu_template.png");
-
         /// <summary>
         /// Generate menu image
         /// </summary>
@@ -39,11 +34,11 @@ namespace CKLunchBot.Core.ImageProcess
         /// <exception cref="MenuImageGenerateException"></exception>
         public static byte[] GenerateMenuImage(TodayMenu menu, MenuType type)
         {
-            using ImageGenerator generator = new ImageGenerator(s_menuTemplateImagePath)
-               .AddFont("title", FontPath.TitleFontPath, TitleFontSize, FontStyle.Regular)
-               .AddFont("content", FontPath.ContentFontPath, ContentFontSize, FontStyle.Regular);
+            using ImageGenerator generator = new ImageGenerator(AssetPath.MenuTemplateImage)
+               .AddFont("title", AssetPath.BoldFont, TitleFontSize, FontStyle.Regular)
+               .AddFont("content", AssetPath.RegularFont, ContentFontSize, FontStyle.Regular);
 
-            (float x, float y) titlePosition = (405.0f, 37.0f); // change
+            (float x, float y) titlePosition = (405.0f, 37.0f); // changeable
 
             string titleText1 = TimeUtils.GetFormattedKoreaTime(menu.Date);
             string titleText2 = " 오늘의 ";

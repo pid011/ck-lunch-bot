@@ -24,6 +24,12 @@
     <None Update="assets\fonts\Maplestory Light.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Fonts\MaruBuri-Bold.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Fonts\MaruBuri-Regular.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\menu_template.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
