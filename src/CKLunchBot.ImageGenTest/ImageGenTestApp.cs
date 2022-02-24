@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using CKLunchBot.Core.Menu;
-
+using CKLunchBot.Core.Utils;
 using SixLabors.ImageSharp;
 
 namespace CKLunchBot.ImageGenTest
@@ -20,7 +20,7 @@ namespace CKLunchBot.ImageGenTest
 
                 var weekMenu = await WeekMenu.LoadAsync();
 
-                var todayMenu = weekMenu.FindMenu(10);
+                var todayMenu = weekMenu.FindMenu(TimeUtils.KSTNow.Day);
                 await SaveMenuImage(outputDir, todayMenu, MenuType.Lunch);
 
                 /*

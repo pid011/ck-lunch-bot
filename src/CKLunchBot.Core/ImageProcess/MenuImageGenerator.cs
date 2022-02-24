@@ -24,7 +24,7 @@ namespace CKLunchBot.Core.ImageProcess
 
         private const int MaxLengthOfMenuText = 12;
 
-        private const string NoMenuProvidedText = "(메뉴 없음)";
+        // private const string NoMenuProvidedText = "(메뉴 없음)";
         private const string MenuPrefix = "::";
 
         private static readonly string s_menuTemplateImagePath =
