@@ -8,9 +8,8 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using CKLunchBot.Core.ImageProcess;
+using CKLunchBot.Core;
 using CKLunchBot.Core.Menu;
-using CKLunchBot.Core.Utils;
 using Serilog;
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -121,7 +120,7 @@ namespace CKLunchBot.Actions
             byte[] image;
             try
             {
-                image = await todayMenu.MakeImageAsync(menuType);
+                image = await Task.Run(() => todayMenu.MakeImage(menuType));
             }
             catch (MenuImageGenerateException e)
             {
@@ -194,11 +193,6 @@ namespace CKLunchBot.Actions
         {
             var todayMenu = weekMenu.FindMenu(day);
             return todayMenu;
-        }
-
-        public static async Task<byte[]> GenerateImageAsync(TodayMenu menu, MenuType type)
-        {
-            return await menu.MakeImageAsync(type);
         }
 
         public static async Task<TwitterClient> ConnectToTwitterAsync(TwitterApiKeys keys)

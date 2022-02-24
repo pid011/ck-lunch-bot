@@ -31,7 +31,7 @@ namespace CKLunchBot.Core.Menu
         public async static Task<WeekMenu> LoadAsync(CancellationToken cancelToken = default)
         {
             var html = await MenuRequester.RequestMenuHtmlAsync(cancelToken);
-            return new WeekMenu(MenuParser.ParseMenu(html));
+            return new WeekMenu(MenuParser.Parse(html));
         }
 
         /// <summary>
@@ -39,14 +39,9 @@ namespace CKLunchBot.Core.Menu
         /// </summary>
         /// <param name="day"></param>
         /// <returns></returns>
-        public TodayMenu FindMenu(int day)
+        public TodayMenu? FindMenu(int day)
         {
-            var todayMenu = _menus.FirstOrDefault(menu => menu.Date.Day == day);
-            if (todayMenu is null)
-            {
-                throw new NoProvidedMenuException($"{day}일에 제공하는 메뉴를 찾을 수 없습니다.");
-            }
-            return todayMenu;
+            return _menus.FirstOrDefault(menu => menu.Date.Day == day);
         }
 
         public IEnumerator<TodayMenu> GetEnumerator()

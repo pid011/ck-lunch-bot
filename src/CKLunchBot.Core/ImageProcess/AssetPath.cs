@@ -6,7 +6,7 @@ using System.IO;
 
 namespace CKLunchBot.Core.ImageProcess
 {
-    public static class AssetPath
+    internal static class AssetPath
     {
         private static readonly string s_assetsPath = Path.Combine(AppContext.BaseDirectory, "Assets");
         private static readonly string s_fontsPath = Path.Combine(s_assetsPath, "Fonts");

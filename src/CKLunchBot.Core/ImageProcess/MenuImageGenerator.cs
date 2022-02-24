@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Sepi. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
-
+using System.Numerics;
 using CKLunchBot.Core.Menu;
-using CKLunchBot.Core.Utils;
 
 using SixLabors.Fonts;
 
@@ -38,7 +38,7 @@ namespace CKLunchBot.Core.ImageProcess
                .AddFont("title", AssetPath.BoldFont, TitleFontSize, FontStyle.Regular)
                .AddFont("content", AssetPath.RegularFont, ContentFontSize, FontStyle.Regular);
 
-            (float x, float y) titlePosition = (405.0f, 37.0f); // changeable
+            var titlePosition = new Vector2(405.0f, 37.0f); // changeable
 
             string titleText1 = menu.Date.GetFormattedKoreanTimeString();
             string titleText2 = " 오늘의 ";
@@ -51,8 +51,8 @@ namespace CKLunchBot.Core.ImageProcess
             };
 
             generator
-                .DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.White, titleText1, HorizontalAlignment.Right)
-                .DrawText(titlePosition, generator.Fonts["title"], CKLunchBotColors.Black, titleText2);
+                .DrawText(generator.Fonts["title"], CKLunchBotColors.White, titlePosition, titleText1, HorizontalAlignment.Right)
+                .DrawText(generator.Fonts["title"], CKLunchBotColors.Black, titlePosition, titleText2);
 
             var items = type switch
             {
@@ -62,11 +62,15 @@ namespace CKLunchBot.Core.ImageProcess
                 _ => throw new MenuImageGenerateException($"No data found matching {type}")
             };
 
-            (float x, float y) drawPosition = (ContentPosXStart, ContentPosY);
+            var drawPosition = new Vector2(ContentPosXStart, ContentPosY);
 
-            var texts = items?
-                .SkipWhile(item => string.IsNullOrWhiteSpace(item))
-                .Select(item => SplitLine($"{MenuPrefix} {item}", MaxLengthOfMenuText + MenuPrefix.Length + 1)) ?? null;
+            IEnumerable<string>? texts = null;
+            if (items is not null)
+            {
+                texts = items.Menus?
+                    .SkipWhile(item => string.IsNullOrWhiteSpace(item))
+                    .Select(item => SplitLine($"{MenuPrefix} {item}", MaxLengthOfMenuText + MenuPrefix.Length + 1)) ?? null;
+            }
 
             if (texts is null || !texts.Any())
             {
@@ -83,17 +87,17 @@ namespace CKLunchBot.Core.ImageProcess
                         continue;
                     }
 
-                    generator.DrawText(drawPosition, generator.Fonts["content"], CKLunchBotColors.Black, text);
+                    generator.DrawText(generator.Fonts["content"], CKLunchBotColors.Black, drawPosition, text);
                     if (i == 3)
                     {
-                        drawPosition.y += DefaultLineHeight * 2;
+                        drawPosition.Y += DefaultLineHeight * 2;
                         i = 0;
                     }
                     else
                     {
                         i++;
                     }
-                    drawPosition.x = GetContentPositionX(i);
+                    drawPosition.X = GetContentPositionX(i);
                 }
             }
 

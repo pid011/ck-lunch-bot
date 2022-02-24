@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
-namespace CKLunchBot.Core.Parser
+namespace CKLunchBot.Core
 {
 
     [Serializable]
@@ -9,8 +10,6 @@ namespace CKLunchBot.Core.Parser
         public MenuParseException() { }
         public MenuParseException(string message) : base(message) { }
         public MenuParseException(string message, Exception inner) : base(message, inner) { }
-        protected MenuParseException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        protected MenuParseException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

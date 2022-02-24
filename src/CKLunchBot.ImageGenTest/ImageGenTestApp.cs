@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using CKLunchBot.Core;
 using CKLunchBot.Core.Menu;
-using CKLunchBot.Core.Utils;
 using SixLabors.ImageSharp;
 
 namespace CKLunchBot.ImageGenTest
@@ -21,7 +21,7 @@ namespace CKLunchBot.ImageGenTest
                 var weekMenu = await WeekMenu.LoadAsync();
 
                 var todayMenu = weekMenu.FindMenu(KST.Now.Day);
-                await SaveMenuImage(outputDir, todayMenu, MenuType.Lunch);
+                await SaveMenuImageAsync(outputDir, todayMenu, MenuType.Lunch);
 
                 /*
                 foreach (var menu in weekMenu)
@@ -50,9 +50,9 @@ namespace CKLunchBot.ImageGenTest
             }
         }
 
-        private static async Task SaveMenuImage(string outputDir, TodayMenu menu, MenuType type)
+        private static async Task SaveMenuImageAsync(string outputDir, TodayMenu menu, MenuType type)
         {
-            var imageBytes = await menu.MakeImageAsync(type);
+            var imageBytes = await Task.Run(() => menu.MakeImage(type));
 
             if (!Directory.Exists(outputDir))
             {
@@ -61,7 +61,7 @@ namespace CKLunchBot.ImageGenTest
 
             using var memorystream = new MemoryStream(imageBytes);
             using var filestream = new FileStream(Path.Combine(outputDir, $"{menu.Date.ToShortDateString()}_{type}.png"), FileMode.Create);
-            using var image = Image.Load(memorystream);
+            using var image = await Image.LoadAsync(memorystream);
 
             image.SaveAsPng(filestream);
         }

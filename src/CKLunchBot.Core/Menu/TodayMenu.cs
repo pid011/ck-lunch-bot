@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using CKLunchBot.Core.ImageProcess;
 
 namespace CKLunchBot.Core.Menu
@@ -16,9 +14,9 @@ namespace CKLunchBot.Core.Menu
     public record TodayMenu
     {
         public DateTime Date { get; }
-        public IReadOnlyList<string>? Breakfast { get; init; }
-        public IReadOnlyList<string>? Lunch { get; init; }
-        public IReadOnlyList<string>? Dinner { get; init; }
+        public MenuItem? Breakfast { get; init; }
+        public MenuItem? Lunch { get; init; }
+        public MenuItem? Dinner { get; init; }
 
         public TodayMenu(DateTime date)
         {
@@ -31,10 +29,9 @@ namespace CKLunchBot.Core.Menu
         /// <param name="type"></param>
         /// <returns></returns>
         /// <exception cref="MenuImageGenerateException"></exception>
-        public async Task<byte[]> MakeImageAsync(MenuType type)
+        public byte[] MakeImage(MenuType type)
         {
-            return await Task.Run(
-                () => MenuImageGenerator.GenerateMenuImage(this, type)).ConfigureAwait(false);
+            return MenuImageGenerator.GenerateMenuImage(this, type);
         }
 
         public override string ToString()
@@ -44,13 +41,13 @@ namespace CKLunchBot.Core.Menu
             return new StringBuilder()
                 .AppendLine($"<{Date.Year}-{Date.Month}-{Date.Day} {Date.DayOfWeek}>")
                 .AppendLine($"{"[Breakfast]",-12}")
-                .AppendJoin(',', Breakfast ?? defaultList)
+                .AppendJoin(',', Breakfast?.Menus ?? defaultList)
                 .AppendLine()
                 .AppendLine($"{"[Lunch]",-12}")
-                .AppendJoin(',', Lunch ?? defaultList)
+                .AppendJoin(',', Lunch?.Menus ?? defaultList)
                 .AppendLine()
                 .AppendLine($"{"[Dinner]",-12}")
-                .AppendJoin(',', Dinner ?? defaultList)
+                .AppendJoin(',', Dinner?.Menus ?? defaultList)
                 .ToString();
         }
     }

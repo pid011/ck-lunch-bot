@@ -9,7 +9,7 @@ namespace CKLunchBot.Core.Parser
 {
     internal class MenuParser
     {
-        public static IList<TodayMenu> ParseMenu(HtmlDocument html)
+        public static IList<TodayMenu> Parse(HtmlDocument html)
         {
             try
             {
@@ -24,25 +24,29 @@ namespace CKLunchBot.Core.Parser
 
                 while (dates.MoveNext())
                 {
-                    breakfasts.MoveNext();
-                    lunchs.MoveNext();
-                    dinners.MoveNext();
+                    var breakfast = breakfasts.MoveNext();
+                    var lunch = lunchs.MoveNext();
+                    var dinner = dinners.MoveNext();
 
-                    var rawDate = dates.Current.InnerText;
-                    var rawBreakfast = breakfasts.Current.InnerHtml;
-                    var rawLunch = lunchs.Current.InnerHtml;
-                    var rawDinner = dinners.Current.InnerHtml;
-
-                    var date = ParseDateText(rawDate);
-                    var breakfast = ParseMenuText(rawBreakfast);
-                    var lunch = ParseMenuText(rawLunch);
-                    var dinner = ParseMenuText(rawDinner);
-
-                    var todayMenu = new TodayMenu(date)
+                    var todayMenu = new TodayMenu(ParseDateText(dates.Current.InnerText))
                     {
-                        Breakfast = breakfast.ToList(),
-                        Lunch = lunch.ToList(),
-                        Dinner = dinner.ToList()
+                        Breakfast = breakfast ? new MenuItem
+                        {
+                            Menus = ParseMenuText(breakfasts.Current),
+                            SelfBar = ParseSelfBarText(breakfasts.Current)
+                        } : null,
+
+                        Lunch = lunch ? new MenuItem
+                        {
+                            Menus = ParseMenuText(lunchs.Current),
+                            SelfBar = ParseSelfBarText(lunchs.Current)
+                        } : null,
+
+                        Dinner = dinner ? new MenuItem
+                        {
+                            Menus = ParseMenuText(dinners.Current),
+                            SelfBar = ParseSelfBarText(dinners.Current)
+                        } : null,
                     };
                     weekMenu.Add(todayMenu);
                 }
@@ -53,25 +57,48 @@ namespace CKLunchBot.Core.Parser
             {
                 throw new MenuParseException("Faild to parse menu html", e);
             }
-        }
 
-        private static DateTime ParseDateText(string dateText)
-        {
-            var matched = Regex.Matches(dateText, @"[0-9]{1,2}");
-            if (matched.Count is not 2
-                || !int.TryParse(matched[0].Value, out var month)
-                || !int.TryParse(matched[1].Value, out var day))
+            static DateTime ParseDateText(string dateText)
             {
-                throw new MenuParseException($"Faild to parse date text [{dateText}]");
+                var matched = Regex.Matches(dateText, @"[0-9]{1,2}");
+                if (matched.Count is not 2
+                    || !int.TryParse(matched[0].Value, out var month)
+                    || !int.TryParse(matched[1].Value, out var day))
+                {
+                    throw new MenuParseException($"Faild to parse date text [{dateText}]");
+                }
+
+                var now = KST.Now;
+
+                // parsed_month == now_month (01/02 :: 01/04)
+                if (now.Month == month)
+                {
+                    return now.AddDays(day - now.Day);
+                }
+
+                // parsed_month < now_month (02/29 :: 03/01)
+                // parsed_month > now_month (03/01 :: 02/29)
+                var plusDay = month > now.Month ? 1.0 : -1.0;
+                while (now.Day != day)
+                {
+                    now = now.AddDays(plusDay);
+                }
+                return now;
             }
 
-            // BUG: DateTime.Now가 2021년인데 메뉴 날짜가 2022년 1월 1일이라서 년도가 다른 경우 잘못된 날짜가 되어 버림
-            return new DateTime(DateTime.Now.Year, month, day);
-        }
+            static IReadOnlyList<string> ParseMenuText(HtmlNode node) =>
+                node.ChildNodes
+                .Where(node => node.Name is "#text")
+                .Select(node => node.InnerText)
+                .ToList();
 
-        private static IEnumerable<string> ParseMenuText(string menuText)
-        {
-            return menuText.Split("<br>").Where(s => !string.IsNullOrWhiteSpace(s));
+            static IReadOnlyList<string> ParseSelfBarText(HtmlNode node) => node.ChildNodes
+                .FirstOrDefault(node => node.Name is "샐프바")?
+                .ChildNodes
+                .Where(node => node.Name is "#text")
+                .Select(node => node.InnerText)
+                .ToList()
+                ?? new List<string>();
         }
     }
 }

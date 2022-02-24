@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CKLunchBot.Core.Utils
+namespace CKLunchBot.Core
 {
     public static class DateTimeExtensions
     {

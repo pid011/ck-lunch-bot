@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -27,10 +28,9 @@ namespace CKLunchBot.Core.ImageProcess
             _image = Image.Load(imagePath);
         }
 
-        public ImageGenerator DrawText(
-            (float x, float y) position, Font font, (byte r, byte g, byte b) color, string text, HorizontalAlignment align = 0)
+        public ImageGenerator DrawText(Font font, Color color, Vector2 position, string text, HorizontalAlignment align = 0)
         {
-            DrawingOptions drawingOptions = new()
+            var drawingOptions = new DrawingOptions()
             {
                 GraphicsOptions = new GraphicsOptions
                 {
@@ -38,18 +38,15 @@ namespace CKLunchBot.Core.ImageProcess
                 }
             };
 
-            TextOptions textOptions = new(font)
+            var textOptions = new TextOptions(font)
             {
                 HorizontalAlignment = align,
                 VerticalAlignment = VerticalAlignment.Top,
-                Origin = new System.Numerics.Vector2(position.x, position.y),
+                Origin = position,
                 ApplyHinting = true
             };
 
-            Color textColor = Color.FromRgb(color.r, color.g, color.b);
-            PointF textLocation = new(position.x, position.y);
-
-            _image.Mutate(x => x.DrawText(drawingOptions, textOptions, text, Brushes.Solid(textColor), null));
+            _image.Mutate(x => x.DrawText(drawingOptions, textOptions, text, Brushes.Solid(color), null));
 
             return this;
         }
@@ -76,28 +73,23 @@ namespace CKLunchBot.Core.ImageProcess
             return stream.ToArray();
         }
 
-        #region IDisposable Support
+        #region IDisposable
 
-        private bool _disposedValue = false;
+        private bool _disposed = false;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposed)
             {
-                if (disposing)
-                {
-                }
-                if (_image != null)
-                {
-                    _image.Dispose();
-                }
-                _disposedValue = true;
+                return;
             }
-        }
 
-        ~ImageGenerator()
-        {
-            Dispose(false);
+            if (disposing)
+            {
+                _image.Dispose();
+            }
+
+            _disposed = true;
         }
 
         public void Dispose()
@@ -106,6 +98,11 @@ namespace CKLunchBot.Core.ImageProcess
             GC.SuppressFinalize(this);
         }
 
-        #endregion IDisposable Support
+        ~ImageGenerator()
+        {
+            Dispose(false);
+        }
+
+        #endregion IDisposable
     }
 }
