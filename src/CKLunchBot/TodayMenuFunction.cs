@@ -14,9 +14,7 @@ namespace CKLunchBot
     public class TodayMenuFunction
     {
         [FunctionName("today")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -37,24 +35,30 @@ namespace CKLunchBot
                 }
             }
 
-            if (string.IsNullOrEmpty(reqType))
-            {
-                return new BadRequestObjectResult("Need request type.");
-            }
-
-            if (!Enum.TryParse<MenuType>(reqType.ToLower(), true, out var menuType))
-            {
-                return new BadRequestObjectResult("Wrong request type.");
-            }
-
-            return await ProcessAsync(log, menuType);
+            return await ProcessAsync(reqType);
         }
 
-        private static async Task<IActionResult> ProcessAsync(ILogger log, MenuType menuType)
+        private static async Task<IActionResult> ProcessAsync(string? reqType)
         {
-            await Task.Delay(1000);
-            log.LogInformation($"type={menuType}");
-            return new OkObjectResult($"type={menuType}");
+            var weekMenu = await WeekMenu.LoadAsync();
+            var todayMenu = weekMenu.Find(KST.Now.ToDateOnly());
+            if (todayMenu is null)
+            {
+                return new BadRequestObjectResult("Cannot found today menu.");
+            }
+
+            if (!string.IsNullOrEmpty(reqType) && Enum.TryParse<MenuType>(reqType.ToLower(), true, out var menuType))
+            {
+                var menu = todayMenu[menuType];
+                if (menu!.IsEmpty())
+                {
+                    return new BadRequestObjectResult($"{menuType} menu is empty.");
+                }
+
+                return new OkObjectResult(menu!.ToString());
+            }
+
+            return new OkObjectResult(todayMenu.ToString());
         }
     }
 }
