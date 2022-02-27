@@ -69,26 +69,26 @@ public static class MenuImageGenerator
 
         if (menu.IsEmpty())
         {
-            drawingBoard.DrawText(contentFont, BaseBrushes.Black, new PointF(ContentPosXStart, ContentPosYStart), NoMenuProvidedText);
+            drawingBoard.DrawText(subTitleFont, BaseBrushes.Black, new PointF(ContentPosXStart, ContentPosYStart), NoMenuProvidedText);
             return await drawingBoard.Mutate().ExportAsPngAsync();
         }
 
         if (menu.Menus.Count > 0)
         {
-            DrawMenus(drawingBoard, contentFont, menu.Menus, contentPos);
+            DrawMenus(drawingBoard, subTitleFont, menu.Menus, contentPos);
         }
 
         contentPos = GetNextLinePos(contentPos);
 
         if (menu.SelfCorner.Count > 0)
         {
-            drawingBoard.DrawText(subTitleFont, BaseBrushes.Black, contentPos, "<셀프코너>");
+            drawingBoard.DrawText(titleFont, BaseBrushes.Black, contentPos, "<셀프코너>");
             contentPos.Y += SubTitleContentInterval;
 
-            contentPos = DrawMenus(drawingBoard, contentFont, menu.SelfCorner, contentPos);
+            contentPos = DrawMenus(drawingBoard, subTitleFont, menu.SelfCorner, contentPos);
         }
 
-        return await drawingBoard.Mutate().ExportAsPngAsync();
+        return await drawingBoard.Mutate().ExportAsJpegAsync(quality: 95);
 
         ///////////////////////////////////////////////////////////////////
 

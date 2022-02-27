@@ -50,7 +50,7 @@ static async Task SaveMenuImageAsync(string outputDir, TodayMenu menu, MenuType 
     }
 
     using var memorystream = new MemoryStream(imageBytes);
-    using var filestream = new FileStream(Path.Combine(outputDir, $"{menu.Date.ToShortDateString()}_{type}.png"), FileMode.Create);
+    using var filestream = new FileStream(Path.Combine(outputDir, $"{menu.Date.ToShortDateString()}_{type}.jpg"), FileMode.Create);
     using var image = await Image.LoadAsync(memorystream);
 
     image.SaveAsPng(filestream);
