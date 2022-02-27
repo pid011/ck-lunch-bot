@@ -20,7 +20,7 @@ namespace CKLunchBot
     public class TweetFunction
     {
         // UTC
-        private const string BreakfastCron = "0 0 22 * * 0-4";
+        private const string BreakfastCron = "0 30 22 * * 0-4";
         private const string LunchCron = "0 0 2 * * 1-5";
         private const string DinnerCron = "0 0 7 * * 1-5";
 
