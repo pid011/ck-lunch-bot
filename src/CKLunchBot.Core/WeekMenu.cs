@@ -12,11 +12,11 @@ namespace CKLunchBot.Core;
 
 public record class WeekMenu : IReadOnlyCollection<TodayMenu>
 {
-    private readonly IList<TodayMenu> _dayMenus;
+    private readonly IReadOnlyCollection<TodayMenu> _dayMenus;
 
     public int Count => _dayMenus.Count;
 
-    private WeekMenu(IList<TodayMenu> dayMenus)
+    public WeekMenu(IReadOnlyCollection<TodayMenu> dayMenus)
     {
         _dayMenus = dayMenus;
     }

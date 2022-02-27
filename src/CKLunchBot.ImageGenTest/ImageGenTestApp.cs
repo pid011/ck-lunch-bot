@@ -11,7 +11,7 @@ var weekMenu = await WeekMenu.LoadAsync();
 Console.WriteLine(weekMenu.ToString());
 
 // var date = KST.Now.ToDateOnly();
-var date = new DateOnly(2022, 3, 2);
+var date = new DateOnly(2022, 3, 4);
 
 var todayMenu = weekMenu.Find(date);
 
@@ -50,7 +50,7 @@ static async Task SaveMenuImageAsync(string outputDir, TodayMenu menu, MenuType 
     }
 
     using var memorystream = new MemoryStream(imageBytes);
-    using var filestream = new FileStream(Path.Combine(outputDir, $"{menu.Date.ToShortDateString()}_{type}.png"), FileMode.Create);
+    using var filestream = new FileStream(Path.Combine(outputDir, $"{menu.Date.ToShortDateString()}_{type}.jpg"), FileMode.Create);
     using var image = await Image.LoadAsync(memorystream);
 
     image.SaveAsPng(filestream);

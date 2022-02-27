@@ -28,11 +28,32 @@ namespace CKLunchBot.Core.Tests
         }
 
         [TestMethod]
+        public void MenuInstanceTest()
+        {
+            var now = DateTime.Now;
+            var date = now.ToDateOnly();
+            var weekMenu = CreateTestWeekMenu(date);
+
+            Assert.IsNotNull(weekMenu.Find(date.AddDays(1)));
+        }
+
+        [TestMethod]
         public async Task MenuImageGenTest()
         {
             var now = DateTime.Now;
+            var date = now.ToDateOnly();
+            var weekMenu = CreateTestWeekMenu(date);
 
-            var menu = new TodayMenu(now.ToDateOnly())
+            foreach (var menu in weekMenu)
+            {
+                var imageBytes = await MenuImageGenerator.GenerateAsync(menu.Date, MenuType.Lunch, menu.Lunch);
+                Assert.IsNotNull(imageBytes);
+            }
+        }
+
+        private static WeekMenu CreateTestWeekMenu(DateOnly date)
+        {
+            var menu1 = new TodayMenu(date)
             {
                 Breakfast = new Menu(MenuType.Breakfast)
                 {
@@ -51,8 +72,16 @@ namespace CKLunchBot.Core.Tests
                 }
             };
 
-            var imageBytes = await MenuImageGenerator.GenerateAsync(menu.Date, MenuType.Lunch, menu.Lunch);
-            Assert.IsNotNull(imageBytes);
+            var menu2 = menu1 with
+            {
+                Date = date.AddDays(1),
+                Lunch = new Menu(MenuType.Breakfast)
+                {
+                    Menus = new[] { "aaa", "bbb" }
+                }
+            };
+
+            return new WeekMenu(new[] { menu1, menu2 });
         }
     }
 }

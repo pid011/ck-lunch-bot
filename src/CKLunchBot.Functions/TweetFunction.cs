@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0079
+#pragma warning disable IDE0079
 #pragma warning disable IDE0051
 
 using System;
@@ -59,11 +59,6 @@ public class TweetFunction
         {
             log.LogWarning(e.Message);
         }
-        catch (Exception e)
-        {
-            log.LogError(e.Message);
-            log.LogDebug(e.StackTrace);
-        }
         finally
         {
             log.LogInformation($"Next: {timer.Schedule.GetNextOccurrence(DateTime.Now)}");
@@ -122,15 +117,22 @@ public class TweetFunction
 
     private static TwitterClient GetTwitterClient(TwitterApiKeys keys)
     {
-        return new TwitterClient(keys.ConsumerApiKey, keys.ConsumerSecretKey, keys.AccessToken, keys.AccessTokenSecret);
+        var credentials = new TwitterCredentials
+        {
+            ConsumerKey = keys.ConsumerApiKey,
+            ConsumerSecret = keys.ConsumerSecretKey,
+            AccessToken = keys.AccessToken,
+            AccessTokenSecret = keys.AccessTokenSecret
+        };
+
+        return new TwitterClient(credentials);
     }
 
     private static string GetTweetText(DateOnly date, MenuType type)
     {
         return new StringBuilder()
-            .Append("🥪")
-            .Append(date.GetFormattedKoreanString())
-            .Append(" 오늘의 청강대 ")
+            .AppendLine($"[{date.GetFormattedKoreanString()}]")
+            .Append("🥪 오늘의 청강대 ")
             .Append(type switch
             {
                 MenuType.Breakfast => "아침",
