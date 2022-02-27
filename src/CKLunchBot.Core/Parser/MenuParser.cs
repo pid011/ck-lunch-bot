@@ -8,7 +8,7 @@ namespace CKLunchBot.Core.Parser;
 
 internal class MenuParser
 {
-    public static IList<TodayMenu> ParseAllDayMenu(HtmlDocument html)
+    public static IReadOnlyCollection<TodayMenu> ParseAllDayMenu(HtmlDocument html)
     {
         try
         {

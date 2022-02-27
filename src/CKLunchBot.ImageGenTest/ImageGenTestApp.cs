@@ -11,7 +11,7 @@ var weekMenu = await WeekMenu.LoadAsync();
 Console.WriteLine(weekMenu.ToString());
 
 // var date = KST.Now.ToDateOnly();
-var date = new DateOnly(2022, 3, 2);
+var date = new DateOnly(2022, 3, 4);
 
 var todayMenu = weekMenu.Find(date);
 
