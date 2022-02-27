@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace CKLunchBot;
+namespace CKLunchBot.Functions;
 
 [Serializable]
 public class ProcessFaildException : Exception
