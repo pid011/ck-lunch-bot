@@ -59,11 +59,6 @@ public class TweetFunction
         {
             log.LogWarning(e.Message);
         }
-        catch (Exception e)
-        {
-            log.LogError(e.Message);
-            log.LogDebug(e.StackTrace);
-        }
         finally
         {
             log.LogInformation($"Next: {timer.Schedule.GetNextOccurrence(DateTime.Now)}");
