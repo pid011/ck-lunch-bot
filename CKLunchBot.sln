@@ -20,7 +20,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.ImageGenTest", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Actions", "src\CKLunchBot.Actions\CKLunchBot.Actions.csproj", "{5B7CFD03-01E5-4615-92BD-DAF94D786953}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CKLunchBot", "src\CKLunchBot\CKLunchBot.csproj", "{588F6CC2-B161-4F07-84D1-AE6625819E2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Functions", "src\CKLunchBot\CKLunchBot.Functions.csproj", "{588F6CC2-B161-4F07-84D1-AE6625819E2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
