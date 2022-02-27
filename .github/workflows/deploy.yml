@@ -1,14 +1,14 @@
-name: ci
+name: App Deploy
 on:
   push:
     branches:
     - main
 env:
   AZURE_FUNCTIONAPP_NAME: cklunchbot
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: src/CKLunchBot/published
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: src/CKLunchBot.Functions/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
-  WORKING_DIRECTORY: src/CKLunchBot
+  WORKING_DIRECTORY: src/CKLunchBot.Functions
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

@@ -15,31 +15,46 @@ using Tweetinvi.Parameters;
 
 namespace CKLunchBot
 {
+    internal record TwitterApiKeys(string ConsumerApiKey, string ConsumerSecretKey, string AccessToken, string AccessTokenSecret);
+
     public class TweetFunction
     {
-        private record TwitterApiKeys(string ConsumerApiKey, string ConsumerSecretKey, string AccessToken, string AccessTokenSecret);
-
-        private const string Cron = "0 0 22,2,7 * * 0-5"; // UTC 시간 고려해서 SUN-FRI
-        // private const string TestCron = "0 */1 * * * *";
-
-        private const int BreakfastHour = 8;
-        private const int LunchHour = 11;
-        private const int DinnerHour = 16;
+        // UTC
+        private const string BreakfastCron = "0 30 22 * * 0-4";
+        private const string LunchCron = "0 0 2 * * 1-5";
+        private const string DinnerCron = "0 0 7 * * 1-5";
 
         private const string ConsumerApiKeyName = "TWITTER_CONSUMER_API_KEY";
         private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
         private const string AccessTokenName = "TWITTER_ACCESS_TOKEN";
         private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
 
-        [FunctionName("tweet")]
-        public static async Task Run([TimerTrigger(Cron)] TimerInfo timerInfo, ILogger log) // UTC
+        [FunctionName("TweetBreakfast")]
+        public static async Task TweetBreakfast([TimerTrigger(BreakfastCron)] TimerInfo timer, ILogger log)
+        {
+            await RunAsync(timer, log, MenuType.Breakfast);
+        }
+
+        [FunctionName("TweetLunch")]
+        public static async Task TweetLunch([TimerTrigger(LunchCron)] TimerInfo timer, ILogger log)
+        {
+            await RunAsync(timer, log, MenuType.Lunch);
+        }
+
+        [FunctionName("TweetDinner")]
+        public static async Task TweetDinner([TimerTrigger(DinnerCron)] TimerInfo timer, ILogger log)
+        {
+            await RunAsync(timer, log, MenuType.Dinner);
+        }
+
+        private static async Task RunAsync(TimerInfo timer, ILogger log, MenuType menuType)
         {
             var now = KST.Now;
             log.LogInformation($"Function started: {now} KST");
 
             try
             {
-                await ProcessAsync(log, now);
+                await ProcessAsync(log, now, menuType);
             }
             catch (ProcessFaildException e)
             {
@@ -52,11 +67,11 @@ namespace CKLunchBot
             }
             finally
             {
-                log.LogInformation($"Next: {timerInfo.Schedule.GetNextOccurrence(DateTime.Now)}");
+                log.LogInformation($"Next: {timer.Schedule.GetNextOccurrence(DateTime.Now)}");
             }
         }
 
-        private static async Task ProcessAsync(ILogger log, DateTime now)
+        private static async Task ProcessAsync(ILogger log, DateTime now, MenuType menuType)
         {
             var date = now.ToDateOnly();
 
@@ -67,20 +82,6 @@ namespace CKLunchBot
             var twitterApiKeys = new TwitterApiKeys(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
 
             log.LogInformation($"Successfully loaded Twitter API keys.");
-
-            MenuType? menuType = now.Hour switch
-            {
-                BreakfastHour => MenuType.Breakfast,
-                LunchHour => MenuType.Lunch,
-                DinnerHour => MenuType.Dinner,
-                _ => null
-            };
-
-            if (menuType is null)
-            {
-                throw new ProcessFaildException("Tweet function was executed at an unspecified time.");
-            }
-
             log.LogInformation($"Menu type = {menuType}");
 
             var weekMenu = await WeekMenu.LoadAsync();
@@ -90,7 +91,7 @@ namespace CKLunchBot
                 throw new ProcessFaildException($"Cannot found menu of day {now.Day}.");
             }
 
-            var menu = todayMenu[menuType.Value];
+            var menu = todayMenu[menuType];
             if (menu is null || menu.IsEmpty())
             {
                 throw new ProcessFaildException($"Cannot found menu of type {menuType}.");
@@ -100,7 +101,7 @@ namespace CKLunchBot
 
             log.LogDebug(Environment.CurrentDirectory);
             log.LogInformation("Generating image...");
-            var image = await MenuImageGenerator.GenerateAsync(date, menuType.Value, menu);
+            var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
 
             var twitterClient = GetTwitterClient(twitterApiKeys);
             log.LogInformation("Tweeting...");
@@ -108,7 +109,7 @@ namespace CKLunchBot
 #if DEBUG
             log.LogInformation("Cannot tweet because it's debug mode.");
 #else
-            var tweetText = GetTweetText(date, menuType.Value);
+            var tweetText = GetTweetText(date, menuType);
             var tweet = await PublishTweetAsync(twitterClient, tweetText, image);
             log.LogInformation($"Done! {tweet.Url}");
 #endif
@@ -133,9 +134,9 @@ namespace CKLunchBot
                 .Append(" 오늘의 청강대 ")
                 .Append(type switch
                 {
-                    MenuType.Breakfast => "아침🌄",
-                    MenuType.Lunch => "점심☀️",
-                    MenuType.Dinner => "저녁🌇",
+                    MenuType.Breakfast => "아침",
+                    MenuType.Lunch => "점심",
+                    MenuType.Dinner => "저녁",
                     _ => string.Empty
                 })
                 .Append(" 메뉴는...")
