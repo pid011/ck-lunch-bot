@@ -1,4 +1,4 @@
-#pragma warning disable IDE0079
+﻿#pragma warning disable IDE0079
 #pragma warning disable IDE0051
 
 using System;
@@ -19,7 +19,7 @@ namespace CKLunchBot
     {
         private record TwitterApiKeys(string ConsumerApiKey, string ConsumerSecretKey, string AccessToken, string AccessTokenSecret);
 
-        private const string Cron = "0 20 22,1,7 * * 0-5"; // UTC 시간 고려해서 SUN-FRI
+        private const string Cron = "0 0 22,2,7 * * 0-5"; // UTC 시간 고려해서 SUN-FRI
         // private const string TestCron = "0 */1 * * * *";
 
         private const int BreakfastHour = 8;
