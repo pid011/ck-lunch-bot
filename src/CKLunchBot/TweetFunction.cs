@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0079
+#pragma warning disable IDE0079
 #pragma warning disable IDE0051
 
 using System;
@@ -98,6 +98,7 @@ namespace CKLunchBot
 
             log.LogInformation(menu.ToString());
 
+            log.LogDebug(Environment.CurrentDirectory);
             log.LogInformation("Generating image...");
             var image = await MenuImageGenerator.GenerateAsync(date, menuType.Value, menu);
 

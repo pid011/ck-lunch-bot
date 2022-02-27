@@ -5,7 +5,7 @@ namespace CKLunchBot.Core.Drawing;
 
 internal static class AssetPath
 {
-    private static readonly string s_assetsPath = Path.Combine(AppContext.BaseDirectory, "Assets");
+    private static readonly string s_assetsPath = Path.Combine(Environment.CurrentDirectory, "Assets");
     private static readonly string s_fontsPath = Path.Combine(s_assetsPath, "Fonts");
     private static readonly string s_imagesPath = Path.Combine(s_assetsPath, "Images");
 
