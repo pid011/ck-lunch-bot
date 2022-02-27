@@ -1,8 +1,11 @@
-[![deploy](https://github.com/pid011/ck-lunch-bot/actions/workflows/ci-deploy.yml/badge.svg)](https://github.com/pid011/ck-lunch-bot/actions/workflows/ci-deploy.yml)
+[![App Deploy](https://github.com/pid011/ck-lunch-bot/actions/workflows/deploy.yml/badge.svg)](https://github.com/pid011/ck-lunch-bot/actions/workflows/deploy.yml)
+
 # ck-lunch-bot
 
-청강대 점심 메뉴 봇
+매 시간마다 청강대의 아침, 점심, 저녁 메뉴를 트윗합니다.
 
-## Requirements
+## Stacks
 
-.NET 6
+- C#
+- .NET
+- Azure Functions
