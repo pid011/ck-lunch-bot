@@ -2,7 +2,7 @@ name: ci
 on:
   push:
     branches:
-    - release
+    - main
 env:
   AZURE_FUNCTIONAPP_NAME: cklunchbot
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src/CKLunchBot/published
