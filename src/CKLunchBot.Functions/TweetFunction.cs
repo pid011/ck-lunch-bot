@@ -1,4 +1,4 @@
-#pragma warning disable IDE0079
+﻿#pragma warning disable IDE0079
 #pragma warning disable IDE0051
 
 using System;
@@ -83,7 +83,7 @@ public class TweetFunction
         log.LogInformation($"Successfully loaded Twitter API keys.");
         log.LogInformation($"Menu type = {menuType}");
 
-        log.LogInformation($"Getting target menus...");
+        log.LogInformation("Requesting menu list...");
 
         var weekMenu = await WeekMenu.LoadAsync();
         var todayMenu = weekMenu.Find(date);
@@ -105,11 +105,11 @@ public class TweetFunction
         var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
         log.LogInformation($"Image generated. length={image.Length}");
 
-        var twitterClient = GetTwitterClient(twitterApiKeys);
-        log.LogInformation("Tweeting...");
-
         var tweetText = GetTweetText(date, menuType);
         log.LogInformation($"tweet text: {tweetText}");
+
+        var twitterClient = GetTwitterClient(twitterApiKeys);
+        log.LogInformation("Tweeting...");
 
         // Azure Function 버그 찾기 위해 임시로 작성한 코드
         var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
@@ -163,21 +163,15 @@ public class TweetFunction
 
     private static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
     {
-        ITweet tweet;
-
         if (image is null)
         {
-            tweet = await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString()));
-        }
-        else
-        {
-            IMedia uploadedImage = await twitter.Upload.UploadTweetImageAsync(image);
-            tweet = await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString())
-            {
-                Medias = { uploadedImage }
-            });
+            return await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString()));
         }
 
-        return tweet;
+        IMedia uploadedImage = await twitter.Upload.UploadTweetImageAsync(image);
+        return await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString())
+        {
+            Medias = { uploadedImage }
+        });
     }
 }

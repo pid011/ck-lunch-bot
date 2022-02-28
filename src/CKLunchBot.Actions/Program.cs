@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Text;
@@ -32,131 +30,71 @@ internal class Program
 
         var rootCommand = new RootCommand
         {
-            new Argument<MenuType>("menuType"),
-            new Option<int>(new string[]{"--day"}, () => 0, "Day to get menu")
+            new Argument<MenuType>("menuType")
         };
 
-        rootCommand.Handler = CommandHandler.Create<MenuType, int>(Run);
+        rootCommand.Handler = CommandHandler.Create<MenuType>(RunAsync);
 
-        var result = await rootCommand.InvokeAsync(args).ConfigureAwait(false);
-
-        if (result == 0)
-        {
-            Log.Information("Action done.");
-        }
-        else
-        {
-            Log.Warning("Action faild.");
-        }
-
-        return result;
-    }
-
-    private static async Task<int> Run(MenuType menuType, int day)
-    {
-        var now = KST.Now;
-
-        Log.Information($"\nAction started time: {now} KST\n");
-
-        TwitterApiKeys? twitterKeys = null;
         try
         {
-            var consumerApiKey = GetEnvVariable(ConsumerApiKeyName);
-            var consumerSecretKey = GetEnvVariable(ConsumerSecretKeyName);
-            var accessToken = GetEnvVariable(AccessTokenName);
-            var accessTokenSecret = GetEnvVariable(AccessTokenSecretName);
-            twitterKeys = new TwitterApiKeys(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
+            return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            Log.Error(e.ToString());
             return 1;
         }
+    }
+
+    private static async Task<int> RunAsync(MenuType menuType)
+    {
+        var now = KST.Now;
+        var date = now.ToDateOnly();
+        Log.Information($"Action started time: {now} KST\n");
+
+        var consumerApiKey = GetEnvVariable(ConsumerApiKeyName);
+        var consumerSecretKey = GetEnvVariable(ConsumerSecretKeyName);
+        var accessToken = GetEnvVariable(AccessTokenName);
+        var accessTokenSecret = GetEnvVariable(AccessTokenSecretName);
+        var twitterApiKeys = new TwitterApiKeys(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
+        Log.Information($"Successfully loaded Twitter API keys.");
 
         Log.Information("Requesting menu list...");
+
         var weekMenu = await WeekMenu.LoadAsync();
-
-        Log.Debug($"Responsed menu list:\n{weekMenu}");
-
-        TodayMenu? todayMenu;
-
-        var date = now.ToDateOnly();
-        if (day is 0)
-        {
-            day = date.Day;
-            todayMenu = weekMenu.Find(date);
-        }
-        else
-        {
-            todayMenu = weekMenu.Find(date.AddDays(day - date.Day));
-        }
-
+        var todayMenu = weekMenu.Find(date);
         if (todayMenu is null)
         {
-            Log.Warning($"Cannot found menu of day {day}");
+            Log.Warning($"Cannot found menu of day {now.Day}.");
             return 0;
         }
-        Log.Debug($"Target menu:\n{todayMenu}");
 
-        var targetMenu = todayMenu![menuType];
-        if (targetMenu is null || targetMenu.IsEmpty())
+        var menu = todayMenu[menuType];
+        if (menu is null || menu.IsEmpty())
         {
-            Log.Warning($"{menuType}의 메뉴가 존재하지 않습니다.");
+            Log.Warning($"Cannot found menu of type {menuType}.");
             return 0;
         }
+
+        Log.Information(menu.ToString());
 
         Log.Information("Generating menu image...");
 
-        byte[] image;
-        try
-        {
-            image = await MenuImageGenerator.GenerateAsync(todayMenu.Date, menuType, targetMenu);
-        }
-        catch (MenuImageGenerateException e)
-        {
-            Log.Warning(e.Message);
-            return 1;
-        }
+        Log.Information("Generating image...");
+        var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
+        Log.Information($"Image generated. length={image.Length}");
 
-        Log.Information("Publishing tweet...");
-        var tweetText = new StringBuilder()
-            .Append(todayMenu.Date.GetFormattedKoreanString())
-            .Append(" 오늘의 청강대 ")
-            .Append(menuType switch
-            {
-                MenuType.Breakfast => "아침",
-                MenuType.Lunch => "점심",
-                MenuType.Dinner => "저녁",
-                _ => string.Empty
-            })
-            .Append(" 메뉴는!")
-            .ToString();
-        Log.Debug($"tweetText: {tweetText}");
-        TwitterClient twitter = await ConnectToTwitterAsync(twitterKeys);
+        var tweetText = GetTweetText(date, menuType);
+        Log.Information($"tweet text: {tweetText}");
+
+        var twitterClient = GetTwitterClient(twitterApiKeys);
+        Log.Information("Tweeting...");
 
 #if DEBUG
-        Log.Information("The bot didn't tweet because it's Debug mode.");
-#endif
-
-#if RELEASE
-        if (image is null)
-        {
-            Log.Error("Tweet image is null");
-            return 1;
-        }
-
-        try
-        {
-            ITweet tweet = await PublishTweetAsync(twitter, tweetText.ToString(), image);
-            Log.Information($"tweet: {tweet}");
-            Log.Information("Tweet publish completed.");
-        }
-        catch (Exception e)
-        {
-            Log.Error($"Faild to tweet menu.");
-            Log.Error($"{e}");
-            return 1;
-        }
+        Log.Information("Cannot tweet because it's debug mode.");
+#else
+        var tweet = await PublishTweetAsync(twitterClient, tweetText, image);
+        Log.Information($"Done! {tweet.Url}");
 #endif
 
         return 0;
@@ -168,36 +106,46 @@ internal class Program
             ?? throw new Exception($"Faild to get enviroment value name of {key}");
     }
 
-    public static async Task<TwitterClient> ConnectToTwitterAsync(TwitterApiKeys keys)
+    private static TwitterClient GetTwitterClient(TwitterApiKeys keys)
     {
-        var client = new TwitterClient(keys.ConsumerApiKey, keys.ConsumerSecretKey, keys.AccessToken, keys.AccessTokenSecret);
-        IAuthenticatedUser authenticatedUser = await client.Users.GetAuthenticatedUserAsync();
+        var credentials = new TwitterCredentials
+        {
+            ConsumerKey = keys.ConsumerApiKey,
+            ConsumerSecret = keys.ConsumerSecretKey,
+            AccessToken = keys.AccessToken,
+            AccessTokenSecret = keys.AccessTokenSecret
+        };
 
-        Log.Debug("------------ Bot information ------------");
-        Log.Debug($"Name: {authenticatedUser.Name} @{authenticatedUser.ScreenName}");
-        Log.Debug($"ID:   {authenticatedUser.Id}");
-        Log.Debug("-----------------------------------------");
+        return new TwitterClient(credentials);
+    }
 
-        return client;
+    private static string GetTweetText(DateOnly date, MenuType type)
+    {
+        return new StringBuilder()
+            .AppendLine($"[{date.GetFormattedKoreanString()}]")
+            .Append("🥪 오늘의 청강대 ")
+            .Append(type switch
+            {
+                MenuType.Breakfast => "아침",
+                MenuType.Lunch => "점심",
+                MenuType.Dinner => "저녁",
+                _ => string.Empty
+            })
+            .Append("메뉴는...")
+            .ToString();
     }
 
     public static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
     {
-        ITweet tweet;
-
         if (image is null)
         {
-            tweet = await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString()));
-        }
-        else
-        {
-            IMedia uploadedImage = await twitter.Upload.UploadTweetImageAsync(image);
-            tweet = await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString())
-            {
-                Medias = { uploadedImage }
-            });
+            return await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString()));
         }
 
-        return tweet;
+        IMedia uploadedImage = await twitter.Upload.UploadTweetImageAsync(image);
+        return await twitter.Tweets.PublishTweetAsync(new PublishTweetParameters(tweetText.ToString())
+        {
+            Medias = { uploadedImage }
+        });
     }
 }

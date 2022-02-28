@@ -29,13 +29,6 @@ public static class MenuImageGenerator
     private const string NoMenuProvidedText = "음... 없네요";
     private const string MenuPrefix = "-";
 
-    /// <summary>
-    /// Generate menu image
-    /// </summary>
-    /// <param name="menu"></param>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    /// <exception cref="MenuImageGenerateException"></exception>
     public static async Task<byte[]> GenerateAsync(DateOnly date, MenuType type, Menu menu)
     {
         using var drawingBoard = new DrawingBoard(AssetPath.MenuTemplateImage);
