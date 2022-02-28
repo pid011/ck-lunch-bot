@@ -18,8 +18,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.ImageGenTest", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Actions", "src\CKLunchBot.Actions\CKLunchBot.Actions.csproj", "{5B7CFD03-01E5-4615-92BD-DAF94D786953}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CKLunchBot.Functions", "src\CKLunchBot.Functions\CKLunchBot.Functions.csproj", "{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,18 +76,6 @@ Global
 		{5B7CFD03-01E5-4615-92BD-DAF94D786953}.Release|x64.Build.0 = Release|Any CPU
 		{5B7CFD03-01E5-4615-92BD-DAF94D786953}.Release|x86.ActiveCfg = Release|Any CPU
 		{5B7CFD03-01E5-4615-92BD-DAF94D786953}.Release|x86.Build.0 = Release|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Debug|x64.Build.0 = Debug|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Debug|x86.Build.0 = Debug|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Release|x64.ActiveCfg = Release|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Release|x64.Build.0 = Release|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Release|x86.ActiveCfg = Release|Any CPU
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,7 +85,6 @@ Global
 		{B6294F91-0280-437F-AEE2-093369DD88BA} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
 		{DACCCA22-570D-4019-96A1-9FD163813790} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
 		{5B7CFD03-01E5-4615-92BD-DAF94D786953} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
-		{DE1FC4B7-154E-4502-AF3F-9C40C8B50E9E} = {1ABB630C-7631-4109-8CFC-008FCE238FAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2371DCA4-17BA-4361-8ADE-E1862B69573A}
