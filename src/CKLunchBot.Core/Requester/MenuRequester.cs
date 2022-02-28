@@ -8,12 +8,10 @@ internal class MenuRequester
 {
     private const string MenuUrl = @"https://www.ck.ac.kr/univ-life/menu";
 
+    private static readonly HtmlWeb s_web = new();
+
     public async static Task<HtmlDocument> RequestMenuHtmlAsync(CancellationToken cancelToken = default)
     {
-        using var htmlStream = await WebClient.Client.GetStreamAsync(MenuUrl, cancelToken);
-        var html = new HtmlDocument();
-        html.Load(htmlStream);
-
-        return html;
+        return await s_web.LoadFromWebAsync(MenuUrl, cancelToken);
     }
 }
