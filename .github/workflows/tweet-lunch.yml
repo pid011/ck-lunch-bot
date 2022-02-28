@@ -41,4 +41,4 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
         run: |
           cd "${{ env.PUBLISH_PATH }}"
-          dotnet run ${{ env.DLL_NAME }} ${{ env.MENU_TYPE }}
+          dotnet "${{ env.DLL_NAME }}" ${{ env.MENU_TYPE }}
