@@ -90,7 +90,7 @@ internal class Program
 #if DEBUG
         Log.Information("Cannot tweet because it's debug mode.");
 #else
-        var tweet = await PublishTweetAsync(twitterClient, tweetText, image);
+        var tweet = await PublishTweetAsync(twitterClient, tweetMessage, image);
         Log.Information($"Done! {tweet.Url}");
 #endif
 
