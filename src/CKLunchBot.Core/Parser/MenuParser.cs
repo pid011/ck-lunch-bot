@@ -8,6 +8,16 @@ namespace CKLunchBot.Core.Parser;
 
 internal class MenuParser
 {
+    private static readonly string[] s_selfCornerTexts = { "샐프바", "셀프바", "샐프코너", "셀프코너" };
+
+    private static readonly Dictionary<string, bool> s_checks;
+
+    static MenuParser()
+    {
+        // 미리 딕셔너리로 캐싱해서 검색속도 향상
+        s_checks = new Dictionary<string, bool>(s_selfCornerTexts.ToDictionary(s => s, s => true));
+    }
+
     public static IReadOnlyCollection<TodayMenu> ParseAllDayMenu(HtmlDocument html)
     {
         try
@@ -59,7 +69,7 @@ internal class MenuParser
             .ToArray();
 
         static IReadOnlyCollection<string> ParseSelfBarText(HtmlNode node) => node.ChildNodes
-            .FirstOrDefault(node => node.Name is "샐프코너")?
+            .FirstOrDefault(node => s_checks.ContainsKey(node.Name))?
             .ChildNodes
             .Where(node => node.Name is "#text")
             .Select(node => node.InnerText)
