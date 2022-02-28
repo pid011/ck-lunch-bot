@@ -7,19 +7,16 @@ namespace CKLunchBot.Core.Requester;
 
 internal class MenuRequester
 {
-    private const string MenuUrl = @"https://www.ck.ac.kr/univ-life/menu";
+    private const string MenuUrl = @"http://www.ck.ac.kr/univ-life/menu";
 
-    private static readonly HttpClient s_client = new(new HttpClientHandler
-    {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-    });
+    private static readonly HttpClient s_client = new();
 
     public async static Task<HtmlDocument> RequestMenuHtmlAsync(CancellationToken cancelToken = default)
     {
-        var str = await s_client.GetStringAsync(MenuUrl, cancelToken);
+        using var stream = await s_client.GetStreamAsync(MenuUrl, cancelToken);
 
         var html = new HtmlDocument();
-        html.LoadHtml(str);
+        html.Load(stream);
 
         return html;
     }

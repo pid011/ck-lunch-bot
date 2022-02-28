@@ -2,6 +2,8 @@
 #pragma warning disable IDE0051
 
 using System;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using CKLunchBot.Core;
@@ -20,8 +22,11 @@ public class TweetFunction
 {
     // UTC
     private const string BreakfastCron = "0 30 22 * * 0-4";
-    private const string LunchCron = "0 0 2 * * 1-5";
+    // private const string LunchCron = "0 0 2 * * 1-5";
     private const string DinnerCron = "0 0 7 * * 1-5";
+
+    // Test
+    private const string LunchCron = "0 */2 * * * *";
 
     private const string ConsumerApiKeyName = "TWITTER_CONSUMER_API_KEY";
     private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
@@ -100,7 +105,22 @@ public class TweetFunction
 
         log.LogInformation(menu.ToString());
 
-        log.LogInformation(Environment.CurrentDirectory);
+        {
+            log.LogInformation(CKLunchBot.Core.Drawing.AssetPath.MenuTemplateImage);
+
+            log.LogInformation($"[Environment.CurrentDirectory] {Environment.CurrentDirectory}");
+            Array.ForEach(Directory.GetDirectories(Environment.CurrentDirectory), x => log.LogInformation(x));
+
+            log.LogInformation($"[Assembly.GetExecutingAssembly().Location] {Assembly.GetExecutingAssembly().Location}");
+            Array.ForEach(Directory.GetDirectories(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!), x => log.LogInformation(x));
+
+            log.LogInformation($"[AppDomain.CurrentDomain.BaseDirectory] {AppDomain.CurrentDomain.BaseDirectory}");
+            Array.ForEach(Directory.GetDirectories(AppDomain.CurrentDomain.BaseDirectory), x => log.LogInformation(x));
+        }
+
+
+
+
         log.LogInformation("Generating image...");
         var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
         log.LogInformation($"Image generated. length={image.Length}");
