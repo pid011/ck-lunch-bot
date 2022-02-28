@@ -78,17 +78,14 @@ internal class Program
 
         Log.Information(menu.ToString());
 
-        Log.Information("Generating menu image...");
-
         Log.Information("Generating image...");
         var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
         Log.Information($"Image generated. length={image.Length}");
 
-        var tweetText = GetTweetText(date, menuType);
-        Log.Information($"tweet text:\n{tweetText}");
-
         var twitterClient = GetTwitterClient(twitterApiKeys);
         Log.Information("Tweeting...");
+        var tweetMessage = GetMenuTweetText(date, menuType);
+        Log.Information($"\n- tweet message -\n{tweetMessage}\n- tweet message -");
 
 #if DEBUG
         Log.Information("Cannot tweet because it's debug mode.");
@@ -119,7 +116,7 @@ internal class Program
         return new TwitterClient(credentials);
     }
 
-    private static string GetTweetText(DateOnly date, MenuType type)
+    private static string GetMenuTweetText(DateOnly date, MenuType type)
     {
         return new StringBuilder()
             .AppendLine($"[{date.GetFormattedKoreanString()}]")
