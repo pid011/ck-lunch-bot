@@ -59,6 +59,11 @@ public class TweetFunction
         {
             log.LogWarning(e.Message);
         }
+        catch (Exception e)
+        {
+            log.LogError(e.ToString());
+            log.LogTrace(e, "Function running faild!");
+        }
         finally
         {
             log.LogInformation($"Next: {timer.Schedule.GetNextOccurrence(DateTime.Now)}");
@@ -78,6 +83,8 @@ public class TweetFunction
         log.LogInformation($"Successfully loaded Twitter API keys.");
         log.LogInformation($"Menu type = {menuType}");
 
+        log.LogInformation($"Getting target menus...");
+
         var weekMenu = await WeekMenu.LoadAsync();
         var todayMenu = weekMenu.Find(date);
         if (todayMenu is null)
@@ -93,13 +100,22 @@ public class TweetFunction
 
         log.LogInformation(menu.ToString());
 
-        log.LogDebug(Environment.CurrentDirectory);
+        log.LogInformation(Environment.CurrentDirectory);
         log.LogInformation("Generating image...");
         var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
+        log.LogInformation($"Image generated. length={image.Length}");
 
         var twitterClient = GetTwitterClient(twitterApiKeys);
         log.LogInformation("Tweeting...");
 
+        var tweetText = GetTweetText(date, menuType);
+        log.LogInformation($"tweet text: {tweetText}");
+
+        // Azure Function 버그 찾기 위해 임시로 작성한 코드
+        var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
+        log.LogInformation($"Twitter API Test succeed: {authenticatedUser.ScreenName}");
+
+        /*
 #if DEBUG
         log.LogInformation("Cannot tweet because it's debug mode.");
 #else
@@ -107,6 +123,7 @@ public class TweetFunction
         var tweet = await PublishTweetAsync(twitterClient, tweetText, image);
         log.LogInformation($"Done! {tweet.Url}");
 #endif
+        */
     }
 
     private static string GetEnvVariable(string key)
