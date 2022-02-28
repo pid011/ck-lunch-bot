@@ -85,7 +85,7 @@ internal class Program
         Log.Information($"Image generated. length={image.Length}");
 
         var tweetText = GetTweetText(date, menuType);
-        Log.Information($"tweet text: {tweetText}");
+        Log.Information($"tweet text:\n{tweetText}");
 
         var twitterClient = GetTwitterClient(twitterApiKeys);
         Log.Information("Tweeting...");
