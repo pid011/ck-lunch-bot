@@ -4,6 +4,14 @@ on:
   schedule:
     - cron: '45 1 * * 1-5' # KST 11:00
 
+env:
+  MENU_TYPE: lunch
+
+  DLL_NAME: CKLunchBot.Actions.dll
+  PUBLISH_PATH: src/CKLunchBot.Actions/published
+  CONFIGURATION: Release
+  DOTNET_VERSION: 6.0.x
+  WORKING_DIRECTORY: src/CKLunchBot.Actions
 jobs:
   tweet:
     runs-on: ubuntu-latest
@@ -14,13 +22,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
 
       - name: Build
-        run: dotnet build ./src/CKLunchBot.Actions --no-restore -c Release
+        run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Publish
+        run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.PUBLISH_PATH }}"
 
       - name: Run
         env:
@@ -28,4 +39,6 @@ jobs:
           TWITTER_CONSUMER_SECRET_KEY: ${{ secrets.TWITTER_CONSUMER_SECRET_KEY }}
           TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-        run: dotnet run --project ./src/CKLunchBot.Actions -c Release --no-build -- lunch
+        run: |
+          cd "${{ env.PUBLISH_PATH }}"
+          dotnet run ${{ env.DLL_NAME }} ${{ env.MENU_TYPE }}
