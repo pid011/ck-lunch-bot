@@ -1,13 +1,9 @@
-﻿#pragma warning disable IDE0079
-#pragma warning disable IDE0051
+﻿#pragma warning disable IDE0005 // Using directive is unnecessary.
 
 using System;
-using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using CKLunchBot.Core;
-using CKLunchBot.Core.Drawing;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Tweetinvi;
@@ -21,9 +17,9 @@ internal record TwitterApiKeys(string ConsumerApiKey, string ConsumerSecretKey, 
 public class TweetFunction
 {
     // UTC
-    private const string BreakfastCron = "0 30 22 * * 0-4";
-    // private const string LunchCron = "0 0 2 * * 1-5";
-    private const string DinnerCron = "0 0 7 * * 1-5";
+    private const string BreakfastCron = "0 00 22 * * 0-4"; // 07:00
+    // private const string LunchCron = "0 0 2 * * 1-5"; // 11:00
+    private const string DinnerCron = "0 0 7 * * 1-5"; // 16:00
 
     // Test
     private const string LunchCron = "0 */2 * * * *";
@@ -32,6 +28,8 @@ public class TweetFunction
     private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
     private const string AccessTokenName = "TWITTER_ACCESS_TOKEN";
     private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
+
+    private const string MenuTextSperator = ", ";
 
     [FunctionName("TweetBreakfast")]
     public static async Task TweetBreakfast([TimerTrigger(BreakfastCron)] TimerInfo timer, ILogger log)
@@ -105,7 +103,7 @@ public class TweetFunction
 
         log.LogInformation(menu.ToString());
 
-        var tweetText = GetTweetText(date, menuType);
+        var tweetText = MakeTweetText(date, menuType, menu);
 
         log.LogInformation("===============================");
         log.LogInformation(tweetText);
@@ -114,9 +112,9 @@ public class TweetFunction
         var twitterClient = GetTwitterClient(twitterApiKeys);
         log.LogInformation("Tweeting...");
 
-        // Azure Function 버그 찾기 위해 임시로 작성한 코드
+        // Test
         var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
-        log.LogInformation($"Twitter API Test succeed: {authenticatedUser.ScreenName}");
+        log.LogInformation($"Bot information: {authenticatedUser.Name}@{authenticatedUser.ScreenName}");
 
         /*
 #if DEBUG
@@ -148,9 +146,9 @@ public class TweetFunction
         return new TwitterClient(credentials);
     }
 
-    private static string GetTweetText(DateOnly date, MenuType type)
+    private static string MakeTweetText(DateOnly date, MenuType type, Menu menu)
     {
-        return new StringBuilder()
+        var builder = new StringBuilder()
             .AppendLine($"[{date.GetFormattedKoreanString()}]")
             .Append("🥪 오늘의 청강대 ")
             .Append(type switch
@@ -160,10 +158,23 @@ public class TweetFunction
                 MenuType.Dinner => "저녁",
                 _ => string.Empty
             })
-            .Append(" 메뉴는...")
-            .ToString();
+            .AppendLine(" 메뉴는")
+            .AppendLine()
+            .AppendJoin(MenuTextSperator, menu.Menus);
+
+        if (menu.SelfCorner.Count > 0)
+        {
+            builder
+                .AppendLine()
+                .AppendLine()
+                .AppendLine("<셀프코너>")
+                .AppendJoin(MenuTextSperator, menu.SelfCorner);
+        }
+
+        return builder.ToString();
     }
 
+#if !DEBUG
     private static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
     {
         if (image is null)
@@ -177,4 +188,5 @@ public class TweetFunction
             Medias = { uploadedImage }
         });
     }
+#endif
 }
