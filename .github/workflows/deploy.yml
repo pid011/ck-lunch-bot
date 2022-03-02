@@ -5,13 +5,13 @@ on:
     - main
 env:
   AZURE_FUNCTIONAPP_NAME: cklunchbot
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: src/CKLunchBot/published
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: src\CKLunchBot\published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
-  WORKING_DIRECTORY: src/CKLunchBot
+  WORKING_DIRECTORY: src\CKLunchBot
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@master
     - name: Setup .NET Core

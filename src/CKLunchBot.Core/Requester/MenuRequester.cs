@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -7,7 +8,7 @@ namespace CKLunchBot.Core.Requester;
 
 internal class MenuRequester
 {
-    private const string MenuUrl = @"http://www.ck.ac.kr/univ-life/menu";
+    private const string MenuUrl = @"https://www.ck.ac.kr/univ-life/menu";
 
     private static readonly HttpClient s_client = new();
 

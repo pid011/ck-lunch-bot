@@ -18,11 +18,11 @@ public class TweetFunction
 {
     // UTC
     private const string BreakfastCron = "0 00 22 * * 0-4"; // 07:00
-    // private const string LunchCron = "0 0 2 * * 1-5"; // 11:00
+    private const string LunchCron = "0 0 2 * * 1-5"; // 11:00
     private const string DinnerCron = "0 0 7 * * 1-5"; // 16:00
 
     // Test
-    private const string LunchCron = "0 */2 * * * *";
+    // private const string LunchCron = "0 */2 * * * *";
 
     private const string ConsumerApiKeyName = "TWITTER_CONSUMER_API_KEY";
     private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
@@ -116,15 +116,12 @@ public class TweetFunction
         var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
         log.LogInformation($"Bot information: {authenticatedUser.Name}@{authenticatedUser.ScreenName}");
 
-        /*
 #if DEBUG
         log.LogInformation("Cannot tweet because it's debug mode.");
 #else
-        var tweetText = GetTweetText(date, menuType);
-        var tweet = await PublishTweetAsync(twitterClient, tweetText, image);
+        var tweet = await PublishTweetAsync(twitterClient, tweetText);
         log.LogInformation($"Done! {tweet.Url}");
 #endif
-        */
     }
 
     private static string GetEnvVariable(string key)
