@@ -7,11 +7,12 @@ namespace CKLunchBot.Core;
 public record class Menu(MenuType Type)
 {
     public IReadOnlyCollection<string> Menus { get; init; } = Array.Empty<string>();
-    public IReadOnlyCollection<string> SelfCorner { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> SpecialMenus { get; init; } = Array.Empty<string>();
+    public string SpecialTitle { get; init; } = string.Empty;
 
     public bool IsEmpty()
     {
-        return Menus.Count is 0 && SelfCorner.Count is 0;
+        return Menus.Count is 0 && SpecialMenus.Count is 0;
     }
 
     public override string ToString()
@@ -21,7 +22,7 @@ public record class Menu(MenuType Type)
 
         MakeString(nameof(Menus), Menus);
         builder.AppendLine();
-        MakeString(nameof(SelfCorner), SelfCorner);
+        MakeString(SpecialTitle, SpecialMenus);
 
         return builder.ToString();
 

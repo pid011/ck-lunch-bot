@@ -1,5 +1,3 @@
-﻿#pragma warning disable IDE0005 // Using directive is unnecessary.
-
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +6,10 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Tweetinvi;
 using Tweetinvi.Models;
+
+#if RELEASE
 using Tweetinvi.Parameters;
+#endif
 
 namespace CKLunchBot.Functions;
 
@@ -159,19 +160,19 @@ public class TweetFunction
             .AppendLine()
             .AppendJoin(MenuTextSperator, menu.Menus);
 
-        if (menu.SelfCorner.Count > 0)
+        if (menu.SpecialMenus.Count > 0)
         {
             builder
                 .AppendLine()
                 .AppendLine()
-                .AppendLine("<셀프코너>")
-                .AppendJoin(MenuTextSperator, menu.SelfCorner);
+                .AppendLine($"<{menu.SpecialTitle}>")
+                .AppendJoin(MenuTextSperator, menu.SpecialMenus);
         }
 
         return builder.ToString();
     }
 
-#if !DEBUG
+#if RELEASE
     private static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
     {
         if (image is null)

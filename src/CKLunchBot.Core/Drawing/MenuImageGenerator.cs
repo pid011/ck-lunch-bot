@@ -73,12 +73,12 @@ public static class MenuImageGenerator
 
         contentPos = GetNextLinePos(contentPos);
 
-        if (menu.SelfCorner.Count > 0)
+        if (menu.SpecialMenus.Count > 0)
         {
             drawingBoard.DrawText(titleFont, BaseBrushes.Black, contentPos, "<셀프코너>");
             contentPos.Y += SubTitleContentInterval;
 
-            contentPos = DrawMenus(drawingBoard, subTitleFont, menu.SelfCorner, contentPos);
+            contentPos = DrawMenus(drawingBoard, subTitleFont, menu.SpecialMenus, contentPos);
         }
 
         return await drawingBoard.Mutate().ExportAsJpegAsync(quality: 95);
