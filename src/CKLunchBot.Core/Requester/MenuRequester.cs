@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -12,7 +11,7 @@ internal class MenuRequester
 
     private static readonly HttpClient s_client = new();
 
-    public async static Task<HtmlDocument> RequestMenuHtmlAsync(CancellationToken cancelToken = default)
+    public static async Task<HtmlDocument> RequestMenuHtmlAsync(CancellationToken cancelToken = default)
     {
         using var stream = await s_client.GetStreamAsync(MenuUrl, cancelToken);
 

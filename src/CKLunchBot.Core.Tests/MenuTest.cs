@@ -58,17 +58,17 @@ namespace CKLunchBot.Core.Tests
                 Breakfast = new Menu(MenuType.Breakfast)
                 {
                     Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
-                    SelfCorner = new[] { "aaa", "bbb", "ccc", "dddd" }
+                    SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
                 },
                 Lunch = new Menu(MenuType.Breakfast)
                 {
                     Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
-                    SelfCorner = new[] { "aaa", "bbb", "ccc", "dddd" }
+                    SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
                 },
                 Dinner = new Menu(MenuType.Breakfast)
                 {
                     Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
-                    SelfCorner = new[] { "aaa", "bbb", "ccc", "dddd" }
+                    SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
                 }
             };
 

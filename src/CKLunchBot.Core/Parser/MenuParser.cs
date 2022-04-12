@@ -8,14 +8,17 @@ namespace CKLunchBot.Core.Parser;
 
 internal class MenuParser
 {
-    private static readonly string[] s_selfCornerTexts = { "샐프바", "셀프바", "샐프코너", "셀프코너" };
+    private static readonly string[] s_specialMenuTitles =
+    {
+        "샐프바", "셀프바", "샐프코너", "셀프코너", "단품메뉴", "단품 메뉴"
+    };
 
     private static readonly Dictionary<string, bool> s_checks;
 
     static MenuParser()
     {
         // 미리 딕셔너리로 캐싱해서 검색속도 향상
-        s_checks = new Dictionary<string, bool>(s_selfCornerTexts.ToDictionary(s => s, s => true));
+        s_checks = new Dictionary<string, bool>(s_specialMenuTitles.ToDictionary(s => s, s => true));
     }
 
     public static IReadOnlyCollection<TodayMenu> ParseAllDayMenu(HtmlDocument html)
@@ -57,10 +60,14 @@ internal class MenuParser
 
     private static Menu ParseMenu(MenuType type, HtmlNode node)
     {
+        var menus = ParseMenuText(node);
+        var (specialMenuName, specialMenus) = ParseSpecialMenuText(node);
+
         return new Menu(type)
         {
             Menus = ParseMenuText(node),
-            SelfCorner = ParseSelfBarText(node),
+            SpecialTitle = specialMenuName,
+            SpecialMenus = specialMenus
         };
 
         static IReadOnlyCollection<string> ParseMenuText(HtmlNode node) => node.ChildNodes
@@ -68,13 +75,22 @@ internal class MenuParser
             .Select(node => node.InnerText)
             .ToArray();
 
-        static IReadOnlyCollection<string> ParseSelfBarText(HtmlNode node) => node.ChildNodes
-            .FirstOrDefault(node => s_checks.ContainsKey(node.Name))?
-            .ChildNodes
-            .Where(node => node.Name is "#text")
-            .Select(node => node.InnerText)
-            .ToArray()
-            ?? Array.Empty<string>();
+        static (string Name, IReadOnlyCollection<string> Texts) ParseSpecialMenuText(HtmlNode node)
+        {
+            var specialMenuNode = node.ChildNodes.FirstOrDefault(node => s_checks.ContainsKey(node.Name));
+            if (specialMenuNode is null)
+            {
+                return (string.Empty, Array.Empty<string>());
+            }
+
+            var name = specialMenuNode.Name;
+            var texts = specialMenuNode.ChildNodes
+                .Where(node => node.Name is "#text")
+                .Select(node => node.InnerText)
+                .ToArray();
+
+            return (name, texts);
+        }
     }
 
     private static DateOnly ParseDateText(string dateText)
