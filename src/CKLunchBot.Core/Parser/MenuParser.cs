@@ -31,8 +31,8 @@ internal class MenuParser
             var weekMenu = new List<TodayMenu>();
             foreach (var todayMenuRaw in weekMenuRaw)
             {
-                var dateString = todayMenu.SelectSingleNode(@"./th").InnerText;
-                var menus = todayMenu.SelectNodes(@"./td");
+                var dateString = todayMenuRaw.SelectSingleNode(@"./th").InnerText;
+                var menus = todayMenuRaw.SelectNodes(@"./td");
                     // Need refactoring
                 var breakfast = menu[0];
                 var lunch = menu[1];
