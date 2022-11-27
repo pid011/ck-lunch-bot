@@ -34,9 +34,9 @@ internal class MenuParser
                 var dateString = todayMenuRaw.SelectSingleNode(@"./th").InnerText;
                 var menus = todayMenuRaw.SelectNodes(@"./td");
                     // Need refactoring
-                var breakfast = menu[0];
-                var lunch = menu[1];
-                var dinner = menu[2];
+                var breakfast = menus[0];
+                var lunch = menus[1];
+                var dinner = menus[2];
                 
                 var date = ParseDateText(dateString);
                 var todayMenu = new TodayMenu(date)
