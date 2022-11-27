@@ -25,10 +25,29 @@ internal class MenuParser
     {
         try
         {
-            var table = html.DocumentNode.SelectSingleNode(@"//table[@id='user-table']");
-
-            var dates = table.SelectNodes(@"./tr/th").Skip(1).GetEnumerator();
-            var menus = table.SelectNodes(@"./tbody/tr");
+            //var table = html.DocumentNode.SelectSingleNode(@"//table[@id='user-table']");
+            //var dates = table.SelectNodes(@"./tr/th").Skip(1).GetEnumerator();
+            var weekMenuRaw = html.DocumentNode.SelectNodes(@"//*[@id='user-table']/tbody[2]/tr");
+            var weekMenu = new List<TodayMenu>();
+            foreach (var todayMenuRaw in weekMenuRaw)
+            {
+                var dateString = todayMenu.SelectSingleNode(@"./th").InnerText;
+                var menus = todayMenu.SelectNodes(@"./td").
+                    // Need refactoring
+                var breakfast = menu[0];
+                var lunch = menu[1];
+                var dinner = menu[2];
+                
+                var date = ParseDateText(dateString);
+                var todayMenu = new TodayMenu(date)
+                {
+                    Breakfast = breakfast ? ParseMenu(MenuType.Breakfast, breakfast) : new Menu(MenuType.Breakfast),
+                    Lunch = lunch ? ParseMenu(MenuType.Lunch, lunch) : new Menu(MenuType.Lunch),
+                    Dinner = dinner ? ParseMenu(MenuType.Dinner, dinner) : new Menu(MenuType.Dinner),
+                };
+                weekMenu.Add(todayMenu);
+            }
+            /*
             var breakfasts = menus[0].Elements("td").GetEnumerator();
             var lunchs = menus[1].Elements("td").GetEnumerator();
             var dinners = menus[2].Elements("td").GetEnumerator();
@@ -49,6 +68,7 @@ internal class MenuParser
                 };
                 weekMenu.Add(todayMenu);
             }
+            */
 
             return weekMenu;
         }
@@ -65,7 +85,7 @@ internal class MenuParser
 
         return new Menu(type)
         {
-            Menus = ParseMenuText(node),
+            Menus = menus,
             SpecialTitle = specialMenuName,
             SpecialMenus = specialMenus
         };
