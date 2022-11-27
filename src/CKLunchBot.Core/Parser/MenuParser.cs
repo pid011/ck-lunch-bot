@@ -25,9 +25,9 @@ internal class MenuParser
     {
         try
         {
-            //var table = html.DocumentNode.SelectSingleNode(@"//table[@id='user-table']");
+            var table = html.DocumentNode.SelectSingleNode(@"//table[@id='user-table']/tbody[2]");
             //var dates = table.SelectNodes(@"./tr/th").Skip(1).GetEnumerator();
-            var weekMenuRaw = html.DocumentNode.SelectNodes(@"//*[@id='user-table']/tbody[2]/tr");
+            var weekMenuRaw = table.SelectNodes(@"./tr");
             var weekMenu = new List<TodayMenu>();
             foreach (var todayMenuRaw in weekMenuRaw)
             {
