@@ -31,12 +31,14 @@ public class TweetFunction
     private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
 
     private const string MenuTextSperator = ", ";
-
+    
+    /*
     [FunctionName("TweetBreakfast")]
     public static async Task TweetBreakfast([TimerTrigger(BreakfastCron)] TimerInfo timer, ILogger log)
     {
         await RunAsync(timer, log, MenuType.Breakfast);
     }
+    */
 
     [FunctionName("TweetLunch")]
     public static async Task TweetLunch([TimerTrigger(LunchCron)] TimerInfo timer, ILogger log)
