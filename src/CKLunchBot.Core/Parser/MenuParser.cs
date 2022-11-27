@@ -41,9 +41,9 @@ internal class MenuParser
                 var date = ParseDateText(dateString);
                 var todayMenu = new TodayMenu(date)
                 {
-                    Breakfast = breakfast ? ParseMenu(MenuType.Breakfast, breakfast) : new Menu(MenuType.Breakfast),
-                    Lunch = lunch ? ParseMenu(MenuType.Lunch, lunch) : new Menu(MenuType.Lunch),
-                    Dinner = dinner ? ParseMenu(MenuType.Dinner, dinner) : new Menu(MenuType.Dinner),
+                    Breakfast = breakfast != null ? ParseMenu(MenuType.Breakfast, breakfast) : new Menu(MenuType.Breakfast),
+                    Lunch = lunch != null ? ParseMenu(MenuType.Lunch, lunch) : new Menu(MenuType.Lunch),
+                    Dinner = dinner != null ? ParseMenu(MenuType.Dinner, dinner) : new Menu(MenuType.Dinner),
                 };
                 weekMenu.Add(todayMenu);
             }
