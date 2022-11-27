@@ -32,7 +32,7 @@ internal class MenuParser
             foreach (var todayMenuRaw in weekMenuRaw)
             {
                 var dateString = todayMenu.SelectSingleNode(@"./th").InnerText;
-                var menus = todayMenu.SelectNodes(@"./td").
+                var menus = todayMenu.SelectNodes(@"./td");
                     // Need refactoring
                 var breakfast = menu[0];
                 var lunch = menu[1];
