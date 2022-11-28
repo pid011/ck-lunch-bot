@@ -19,7 +19,7 @@ public class TweetFunction
 {
     // UTC
     private const string BreakfastCron = "0 00 22 * * 0-4"; // 07:00
-    private const string LunchCron = "0 0 2 * * 1-5"; // 11:00
+    private const string LunchCron = "0 0 1 * * 1-5"; // 10:00
     private const string DinnerCron = "0 0 7 * * 1-5"; // 16:00
 
     // Test
