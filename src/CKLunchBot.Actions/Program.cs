@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Text;
 using System.Threading.Tasks;
+
 using CKLunchBot.Core;
 using CKLunchBot.Core.Drawing;
+
 using Serilog;
+
 using Tweetinvi;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
@@ -28,12 +30,12 @@ internal class Program
             .WriteTo.Console()
             .CreateLogger();
 
-        var rootCommand = new RootCommand
-        {
-            new Argument<MenuType>("menuType")
-        };
+        var menuTypeArg = new Argument<MenuType>("menuType");
 
-        rootCommand.Handler = CommandHandler.Create<MenuType>(RunAsync);
+        var rootCommand = new RootCommand();
+        rootCommand.AddArgument(menuTypeArg);
+
+        rootCommand.SetHandler(RunAsync, menuTypeArg);
 
         try
         {
@@ -46,7 +48,7 @@ internal class Program
         }
     }
 
-    private static async Task<int> RunAsync(MenuType menuType)
+    private static async Task RunAsync(MenuType menuType)
     {
         var now = KST.Now;
         var date = now.ToDateOnly();
@@ -66,14 +68,14 @@ internal class Program
         if (todayMenu is null)
         {
             Log.Warning($"Cannot found menu of day {now.Day}.");
-            return 0;
+            return;
         }
 
         var menu = todayMenu[menuType];
         if (menu is null || menu.IsEmpty())
         {
             Log.Warning($"Cannot found menu of type {menuType}.");
-            return 0;
+            return;
         }
 
         Log.Information(menu.ToString());
@@ -94,7 +96,7 @@ internal class Program
         Log.Information($"Done! {tweet.Url}");
 #endif
 
-        return 0;
+        return;
     }
 
     private static string GetEnvVariable(string key)
