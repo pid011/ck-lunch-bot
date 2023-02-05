@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using HtmlAgilityPack;
 
 namespace CKLunchBot.Core.Parser;
@@ -33,11 +34,11 @@ internal class MenuParser
             {
                 var dateString = todayMenuRaw.SelectSingleNode(@"./th").InnerText;
                 var menus = todayMenuRaw.SelectNodes(@"./td");
-                    // Need refactoring
+                // Need refactoring
                 var breakfast = menus[0];
                 var lunch = menus[1];
                 var dinner = menus[2];
-                
+
                 var date = ParseDateText(dateString);
                 var todayMenu = new TodayMenu(date)
                 {
