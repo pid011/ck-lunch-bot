@@ -1,9 +1,12 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+
 using CKLunchBot.Core;
+
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+
 using Tweetinvi;
 using Tweetinvi.Models;
 
@@ -18,7 +21,7 @@ internal record TwitterApiKeys(string ConsumerApiKey, string ConsumerSecretKey, 
 public class TweetFunction
 {
     // UTC
-    private const string BreakfastCron = "0 00 22 * * 0-4"; // 07:00
+    // private const string BreakfastCron = "0 00 22 * * 0-4"; // 07:00
     private const string LunchCron = "0 0 1 * * 1-5"; // 10:00
     private const string DinnerCron = "0 0 7 * * 1-5"; // 16:00
 
@@ -31,7 +34,7 @@ public class TweetFunction
     private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
 
     private const string MenuTextSperator = ", ";
-    
+
     /*
     [FunctionName("TweetBreakfast")]
     public static async Task TweetBreakfast([TimerTrigger(BreakfastCron)] TimerInfo timer, ILogger log)
