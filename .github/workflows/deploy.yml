@@ -11,7 +11,7 @@ env:
   WORKING_DIRECTORY: src\CKLunchBot
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -26,7 +26,7 @@ jobs:
       uses: Azure/functions-action@v1
       id: fa
       with:
-        app-name: 'cklunchbot8'
+        app-name: 'cklunchbot9'
         slot-name: 'production'
         publish-profile: ${{ secrets.FUNCTIONS_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
