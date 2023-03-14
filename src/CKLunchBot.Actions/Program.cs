@@ -4,13 +4,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CKLunchBot.Core;
-using CKLunchBot.Core.Drawing;
 
 using Serilog;
 
 using Tweetinvi;
 using Tweetinvi.Models;
+
+#if RELEASE
 using Tweetinvi.Parameters;
+#endif
 
 namespace CKLunchBot.Actions;
 
@@ -80,23 +82,26 @@ internal class Program
 
         Log.Information(menu.ToString());
 
-        Log.Information("Generating image...");
-        var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
-        Log.Information($"Image generated. length={image.Length}");
-
+        var tweetText = MakeTweetText(date, menuType, menu);
+        
+        Log.Information("===============================");
+        Log.Information(tweetText);
+        Log.Information("===============================");
+        
         var twitterClient = GetTwitterClient(twitterApiKeys);
         Log.Information("Tweeting...");
-        var tweetMessage = GetMenuTweetText(date, menuType);
-        Log.Information($"\n- tweet message -\n{tweetMessage}\n- tweet message -");
+
+        var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
+        Log.Information($"Bot information: {authenticatedUser.Name}@{authenticatedUser.ScreenName}");
+
+        Log.Information($"\n- tweet message -\n{tweetText}\n- tweet message -");
 
 #if DEBUG
         Log.Information("Cannot tweet because it's debug mode.");
 #else
-        var tweet = await PublishTweetAsync(twitterClient, tweetMessage, image);
+        var tweet = await PublishTweetAsync(twitterClient, tweetMessage);
         Log.Information($"Done! {tweet.Url}");
 #endif
-
-        return;
     }
 
     private static string GetEnvVariable(string key)
