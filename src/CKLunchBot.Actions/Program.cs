@@ -120,7 +120,7 @@ internal class Program
 
     private static string GetMenuTweetText(DateOnly date, MenuType type)
     {
-        return new StringBuilder()
+        var builder = new StringBuilder()
             .AppendLine($"[{date.GetFormattedKoreanString()}]")
             .Append("🥪 오늘의 청강대 ")
             .Append(type switch
@@ -130,8 +130,20 @@ internal class Program
                 MenuType.Dinner => "저녁",
                 _ => string.Empty
             })
-            .Append("메뉴는...")
-            .ToString();
+            .AppendLine(" 메뉴는")
+            .AppendLine()
+            .AppendJoin(MenuTextSperator, menu.Menus);
+
+        if (menu.SpecialMenus.Count > 0)
+        {
+            builder
+                .AppendLine()
+                .AppendLine()
+                .AppendLine($"<{menu.SpecialTitle}>")
+                .AppendJoin(MenuTextSperator, menu.SpecialMenus);
+        }
+
+        return builder.ToString();
     }
 
     public static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
