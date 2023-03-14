@@ -4,13 +4,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CKLunchBot.Core;
-using CKLunchBot.Core.Drawing;
 
 using Serilog;
 
 using Tweetinvi;
 using Tweetinvi.Models;
+
+#if RELEASE
 using Tweetinvi.Parameters;
+#endif
 
 namespace CKLunchBot.Actions;
 
@@ -22,6 +24,8 @@ internal class Program
     private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
     private const string AccessTokenName = "TWITTER_ACCESS_TOKEN";
     private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
+
+    private const string MenuTextSperator = ", ";
 
     private static async Task<int> Main(string[] args)
     {
@@ -80,23 +84,26 @@ internal class Program
 
         Log.Information(menu.ToString());
 
-        Log.Information("Generating image...");
-        var image = await MenuImageGenerator.GenerateAsync(date, menuType, menu);
-        Log.Information($"Image generated. length={image.Length}");
-
+        var tweetText = MakeTweetText(date, menuType, menu);
+        
+        Log.Information("===============================");
+        Log.Information(tweetText);
+        Log.Information("===============================");
+        
         var twitterClient = GetTwitterClient(twitterApiKeys);
         Log.Information("Tweeting...");
-        var tweetMessage = GetMenuTweetText(date, menuType);
-        Log.Information($"\n- tweet message -\n{tweetMessage}\n- tweet message -");
+
+        var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
+        Log.Information($"Bot information: {authenticatedUser.Name}@{authenticatedUser.ScreenName}");
+
+        Log.Information($"\n- tweet message -\n{tweetText}\n- tweet message -");
 
 #if DEBUG
         Log.Information("Cannot tweet because it's debug mode.");
 #else
-        var tweet = await PublishTweetAsync(twitterClient, tweetMessage, image);
+        var tweet = await PublishTweetAsync(twitterClient, tweetText);
         Log.Information($"Done! {tweet.Url}");
 #endif
-
-        return;
     }
 
     private static string GetEnvVariable(string key)
@@ -118,7 +125,7 @@ internal class Program
         return new TwitterClient(credentials);
     }
 
-    private static string GetMenuTweetText(DateOnly date, MenuType type)
+     private static string MakeTweetText(DateOnly date, MenuType type, Menu menu)
     {
         var builder = new StringBuilder()
             .AppendLine($"[{date.GetFormattedKoreanString()}]")
@@ -145,7 +152,7 @@ internal class Program
 
         return builder.ToString();
     }
-
+#if RELEASE
     public static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
     {
         if (image is null)
@@ -159,4 +166,5 @@ internal class Program
             Medias = { uploadedImage }
         });
     }
+#endif
 }
