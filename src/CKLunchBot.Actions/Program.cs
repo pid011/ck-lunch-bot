@@ -123,7 +123,7 @@ internal class Program
         return new TwitterClient(credentials);
     }
 
-    private static string GetMenuTweetText(DateOnly date, MenuType type)
+     private static string MakeTweetText(DateOnly date, MenuType type, Menu menu)
     {
         var builder = new StringBuilder()
             .AppendLine($"[{date.GetFormattedKoreanString()}]")
