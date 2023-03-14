@@ -25,6 +25,8 @@ internal class Program
     private const string AccessTokenName = "TWITTER_ACCESS_TOKEN";
     private const string AccessTokenSecretName = "TWITTER_ACCESS_TOKEN_SECRET";
 
+    private const string MenuTextSperator = ", ";
+
     private static async Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
@@ -99,7 +101,7 @@ internal class Program
 #if DEBUG
         Log.Information("Cannot tweet because it's debug mode.");
 #else
-        var tweet = await PublishTweetAsync(twitterClient, tweetMessage);
+        var tweet = await PublishTweetAsync(twitterClient, tweetText);
         Log.Information($"Done! {tweet.Url}");
 #endif
     }
