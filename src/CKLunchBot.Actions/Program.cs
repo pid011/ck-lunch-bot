@@ -152,7 +152,7 @@ internal class Program
 
         return builder.ToString();
     }
-
+#if RELEASE
     public static async Task<ITweet> PublishTweetAsync(TwitterClient twitter, string tweetText, byte[]? image = null)
     {
         if (image is null)
@@ -166,4 +166,5 @@ internal class Program
             Medias = { uploadedImage }
         });
     }
+#endif
 }
