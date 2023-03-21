@@ -2,7 +2,7 @@ name: Tweet lunch menu
 
 on:
   schedule:
-    - cron: '0 0 * * 1-5' # KST 09:00
+    - cron: '20 23 * * 0-4' # KST 08:20
 
 env:
   MENU_TYPE: lunch
