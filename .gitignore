@@ -355,3 +355,5 @@ MigrationBackup/
 launchSettings.json
 
 published/
+
+.devcontainer/
