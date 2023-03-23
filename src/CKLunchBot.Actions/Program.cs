@@ -85,11 +85,11 @@ internal class Program
         Log.Information(menu.ToString());
 
         var tweetText = MakeTweetText(date, menuType, menu);
-        
+
         Log.Information("===============================");
         Log.Information(tweetText);
         Log.Information("===============================");
-        
+
         var twitterClient = GetTwitterClient(twitterApiKeys);
         Log.Information("Tweeting...");
 
@@ -125,7 +125,7 @@ internal class Program
         return new TwitterClient(credentials);
     }
 
-     private static string MakeTweetText(DateOnly date, MenuType type, Menu menu)
+    private static string MakeTweetText(DateOnly date, MenuType type, Menu menu)
     {
         var builder = new StringBuilder()
             .AppendLine($"[{date.GetFormattedKoreanString()}]")
