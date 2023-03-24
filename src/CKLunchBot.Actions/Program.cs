@@ -62,7 +62,8 @@ internal class Program
         var consumerSecretKey = GetEnvVariable(ConsumerSecretKeyName);
         var accessToken = GetEnvVariable(AccessTokenName);
         var accessTokenSecret = GetEnvVariable(AccessTokenSecretName);
-        var twitterApiKeys = new TwitterApiKeys(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
+        TwitterApiKeys twitterApiKeys = new(consumerApiKey, consumerSecretKey, accessToken, accessTokenSecret);
+
         Log.Information($"Successfully loaded Twitter API keys.");
 
         Log.Information("Requesting menu list...");
