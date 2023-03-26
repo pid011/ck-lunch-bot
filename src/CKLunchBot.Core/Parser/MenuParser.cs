@@ -7,8 +7,11 @@ using HtmlAgilityPack;
 
 namespace CKLunchBot.Core.Parser;
 
-internal class MenuParser
+internal partial class MenuParser
 {
+    [GeneratedRegex("[0-9]{1,2}")]
+    private static partial Regex DateParser();
+
     private static readonly string[] s_specialMenuTitles =
     {
         "샐프바", "셀프바", "샐프코너", "셀프코너", "단품메뉴", "단품 메뉴"
@@ -48,29 +51,6 @@ internal class MenuParser
                 };
                 weekMenu.Add(todayMenu);
             }
-            /*
-            var breakfasts = menus[0].Elements("td").GetEnumerator();
-            var lunchs = menus[1].Elements("td").GetEnumerator();
-            var dinners = menus[2].Elements("td").GetEnumerator();
-
-            var weekMenu = new List<TodayMenu>();
-            while (dates.MoveNext())
-            {
-                var breakfast = breakfasts.MoveNext();
-                var lunch = lunchs.MoveNext();
-                var dinner = dinners.MoveNext();
-
-                var date = ParseDateText(dates.Current.InnerText);
-                var todayMenu = new TodayMenu(date)
-                {
-                    Breakfast = breakfast ? ParseMenu(MenuType.Breakfast, breakfasts.Current) : new Menu(MenuType.Lunch),
-                    Lunch = lunch ? ParseMenu(MenuType.Lunch, lunchs.Current) : new Menu(MenuType.Lunch),
-                    Dinner = dinner ? ParseMenu(MenuType.Dinner, dinners.Current) : new Menu(MenuType.Dinner),
-                };
-                weekMenu.Add(todayMenu);
-            }
-            */
-
             return weekMenu;
         }
         catch (Exception e)
@@ -116,7 +96,7 @@ internal class MenuParser
 
     private static DateOnly ParseDateText(string dateText)
     {
-        var matched = Regex.Matches(dateText, @"[0-9]{1,2}");
+        var matched = DateParser().Matches(dateText);
         if (matched.Count is not 2
             || !int.TryParse(matched[0].Value, out var month)
             || !int.TryParse(matched[1].Value, out var day))
