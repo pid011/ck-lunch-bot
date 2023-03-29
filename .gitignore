@@ -357,3 +357,5 @@ launchSettings.json
 published/
 
 .devcontainer/
+
+.vscode/
