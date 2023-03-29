@@ -35,7 +35,7 @@ jobs:
         uses: Azure/functions-action@v1
         id: fa
         with:
-          app-name: 'cklunchbot8'
+          app-name: 'cklunchbot22'
           slot-name: 'production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
           publish-profile: ${{ secrets.FUNCTIONS_PUBLISH_PROFILE }}
