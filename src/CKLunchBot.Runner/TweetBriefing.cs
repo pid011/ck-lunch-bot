@@ -5,9 +5,9 @@ using Tweetinvi;
 
 namespace CKLunchBot.Runner;
 
-public static class TweetMenu
+public static class TweetBriefing
 {
-    public static async Task RunAsync(ILogger log, DateOnly date, MenuType menuType)
+    public static async Task RunAsync(ILogger log, DateOnly date)
     {
         log.Information("Requesting menus from web...");
 
@@ -18,16 +18,7 @@ public static class TweetMenu
             log.Warning($"Cannot found menu of {date}");
             return;
         }
-
-        var menu = todayMenu[menuType];
-        if (menu is null || menu.IsEmpty())
-        {
-            log.Warning($"Cannot found menu of type {menuType}");
-            return;
-        }
-
-        log.Information(menu.ToString());
-
+        log.Information(todayMenu.ToString());
         log.Information("Getting TwitterClient using enviroment keys...");
         TwitterClient twitterClient;
         try
@@ -45,7 +36,7 @@ public static class TweetMenu
         var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
         log.Information($"Bot information: {authenticatedUser.Name}@{authenticatedUser.ScreenName}");
 
-        var tweetText = GenerateContentFromMenu(date, menuType, menu);
+        var tweetText = GenerateContentFromMenu(todayMenu);
         log.Information($"\n- CONTENT -\n{tweetText}\n- CONTENT -");
 
 #if RELEASE
@@ -56,19 +47,15 @@ public static class TweetMenu
 #endif
     }
 
-    private static string GenerateContentFromMenu(DateOnly date, MenuType type, Menu menu)
+    private static string GenerateContentFromMenu(TodayMenu menu)
     {
         return new StringBuilder()
-            .AppendLine($"[{date.GetFormattedKoreanString()}]")
-            .AppendLine($"🥪 오늘의 청강대 {type switch
-            {
-                MenuType.Breakfast => "아침",
-                MenuType.Lunch => "점심",
-                MenuType.Dinner => "저녁",
-                _ => string.Empty
-            }} 메뉴는")
+            .AppendLine($"[{menu.Date.GetFormattedKoreanString()}]")
+            .AppendLine("금일 청강대 학식메뉴 브리핑입니다!")
             .AppendLine()
-            .AppendJoin(", ", menu.Menus)
+            .Append(!menu.Breakfast.IsEmpty() ? $"🥗 아침\n{string.Join(", ", menu.Breakfast.Menus)}\n" : string.Empty)
+            .Append(!menu.Lunch.IsEmpty() ? $"🍱 점심\n{string.Join(", ", menu.Lunch.Menus)}\n" : string.Empty)
+            .Append(!menu.Dinner.IsEmpty() ? $"🌭 저녁\n{string.Join(", ", menu.Dinner.Menus)}" : string.Empty)
             .ToString();
     }
 }
