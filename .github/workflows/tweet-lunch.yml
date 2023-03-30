@@ -2,13 +2,13 @@ name: Tweet lunch menu
 
 on:
   schedule:
-    - cron: '20 23 * * 0-4' # KST 08:20
+    - cron: '40 23 * * 0-4' # KST 08:40
 
 env:
   MENU_TYPE: lunch
   PROJECT_PATH: src/CKLunchBot.Actions
   CONFIGURATION: Release
-  DOTNET_VERSION: 6.0.x
+  DOTNET_VERSION: 7.0.x
 jobs:
   tweet:
     runs-on: ubuntu-latest
