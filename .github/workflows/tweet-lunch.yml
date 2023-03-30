@@ -2,7 +2,7 @@ name: Tweet lunch menu
 
 on:
   schedule:
-    - cron: '40 23 * * 0-4' # KST 08:40
+    - cron: '20 1 * * 1-5' # KST 10:20
 
 env:
   MENU_TYPE: lunch
@@ -35,4 +35,4 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
         run: |
           cd "${{ env.PROJECT_PATH }}"
-          dotnet run --configuration ${{ env.CONFIGURATION }} --no-build -- ${{ env.MENU_TYPE }}
+          dotnet run --configuration ${{ env.CONFIGURATION }} --no-build -- menu ${{ env.MENU_TYPE }}

@@ -1,11 +1,10 @@
-name: Tweet dinner menu
+name: Tweet briefing
 
 on:
   schedule:
-    - cron: '20 6 * * 1-5' # KST 15:20
+    - cron: '10 21 * * 0-4' # KST 06:10
 
 env:
-  MENU_TYPE: dinner
   PROJECT_PATH: src/CKLunchBot.Actions
   CONFIGURATION: Release
   DOTNET_VERSION: 7.0.x
@@ -35,4 +34,4 @@ jobs:
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
         run: |
           cd "${{ env.PROJECT_PATH }}"
-          dotnet run --configuration ${{ env.CONFIGURATION }} --no-build -- menu ${{ env.MENU_TYPE }}
+          dotnet run --configuration ${{ env.CONFIGURATION }} --no-build -- briefing
