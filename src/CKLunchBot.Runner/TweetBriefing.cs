@@ -53,9 +53,9 @@ public static class TweetBriefing
             .AppendLine($"[{menu.Date.GetFormattedKoreanString()}]")
             .AppendLine("금일 청강대 학식메뉴 브리핑입니다!")
             .AppendLine()
-            .Append(!menu.Breakfast.IsEmpty() ? $"🥗 아침\n{string.Join(", ", menu.Breakfast.Menus)}\n" : string.Empty)
-            .Append(!menu.Lunch.IsEmpty() ? $"🍱 점심\n{string.Join(", ", menu.Lunch.Menus)}\n" : string.Empty)
-            .Append(!menu.Dinner.IsEmpty() ? $"🌭 저녁\n{string.Join(", ", menu.Dinner.Menus)}" : string.Empty)
+            .Append(!menu.Breakfast.IsEmpty() ? $"🥗 아침\n{string.Join(", ", menu.Breakfast.Menus)}\n\n" : string.Empty)
+            .Append(!menu.Lunch.IsEmpty() ? $"🍱 점심\n{string.Join(", ", menu.Lunch.Menus)}\n\n" : string.Empty)
+            .Append(!menu.Dinner.IsEmpty() ? $"🌭 저녁\n{string.Join(", ", menu.Dinner.Menus)}\n\n" : string.Empty)
             .ToString();
     }
 }
