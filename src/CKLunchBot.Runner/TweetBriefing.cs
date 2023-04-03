@@ -15,9 +15,15 @@ public static class TweetBriefing
         var todayMenu = weekMenu.Find(date);
         if (todayMenu is null)
         {
-            log.Warning($"Cannot found menu of {date}");
+            log.Warning($"Cannot found menu of {date}!");
             return;
         }
+        if (todayMenu.Breakfast.IsEmpty() && todayMenu.Lunch.IsEmpty() && todayMenu.Dinner.IsEmpty())
+        {
+            log.Warning($"All Menu of date {todayMenu.Date} is empty!");
+            return;
+        }
+
         log.Information(todayMenu.ToString());
         log.Information("Getting TwitterClient using enviroment keys...");
         TwitterClient twitterClient;
