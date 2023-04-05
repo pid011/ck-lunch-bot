@@ -47,10 +47,18 @@ public static class TweetMenu
 
         var tweetText = GenerateContentFromMenu(date, menuType, menu);
         log.Information($"\n- CONTENT -\n{tweetText}\n- CONTENT -");
+        log.Information($"Tweet length: {tweetText.Length}");
 
 #if RELEASE
-        var tweet = await Twitter.PublishTweetAsync(twitterClient, tweetText);
-        log.Information($"Done! {tweet.Url}");
+        try
+        {
+            var tweet = await Twitter.PublishTweetAsync(twitterClient, tweetText);
+            log.Information($"Done! {tweet.Url}");
+        }
+        catch (TwitterException e)
+        {
+            log.Fatal(e, $"{e.Content}");
+        }
 #else
         log.Information("Did not tweet because it's debug mode.");
 #endif

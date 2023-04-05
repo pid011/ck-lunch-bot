@@ -44,10 +44,18 @@ public static class TweetBriefing
 
         var tweetText = GenerateContentFromMenu(todayMenu);
         log.Information($"\n- CONTENT -\n{tweetText}\n- CONTENT -");
+        log.Information($"Tweet length: {tweetText.Length}");
 
 #if RELEASE
-        var tweet = await Twitter.PublishTweetAsync(twitterClient, tweetText);
-        log.Information($"Done! {tweet.Url}");
+        try
+        {
+            var tweet = await Twitter.PublishTweetAsync(twitterClient, tweetText);
+            log.Information($"Done! {tweet.Url}");
+        }
+        catch (TwitterException e)
+        {
+            log.Fatal(e, $"{e.Content}");
+        }
 #else
         log.Information("Did not tweet because it's debug mode.");
 #endif
@@ -61,7 +69,7 @@ public static class TweetBriefing
             .AppendLine()
             .Append(!menu.Breakfast.IsEmpty() ? $"🥗 아침\n{string.Join(", ", menu.Breakfast.Menus)}\n\n" : string.Empty)
             .Append(!menu.Lunch.IsEmpty() ? $"🍱 점심\n{string.Join(", ", menu.Lunch.Menus)}\n\n" : string.Empty)
-            .Append(!menu.Dinner.IsEmpty() ? $"🌭 저녁\n{string.Join(", ", menu.Dinner.Menus)}\n\n" : string.Empty)
+            .Append(!menu.Dinner.IsEmpty() ? $"🌭 저녁\n{string.Join(", ", menu.Dinner.Menus)}" : string.Empty)
             .ToString();
     }
 }
