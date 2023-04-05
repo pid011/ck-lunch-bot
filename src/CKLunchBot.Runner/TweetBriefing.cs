@@ -3,6 +3,10 @@ using CKLunchBot.Core;
 using Serilog;
 using Tweetinvi;
 
+#if RELEASE
+using Tweetinvi.Exceptions;
+#endif
+
 namespace CKLunchBot.Runner;
 
 public static class TweetBriefing
