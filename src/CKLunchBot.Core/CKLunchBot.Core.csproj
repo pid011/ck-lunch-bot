@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.47" />
         <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta19" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
