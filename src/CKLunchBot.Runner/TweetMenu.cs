@@ -1,7 +1,6 @@
 using System.Text;
 using CKLunchBot.Core;
 using Serilog;
-using Tweetinvi;
 
 #if RELEASE
 using Tweetinvi.Exceptions;
@@ -33,10 +32,10 @@ public static class TweetMenu
         log.Information(menu.ToString());
 
         log.Information("Getting TwitterClient using enviroment keys...");
-        TwitterClient twitterClient;
+        Twitter.Credentials credentials;
         try
         {
-            twitterClient = Twitter.GetClientUsingKeys();
+            credentials = Twitter.GetCredentialsFromEnv();
         }
         catch (EnvNotFoundException e)
         {
@@ -45,23 +44,24 @@ public static class TweetMenu
         }
         log.Information("Successfully get TwitterClient using enviroment.");
 
-        log.Information("Checking bot account...");
-        var authenticatedUser = await twitterClient.Users.GetAuthenticatedUserAsync();
-        log.Information($"Bot information: {authenticatedUser.Name}@{authenticatedUser.ScreenName}");
-
         var tweetText = GenerateContentFromMenu(date, menuType, menu);
         log.Information($"\n- CONTENT -\n{tweetText}\n- CONTENT -");
         log.Information($"Tweet length: {tweetText.Length}");
 
+        log.Information("Check twitter api...");
+        var user = await Twitter.GetUserInformationAsync(credentials);
+        log.Debug($"Bot information: {user.Name} ({user.Id})");
+        log.Information("Successfully checked twitter api.");
+
 #if RELEASE
         try
         {
-            var tweet = await Twitter.PublishTweetAsync(twitterClient, tweetText);
-            log.Information($"Done! {tweet.Url}");
+            var tweet = await Twitter.PublishTweetAsync(credentials, tweetText);
+            log.Information($"Done! {tweet.Id}");
         }
-        catch (TwitterException e)
+        catch (Exception e)
         {
-            log.Fatal(e, $"{e.Content}");
+            log.Fatal(e, $"{e.Message}");
         }
 #else
         log.Information("Did not tweet because it's debug mode.");
