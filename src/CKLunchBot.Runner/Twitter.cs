@@ -58,13 +58,10 @@ public class Twitter
 
     public static async Task<User> GetUserInformationAsync(Credentials credentials)
     {
-        var oauth = OAuth1Authenticator.ForAccessToken(
-            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);
-
         var client = new RestClient("https://api.twitter.com/2/users/me");
         var request = new RestRequest
         {
-            Authenticator = oauth,
+            Authenticator = GetAuthenticatorFromCredentials(credentials)
         };
         request.AddParameter("user.fields", "id,username,description");
 
@@ -75,26 +72,20 @@ public class Twitter
         }
 
         var user = JsonNode.Parse(response.Content!);
-        var id = user?["data"]?["id"]?.GetValue<string>() ?? throw new Exception("Faild to parse user response data!");
-        var username = user?["data"]?["username"]?.GetValue<string>() ?? throw new Exception("Faild to parse user response data!");
-        var description = user?["data"]?["description"]?.GetValue<string>() ?? throw new Exception("Faild to parse user response data!");
-
-        return new User(id, username, description);
+        return new User(
+            id: user?["data"]?["id"]?.GetValue<string>() ?? throw new Exception("Faild to parse user response data!"),
+            username: user?["data"]?["username"]?.GetValue<string>() ?? throw new Exception("Faild to parse user response data!"),
+            description: user?["data"]?["description"]?.GetValue<string>() ?? throw new Exception("Faild to parse user response data!"));
     }
 
     public static async Task<Tweet> PublishTweetAsync(Credentials credentials, string tweetText)
     {
-        var payload = JsonSerializer.Serialize(new { text = tweetText });
-
-        var oauth = OAuth1Authenticator.ForAccessToken(
-            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);
-
         var client = new RestClient("https://api.twitter.com/2/tweets");
         var request = new RestRequest
         {
-            Authenticator = oauth,
+            Authenticator = GetAuthenticatorFromCredentials(credentials),
         };
-        request.AddJsonBody(payload, false);
+        request.AddJsonBody(JsonSerializer.Serialize(new { text = tweetText }), false);
 
         var response = await client.ExecuteAsync(request);
         if (response.StatusCode != HttpStatusCode.Created)
@@ -103,14 +94,19 @@ public class Twitter
         }
 
         var tweet = JsonNode.Parse(response.Content!);
-        var id = tweet?["data"]?["id"]?.GetValue<string>() ?? throw new Exception("Faild to parse tweet response data!");
-        var text = tweet?["data"]?["text"]?.GetValue<string>() ?? throw new Exception("Faild to parse tweet response data!");
-
-        return new Tweet(id, text);
+        return new Tweet(
+            id: tweet?["data"]?["id"]?.GetValue<string>() ?? throw new Exception("Faild to parse tweet response data!"),
+            text: tweet?["data"]?["text"]?.GetValue<string>() ?? throw new Exception("Faild to parse tweet response data!"));
     }
 
     private static string? GetEnv(string key)
     {
         return Environment.GetEnvironmentVariable(key, EnvironmentVariableTarget.Process);
+    }
+
+    private static IAuthenticator GetAuthenticatorFromCredentials(Credentials credentials)
+    {
+        return OAuth1Authenticator.ForAccessToken(
+            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);
     }
 }
