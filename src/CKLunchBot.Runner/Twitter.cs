@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Authenticators.OAuth;
 
 namespace CKLunchBot.Runner;
 
@@ -83,11 +85,13 @@ public class Twitter
         var client = new RestClient("https://api.twitter.com/2/tweets");
         var request = new RestRequest
         {
-            Authenticator = GetAuthenticatorFromCredentials(credentials),
+            Authenticator = GetAuthenticatorFromCredentials(credentials)
         };
-        request.AddJsonBody(JsonSerializer.Serialize(new { text = tweetText }), false);
+        request.AddBody(JsonSerializer.Serialize(new { text = tweetText }));
 
-        var response = await client.ExecuteAsync(request);
+        Debug.WriteLine(request.Authenticator.ToString());
+
+        var response = await client.ExecutePostAsync(request);
         if (response.StatusCode != HttpStatusCode.Created)
         {
             throw new Exception(response.Content);
@@ -107,6 +111,7 @@ public class Twitter
     private static IAuthenticator GetAuthenticatorFromCredentials(Credentials credentials)
     {
         return OAuth1Authenticator.ForAccessToken(
-            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);
+            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret,
+            OAuthSignatureMethod.HmacSha256); ;
     }
 }

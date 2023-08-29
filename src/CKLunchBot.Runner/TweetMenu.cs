@@ -8,7 +8,7 @@ namespace CKLunchBot.Runner;
 
 public static class TweetMenu
 {
-    public static async Task RunAsync(ILogger log, DateOnly date, MenuType menuType)
+    public static async Task<int> RunAsync(ILogger log, DateOnly date, MenuType menuType)
     {
         log.Information("Requesting menus from web...");
 
@@ -17,14 +17,14 @@ public static class TweetMenu
         if (todayMenu is null)
         {
             log.Warning($"Cannot found menu of {date}");
-            return;
+            return 0;
         }
 
         var menu = todayMenu[menuType];
         if (menu is null || menu.IsEmpty())
         {
             log.Warning($"Cannot found menu of type {menuType}");
-            return;
+            return 0;
         }
 
         log.Information(menu.ToString());
@@ -38,7 +38,7 @@ public static class TweetMenu
         catch (EnvNotFoundException e)
         {
             log.Error($"Faild to get API key '{e.EnvKey}' from enviroment values!");
-            return;
+            return 1;
         }
         log.Information("Successfully get TwitterClient using enviroment.");
 
@@ -60,10 +60,12 @@ public static class TweetMenu
         catch (Exception e)
         {
             log.Fatal(e, $"{e.Message}");
+            return 1;
         }
 #else
         log.Information("Did not tweet because it's debug mode.");
 #endif
+        return 0;
     }
 
     private static string GenerateContentFromMenu(DateOnly date, MenuType type, Menu menu)

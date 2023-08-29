@@ -8,7 +8,7 @@ namespace CKLunchBot.Runner;
 
 public static class TweetBriefing
 {
-    public static async Task RunAsync(ILogger log, DateOnly date)
+    public static async Task<int> RunAsync(ILogger log, DateOnly date)
     {
         log.Information("Requesting menus from web...");
 
@@ -17,12 +17,12 @@ public static class TweetBriefing
         if (todayMenu is null)
         {
             log.Warning($"Cannot found menu of {date}!");
-            return;
+            return 0;
         }
         if (todayMenu.Breakfast.IsEmpty() && todayMenu.Lunch.IsEmpty() && todayMenu.Dinner.IsEmpty())
         {
             log.Warning($"All Menu of date {todayMenu.Date} is empty!");
-            return;
+            return 0;
         }
 
         log.Information(todayMenu.ToString());
@@ -35,7 +35,7 @@ public static class TweetBriefing
         catch (EnvNotFoundException e)
         {
             log.Error($"Faild to get API key '{e.EnvKey}' from enviroment values!");
-            return;
+            return 1;
         }
         log.Information("Successfully get TwitterClient using enviroment.");
 
@@ -57,10 +57,12 @@ public static class TweetBriefing
         catch (Exception e)
         {
             log.Fatal(e, $"{e.Message}");
+            return 1;
         }
 #else
         log.Information("Did not tweet because it's debug mode.");
 #endif
+        return 0;
     }
 
     private static string GenerateContentFromMenu(TodayMenu menu)
