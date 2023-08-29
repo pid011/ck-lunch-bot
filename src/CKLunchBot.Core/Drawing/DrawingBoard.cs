@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -60,7 +61,7 @@ internal class DrawingBoard : IDisposable
             }
         };
 
-        var textOptions = new TextOptions(font)
+        var textOptions = new RichTextOptions(font)
         {
             Origin = location,
             VerticalAlignment = VerticalAlignment.Top,
