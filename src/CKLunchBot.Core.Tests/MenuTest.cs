@@ -1,87 +1,88 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using CKLunchBot.Core.Drawing;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CKLunchBot.Core.Tests
+namespace CKLunchBot.Core.Tests;
+
+[TestClass]
+public class MenuTest
 {
-    [TestClass]
-    public class MenuTest
+    [TestMethod]
+    public async Task MenuLoadTest()
     {
-        [TestMethod]
-        public async Task MenuLoadTest()
-        {
-            var menu = await WeekMenu.LoadAsync();
-            Assert.IsNotNull(menu);
+        var menu = await WeekMenu.LoadAsync();
+        Assert.IsNotNull(menu);
 
-            if (menu.Count > 0)
+        if (menu.Count > 0)
+        {
+            foreach (var todayMenu in menu)
             {
-                foreach (var todayMenu in menu)
+                if (!todayMenu.Lunch.IsEmpty())
                 {
-                    if (!todayMenu.Lunch.IsEmpty())
-                    {
-                        var imageBytes = await MenuImageGenerator.GenerateAsync(todayMenu.Date, MenuType.Lunch, todayMenu.Lunch);
-                        Assert.IsNotNull(imageBytes);
-                    }
+                    var imageBytes = await MenuImageGenerator.GenerateAsync(todayMenu.Date, MenuType.Lunch, todayMenu.Lunch);
+                    Assert.IsNotNull(imageBytes);
                 }
             }
         }
+    }
 
-        [TestMethod]
-        public void MenuInstanceTest()
+    [TestMethod]
+    public void MenuInstanceTest()
+    {
+        var now = DateTime.Now;
+        var date = now.ToDateOnly();
+        var weekMenu = CreateTestWeekMenu(date);
+
+        Assert.IsNotNull(weekMenu.Find(date.AddDays(1)));
+    }
+
+    [TestMethod]
+    public async Task MenuImageGenTest()
+    {
+        var now = DateTime.Now;
+        var date = now.ToDateOnly();
+        var weekMenu = CreateTestWeekMenu(date);
+
+        foreach (var menu in weekMenu)
         {
-            var now = DateTime.Now;
-            var date = now.ToDateOnly();
-            var weekMenu = CreateTestWeekMenu(date);
-
-            Assert.IsNotNull(weekMenu.Find(date.AddDays(1)));
+            var imageBytes = await MenuImageGenerator.GenerateAsync(menu.Date, MenuType.Lunch, menu.Lunch);
+            Assert.IsNotNull(imageBytes);
         }
+    }
 
-        [TestMethod]
-        public async Task MenuImageGenTest()
+    private static WeekMenu CreateTestWeekMenu(DateOnly date)
+    {
+        var menu1 = new TodayMenu(date)
         {
-            var now = DateTime.Now;
-            var date = now.ToDateOnly();
-            var weekMenu = CreateTestWeekMenu(date);
-
-            foreach (var menu in weekMenu)
+            Breakfast = new Menu(MenuType.Breakfast)
             {
-                var imageBytes = await MenuImageGenerator.GenerateAsync(menu.Date, MenuType.Lunch, menu.Lunch);
-                Assert.IsNotNull(imageBytes);
+                Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
+                SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
+            },
+            Lunch = new Menu(MenuType.Breakfast)
+            {
+                Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
+                SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
+            },
+            Dinner = new Menu(MenuType.Breakfast)
+            {
+                Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
+                SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
             }
-        }
+        };
 
-        private static WeekMenu CreateTestWeekMenu(DateOnly date)
+        var menu2 = menu1 with
         {
-            var menu1 = new TodayMenu(date)
+            Date = date.AddDays(1),
+            Lunch = new Menu(MenuType.Breakfast)
             {
-                Breakfast = new Menu(MenuType.Breakfast)
-                {
-                    Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
-                    SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
-                },
-                Lunch = new Menu(MenuType.Breakfast)
-                {
-                    Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
-                    SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
-                },
-                Dinner = new Menu(MenuType.Breakfast)
-                {
-                    Menus = new[] { "aaa", "bbb", "ccc", "dddd" },
-                    SpecialMenus = new[] { "aaa", "bbb", "ccc", "dddd" }
-                }
-            };
+                Menus = new[] { "aaa", "bbb" }
+            }
+        };
 
-            var menu2 = menu1 with
-            {
-                Date = date.AddDays(1),
-                Lunch = new Menu(MenuType.Breakfast)
-                {
-                    Menus = new[] { "aaa", "bbb" }
-                }
-            };
-
-            return new WeekMenu(new[] { menu1, menu2 });
-        }
+        return new WeekMenu(new[] { menu1, menu2 });
     }
 }
