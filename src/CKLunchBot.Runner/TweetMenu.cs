@@ -1,10 +1,8 @@
 using System.Text;
-using CKLunchBot.Core;
-using Serilog;
 
-#if RELEASE
-using Tweetinvi.Exceptions;
-#endif
+using CKLunchBot.Core;
+
+using Serilog;
 
 namespace CKLunchBot.Runner;
 

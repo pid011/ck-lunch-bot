@@ -4,9 +4,6 @@ using CKLunchBot.Core;
 
 using Serilog;
 
-#if RELEASE
-#endif
-
 namespace CKLunchBot.Runner;
 
 public static class TweetBriefing
