@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 
 using RestSharp;
 using RestSharp.Authenticators;
-using RestSharp.Authenticators.OAuth;
 
 namespace CKLunchBot.Runner;
 
@@ -111,7 +110,6 @@ public class Twitter
     private static IAuthenticator GetAuthenticatorFromCredentials(Credentials credentials)
     {
         return OAuth1Authenticator.ForAccessToken(
-            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret,
-            OAuthSignatureMethod.HmacSha256); ;
+            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);
     }
 }
