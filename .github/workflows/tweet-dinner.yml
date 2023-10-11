@@ -2,7 +2,7 @@ name: Tweet dinner menu
 
 on:
   schedule:
-    - cron: '20 6 * * 1-5' # KST 15:20
+    - cron: "20 6 * * 1-5" # KST 15:20
 
 env:
   MENU_TYPE: dinner
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: api_keys
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
