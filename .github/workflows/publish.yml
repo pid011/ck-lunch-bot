@@ -4,10 +4,14 @@ on:
   release:
     types: [published]
 
+env:
+    DOCKER_PATH: src/CKLunchBot/Dockerfile
+    DOCKER_IMAGE: pid011/ck-lunch-bot
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    environment: docker
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -22,13 +26,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: pid011/ck-lunch-bot
+          images: ${{ env.DOCKER_IMAGE }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ${{ env.DOCKER_PATH }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
