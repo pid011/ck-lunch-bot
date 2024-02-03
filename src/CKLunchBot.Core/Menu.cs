@@ -1,42 +1,54 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CKLunchBot.Core;
 
-public record class Menu(MenuType Type)
+public enum MenuType
 {
-    public IReadOnlyCollection<string> Menus { get; init; } = Array.Empty<string>();
-    public IReadOnlyCollection<string> SpecialMenus { get; init; } = Array.Empty<string>();
-    public string SpecialTitle { get; init; } = string.Empty;
+    Breakfast,
+    Lunch,
+    Dinner
+}
+
+public class MenuTable(DateOnly date)
+{
+    public DateOnly Date { get; } = date;
+    public required Menu Breakfast { get; init; }
+    public required Menu Lunch { get; init; }
+    public required Menu Dinner { get; init; }
+
+    public Menu this[MenuType type] => type switch
+    {
+        MenuType.Breakfast => Breakfast,
+        MenuType.Lunch => Lunch,
+        MenuType.Dinner => Dinner,
+        _ => throw new NotImplementedException()
+    };
+
+    public override string ToString()
+    {
+        return new StringBuilder()
+            .AppendLine($"<{Date:yyyy-MM-dd}>")
+            .AppendLine($"Breakfast: {Breakfast}")
+            .AppendLine($"Lunch: {Lunch}")
+            .Append($"Dinner: {Dinner}")
+            .ToString();
+    }
+}
+
+public class Menu(IReadOnlyCollection<string> menus)
+{
+    public static Menu Empty { get; } = new(Array.Empty<string>());
+    public IReadOnlyCollection<string> Menus { get; } = menus;
 
     public bool IsEmpty()
     {
-        return Menus.Count is 0 && SpecialMenus.Count is 0;
+        return Menus.Count is 0;
     }
 
     public override string ToString()
     {
-        var builder = new StringBuilder().AppendLine($"[{Type}]");
-        var emptyString = "(Empty)";
-
-        MakeString(nameof(Menus), Menus);
-        builder.AppendLine();
-        MakeString(SpecialTitle, SpecialMenus);
-
-        return builder.ToString();
-
-        void MakeString(string name, IReadOnlyCollection<string> items)
-        {
-            builder!.Append($"\t<{name}> ");
-            if (items.Count > 0)
-            {
-                builder.AppendJoin(',', items);
-            }
-            else
-            {
-                builder.Append(emptyString);
-            }
-        }
+        return string.Join(", ", Menus);
     }
 }

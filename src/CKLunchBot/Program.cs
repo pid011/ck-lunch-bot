@@ -1,20 +1,24 @@
 using CKLunchBot;
-using CKLunchBot.Runner;
 using Serilog;
-
-Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .CreateBootstrapLogger();
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Configuration.AddEnvironmentVariables("X_");
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables("X_");
 
 builder.Services
-    .AddHostedService<BotService>()
-    .AddSerilog()
-    .Configure<ApiKey>(builder.Configuration.GetSection("X_ApiKey"))
-    .Configure<BotConfig>(builder.Configuration.GetSection("BotConfig"));
+    .AddSerilog(config => config
+            .ReadFrom.Configuration(builder.Configuration)
+            .Enrich.FromLogContext()
+            .WriteTo.File("logs/.log", rollingInterval: RollingInterval.Month)
+            .WriteTo.Console())
+    .Configure<X.Credentials>(builder.Configuration.GetSection("Credentials"))
+    .Configure<BotConfig>(builder.Configuration.GetSection("BotConfig"))
+    .AddSingleton<IMenuService, MenuWebService>()
+    .AddSingleton<IPostService, XPostService>()
+    .AddSingleton<IMessageFormatter, MessageFormatter>()
+    .AddHostedService<BotService>();
 
-builder.Build().Run();
+var host = builder.Build();
+host.Run();
