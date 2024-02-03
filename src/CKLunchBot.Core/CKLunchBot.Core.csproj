@@ -14,16 +14,4 @@
         <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.0.0" />
     </ItemGroup>
-
-    <ItemGroup>
-        <None Update="assets\fonts\MaruBuri-Bold.ttf">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="assets\fonts\MaruBuri-Regular.ttf">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="assets\images\MenuTemplate.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
 </Project>

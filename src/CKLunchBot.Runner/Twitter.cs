@@ -8,7 +8,15 @@ using RestSharp.Authenticators;
 
 namespace CKLunchBot.Runner;
 
-public class Twitter
+public sealed class ApiKey
+{
+    public string ConsumerApiKey { get; set; } = string.Empty;
+    public string ConsumerSecretKey { get; set; } = string.Empty;
+    public string AccessToken { get; set; } = string.Empty;
+    public string AccessTokenSecret { get; set; } = string.Empty;
+}
+
+public static class Twitter
 {
     private const string ConsumerApiKeyName = "TWITTER_CONSUMER_API_KEY";
     private const string ConsumerSecretKeyName = "TWITTER_CONSUMER_SECRET_KEY";
