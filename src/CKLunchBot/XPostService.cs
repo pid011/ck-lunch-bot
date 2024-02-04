@@ -27,13 +27,18 @@ public sealed class XPostService : IPostService
         try
         {
             var _ = await _x.GetUserInformationAsync(cancellationToken);
-            return true;
+        }
+        catch (ApiException e) when (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            _logger.LogWarning("Failed to get user information. Too many requests to X api.");
         }
         catch (Exception e)
         {
             _logger.LogDebug(e, "Failed to check X api.");
             return false;
         }
+
+        return true;
     }
 
     public async ValueTask<Post> PostMessageAsync(string message, CancellationToken cancellationToken = default)

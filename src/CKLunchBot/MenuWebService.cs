@@ -32,8 +32,7 @@ public sealed class MenuWebService(ILogger<MenuWebService> logger) : IMenuServic
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to get html.");
-            throw;
+            throw new HtmlLoadException($"Failed to get html from {RequestUri}.", e);
         }
 
         try
