@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using CKLunchBot.Core;
 using Microsoft.Extensions.Options;
 
@@ -58,6 +59,7 @@ public sealed class BotService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Yield();
+
         try
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -78,33 +80,7 @@ public sealed class BotService(
                 await Task.Delay(delay, stoppingToken);
 
                 _logger.LogInformation("Start posting.");
-                var weekMenu = await _menuService.GetWeekMenuAsync(stoppingToken);
-                if (!TryFindTodayMenu(weekMenu, out var todayMenu))
-                {
-                    _logger.LogWarning("Cannot found today's menu.");
-                    continue;
-                }
-
-                Debug.Assert(todayMenu is not null);
-                var postContents = nextPostType switch
-                {
-                    PostType.Briefing => CreateBriefingContents(_config.BriefingMessage, todayMenu),
-                    PostType.Breakfast => CreatePostContentsFromTemplate(_config.BreakfastMessage, todayMenu.Date, todayMenu.Breakfast),
-                    PostType.Lunch => CreatePostContentsFromTemplate(_config.LunchMessage, todayMenu.Date, todayMenu.Lunch),
-                    PostType.Dinner => CreatePostContentsFromTemplate(_config.DinnerMessage, todayMenu.Date, todayMenu.Dinner),
-                    _ => throw new NotImplementedException()
-                };
-                _logger.LogDebug("Post contents{newline}{contents}", Environment.NewLine, postContents);
-
-                if (_environment.IsProduction())
-                {
-                    var post = await _postService.PostMessageAsync(postContents, stoppingToken);
-                    _logger.LogInformation("Bot successfully posted: {post}", post.Id);
-                }
-                else
-                {
-                    _logger.LogInformation("Current enviroment is not production. Skip posting.");
-                }
+                await ProcessAsync(nextPostType, stoppingToken);
             }
         }
         catch (TaskCanceledException)
@@ -118,6 +94,64 @@ public sealed class BotService(
         finally
         {
             _lifetime.StopApplication();
+        }
+    }
+
+    private async ValueTask ProcessAsync(PostType postType, CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<MenuTable> weekMenu;
+
+        try
+        {
+            weekMenu = await _menuService.GetWeekMenuAsync(cancellationToken);
+        }
+        catch (HtmlLoadException e)
+        {
+            _logger.LogError(e, "Failed to get html.");
+            return;
+        }
+        catch (MenuParseException e)
+        {
+            _logger.LogError(e, "Failed to parse menu.");
+            return;
+        }
+
+        if (!TryFindTodayMenu(weekMenu, out var todayMenu))
+        {
+            _logger.LogWarning("Cannot found today's menu.");
+            return;
+        }
+
+        Debug.Assert(todayMenu is not null);
+        var postContents = postType switch
+        {
+            PostType.Briefing => CreateBriefingContents(_config.BriefingMessage, todayMenu),
+            PostType.Breakfast => CreatePostContentsFromTemplate(_config.BreakfastMessage, todayMenu.Date, todayMenu.Breakfast),
+            PostType.Lunch => CreatePostContentsFromTemplate(_config.LunchMessage, todayMenu.Date, todayMenu.Lunch),
+            PostType.Dinner => CreatePostContentsFromTemplate(_config.DinnerMessage, todayMenu.Date, todayMenu.Dinner),
+            _ => throw new NotImplementedException()
+        };
+        _logger.LogDebug("Post contents{newline}{contents}", Environment.NewLine, postContents);
+
+        if (_environment.IsProduction())
+        {
+            try
+            {
+                var post = await _postService.PostMessageAsync(postContents, cancellationToken);
+                _logger.LogInformation("Bot successfully posted: {post}", post.Id);
+            }
+            catch (ApiException e)
+            {
+                _logger.LogError(e, "Failed to post message.");
+            }
+            catch (JsonException e)
+            {
+                _logger.LogError(e, "Failed to parse poting response.");
+            }
+        }
+        else
+        {
+            _logger.LogInformation("Current enviroment is not production. Skip posting.");
         }
     }
 
@@ -138,15 +172,30 @@ public sealed class BotService(
     {
         _logger.LogInformation("Initializing BotService...");
 
-        if (_environment.IsProduction())
+        ConfigurationValidationCheck();
+
+        if (_environment.IsProduction()) // API 과도 호출 상황을 방지하기 위해 Production 환경에서만 실행
         {
-            if (!await _postService.IsValidAsync(cancellationToken))
+            try
             {
-                throw new InvalidOperationException("PostService is not valid.");
+                if (!await _postService.IsValidAsync(cancellationToken))
+                {
+                    throw new InvalidOperationException("PostService is not valid.");
+                }
+            }
+            catch (ApiException e) when (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                // API가 한도에 도달했더라도 일단 실행 중은 유지하기
+                // X API는 24시간 단위로 체크함
+                _logger.LogWarning("X API rate limit exceeded. But BotService will running.");
+            }
+            catch (ApiException e)
+            {
+                // 이외의 경우라면 예외를 던지고 종료
+                _logger.LogError("Post API is not valid. ({StatusCode})", e.StatusCode);
+                throw;
             }
         }
-
-        ConfigurationValidationCheck();
 
         _logger.LogInformation("Briefing time: {BriefingTime}", _config.BriefingTime.ToString("c"));
         _logger.LogInformation("Breakfast time: {BreakfastTime}", _config.BreakfastTime.ToString("c"));

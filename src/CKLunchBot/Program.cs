@@ -4,7 +4,7 @@ using Serilog;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Configuration
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables("X_");
 
 builder.Services

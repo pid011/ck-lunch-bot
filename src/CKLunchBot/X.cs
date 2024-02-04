@@ -24,7 +24,7 @@ public sealed partial class X(X.Credentials credentials)
         var response = await client.ExecuteAsync(request, cancellationToken);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            throw new Exception(response.Content);
+            throw new ApiException(response.StatusCode, response.Content ?? "Unknown error");
         }
 
         var user = JsonNode.Parse(response.Content!);
@@ -48,7 +48,7 @@ public sealed partial class X(X.Credentials credentials)
         var response = await client.ExecutePostAsync(request, cancellationToken: cancellationToken);
         if (response.StatusCode != HttpStatusCode.Created)
         {
-            throw new Exception(response.Content);
+            throw new ApiException(response.StatusCode, response.Content ?? "Unknown error");
         }
 
         var post = JsonNode.Parse(response.Content!);
