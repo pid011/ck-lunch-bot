@@ -121,8 +121,22 @@ public sealed class BotService(
             _logger.LogWarning("Cannot found today's menu.");
             return;
         }
-
         Debug.Assert(todayMenu is not null);
+
+        var isEmpty = postType switch
+        {
+            PostType.Briefing => todayMenu.Breakfast.IsEmpty() && todayMenu.Lunch.IsEmpty() && todayMenu.Dinner.IsEmpty(),
+            PostType.Breakfast => todayMenu.Breakfast.IsEmpty(),
+            PostType.Lunch => todayMenu.Lunch.IsEmpty(),
+            PostType.Dinner => todayMenu.Dinner.IsEmpty(),
+            _ => false
+        };
+        if (isEmpty)
+        {
+            _logger.LogWarning("Today's menu is empty. Skip posting.");
+            return;
+        }
+
         var postContents = postType switch
         {
             PostType.Briefing => CreateBriefingContents(_config.BriefingMessage, todayMenu),

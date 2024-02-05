@@ -69,7 +69,7 @@ public readonly struct PostBody(string text)
     public string Text { get; } = text;
 }
 
-[JsonSourceGenerationOptions(DictionaryKeyPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(PostBody))]
 public partial class SourceGenerationContext : JsonSerializerContext
 {
