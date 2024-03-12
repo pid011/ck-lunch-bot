@@ -39,7 +39,7 @@ public class MenuTable(DateOnly date)
 
 public class Menu(IReadOnlyCollection<string> menus)
 {
-    public static Menu Empty { get; } = new(Array.Empty<string>());
+    public static Menu Empty { get; } = new([]);
     public IReadOnlyCollection<string> Menus { get; } = menus;
 
     public bool IsEmpty()
