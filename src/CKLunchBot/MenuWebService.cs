@@ -96,7 +96,7 @@ public sealed class MenuWebService(ILogger<MenuWebService> logger) : IMenuServic
         {
             var menus = node.ChildNodes
                 .Where(node => node.Name is "#text")
-                .Select(node => node.InnerText)
+                .Select(node => RegexParser.MenuTextRegex().Replace(node.InnerText, " ").TrimStart().TrimEnd())
                 .ToArray();
             return new Menu(menus);
         }
@@ -134,6 +134,9 @@ public sealed class MenuWebService(ILogger<MenuWebService> logger) : IMenuServic
 
 internal partial class RegexParser
 {
-    [GeneratedRegex("[0-9]{1,2}")]
+    [GeneratedRegex(@"[0-9]{1,2}")]
     public static partial Regex DateTextRegex();
+
+    [GeneratedRegex(@"\s{2,}")]
+    public static partial Regex MenuTextRegex();
 }
