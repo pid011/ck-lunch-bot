@@ -1,0 +1,19 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/publish.yml" />
+    <File Path=".github/workflows/test.yml" />
+    <File Path=".gitignore" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/CKLunchBot.Core.Tests/CKLunchBot.Core.Tests.csproj" />
+    <Project Path="src/CKLunchBot.Core/CKLunchBot.Core.csproj" />
+    <Project Path="src/CKLunchBot.Tests/CKLunchBot.Tests.csproj" />
+    <Project Path="src/CKLunchBot/CKLunchBot.csproj" />
+  </Folder>
+</Solution>
