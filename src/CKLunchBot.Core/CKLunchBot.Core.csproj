@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Version>3.0.1</Version>
         <RepositoryUrl>https://github.com/pid011/ck-lunch-bot</RepositoryUrl>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -9,6 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     </ItemGroup>
 </Project>

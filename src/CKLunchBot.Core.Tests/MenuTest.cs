@@ -11,6 +11,6 @@ public class MenuTest
     {
         var date = new DateOnly(2022, 1, 1);
         var formatted = date.GetFormattedKoreanString();
-        Assert.AreEqual(formatted, "2022.1.1 (토)");
+        Assert.AreEqual("2022.1.1 (토)", formatted);
     }
 }

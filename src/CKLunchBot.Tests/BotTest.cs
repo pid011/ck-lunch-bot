@@ -11,7 +11,7 @@ public class BotTest
     {
         var postBody = new PostBody(text: "aaaaa");
         var json = JsonSerializer.Serialize(postBody, SourceGenerationContext.Default.PostBody);
-        Assert.AreEqual(json, """{"text":"aaaaa"}""");
+        Assert.AreEqual("""{"text":"aaaaa"}""", json);
     }
 
     [TestMethod]
