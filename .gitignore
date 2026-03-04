@@ -360,3 +360,4 @@ published/
 
 .vscode/
 .idea
+*.local.json
