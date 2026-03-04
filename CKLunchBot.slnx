@@ -15,5 +15,7 @@
     <Project Path="src/CKLunchBot.Core/CKLunchBot.Core.csproj" />
     <Project Path="src/CKLunchBot.Tests/CKLunchBot.Tests.csproj" />
     <Project Path="src/CKLunchBot/CKLunchBot.csproj" />
+    <Project Path="src/CKLunchBot.AppHost/CKLunchBot.AppHost.csproj" />
+    <Project Path="src/CKLunchBot.ServiceDefaults/CKLunchBot.ServiceDefaults.csproj" />
   </Folder>
 </Solution>
