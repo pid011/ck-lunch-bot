@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CKLunchBot.Core;
+namespace CKLunchBot.Extensions;
 
 public static class DateTimeExtensions
 {

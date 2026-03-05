@@ -11,10 +11,8 @@
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/CKLunchBot.Core.Tests/CKLunchBot.Core.Tests.csproj" />
-    <Project Path="src/CKLunchBot.Core/CKLunchBot.Core.csproj" />
-    <Project Path="src/CKLunchBot.Functions.Tests/CKLunchBot.Functions.Tests.csproj" />
-    <Project Path="src/CKLunchBot.Functions/CKLunchBot.Functions.csproj" />
+    <Project Path="src/CKLunchBot/CKLunchBot.csproj" />
+    <Project Path="src/CKLunchBot.Tests/CKLunchBot.Tests.csproj" />
     <Project Path="src/CKLunchBot.AppHost/CKLunchBot.AppHost.csproj" />
     <Project Path="src/CKLunchBot.ServiceDefaults/CKLunchBot.ServiceDefaults.csproj" />
   </Folder>

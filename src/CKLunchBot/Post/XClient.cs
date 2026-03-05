@@ -3,11 +3,10 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using CKLunchBot.Core;
 using RestSharp;
 using RestSharp.Authenticators;
 
-namespace CKLunchBot;
+namespace CKLunchBot.Post;
 
 public sealed class XClient(IXCredentials credentials)
 {
@@ -15,7 +14,7 @@ public sealed class XClient(IXCredentials credentials)
 
     public async Task<Account> GetUserInformationAsync(CancellationToken cancellationToken = default)
     {
-        using var client = new RestClient("https://api.twitter.com/2/users/me");
+        using var client = new RestClient("https://api.x.com/2/users/me");
         var request = new RestRequest
         {
             Authenticator = _authenticator
@@ -30,14 +29,17 @@ public sealed class XClient(IXCredentials credentials)
 
         var user = JsonNode.Parse(response.Content!);
         return new Account(
-            id: user?["data"]?["id"]?.GetValue<string>() ?? throw new JsonException("Faild to parse user response data!"),
-            name: user?["data"]?["username"]?.GetValue<string>() ?? throw new JsonException("Faild to parse user response data!"),
-            description: user?["data"]?["description"]?.GetValue<string>() ?? throw new JsonException("Faild to parse user response data!"));
+            id: user?["data"]?["id"]?.GetValue<string>() ??
+                throw new JsonException("Faild to parse user response data!"),
+            name: user?["data"]?["username"]?.GetValue<string>() ??
+                  throw new JsonException("Faild to parse user response data!"),
+            description: user?["data"]?["description"]?.GetValue<string>() ??
+                         throw new JsonException("Faild to parse user response data!"));
     }
 
     public async Task<Post> PostAsync(string tweetText, CancellationToken cancellationToken = default)
     {
-        using var client = new RestClient("https://api.twitter.com/2/tweets");
+        using var client = new RestClient("https://api.x.com/2/tweets");
         var request = new RestRequest
         {
             Authenticator = _authenticator
@@ -54,14 +56,17 @@ public sealed class XClient(IXCredentials credentials)
 
         var post = JsonNode.Parse(response.Content!);
         return new Post(
-            id: post?["data"]?["id"]?.GetValue<string>() ?? throw new JsonException("Faild to parse tweet response data!"),
-            text: post?["data"]?["text"]?.GetValue<string>() ?? throw new JsonException("Faild to parse tweet response data!"));
+            id: post?["data"]?["id"]?.GetValue<string>() ??
+                throw new JsonException("Faild to parse tweet response data!"),
+            text: post["data"]?["text"]?.GetValue<string>() ??
+                  throw new JsonException("Faild to parse tweet response data!"));
     }
 
     private static OAuth1Authenticator GetAuthenticatorFromCredentials(IXCredentials credentials)
     {
         return OAuth1Authenticator.ForAccessToken(
-            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);
+            credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken,
+            credentials.AccessTokenSecret);
     }
 }
 
@@ -72,6 +77,4 @@ public readonly struct PostBody(string text)
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(PostBody))]
-public partial class SourceGenerationContext : JsonSerializerContext
-{
-}
+public partial class SourceGenerationContext : JsonSerializerContext;

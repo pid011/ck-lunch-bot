@@ -1,8 +1,7 @@
-using CKLunchBot.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CKLunchBot;
+namespace CKLunchBot.Post;
 
 public sealed partial class XPostService : IPostService
 {
@@ -16,19 +15,20 @@ public sealed partial class XPostService : IPostService
         {
             throw new ArgumentException("Invalid credentials!");
         }
-        _x = new(credentials.Value);
+
+        _x = new XClient(credentials.Value);
     }
 
     public async ValueTask<Account> GetAccountInfoAsync(CancellationToken cancellationToken = default)
     {
-        return await _x.GetUserInformationAsync(default);
+        return await _x.GetUserInformationAsync(cancellationToken);
     }
 
     public async ValueTask<bool> IsValidAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            var _ = await _x.GetUserInformationAsync(cancellationToken);
+            _ = await _x.GetUserInformationAsync(cancellationToken);
         }
         catch (ApiException e) when (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
@@ -43,7 +43,8 @@ public sealed partial class XPostService : IPostService
         return true;
     }
 
-    public async ValueTask<Post> PostMessageAsync(string message, CancellationToken cancellationToken = default)
+    public async ValueTask<Post> PostMessageAsync(string message,
+        CancellationToken cancellationToken = default)
     {
         return await _x.PostAsync(message, cancellationToken);
     }

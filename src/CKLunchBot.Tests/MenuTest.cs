@@ -1,7 +1,6 @@
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using CKLunchBot.Extensions;
 
-namespace CKLunchBot.Core.Tests;
+namespace CKLunchBot.Tests;
 
 [TestClass]
 public class MenuTest

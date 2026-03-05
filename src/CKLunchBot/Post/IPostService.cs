@@ -1,4 +1,4 @@
-namespace CKLunchBot;
+namespace CKLunchBot.Post;
 
 public readonly struct Account(string id, string name, string description)
 {

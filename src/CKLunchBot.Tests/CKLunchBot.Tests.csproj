@@ -20,8 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CKLunchBot.Core\CKLunchBot.Core.csproj" />
-    <ProjectReference Include="..\CKLunchBot.Functions\CKLunchBot.Functions.csproj" />
+    <ProjectReference Include="..\CKLunchBot\CKLunchBot.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="TestData\menu.html" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-using System;
-
-namespace CKLunchBot.Core;
+namespace CKLunchBot.Menu;
 
 [Serializable]
 public class MenuParseException : Exception

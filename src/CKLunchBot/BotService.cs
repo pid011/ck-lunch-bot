@@ -1,18 +1,20 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using CKLunchBot.Core;
+using CKLunchBot.Extensions;
+using CKLunchBot.Menu;
+using CKLunchBot.Post;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CKLunchBot.Functions;
+namespace CKLunchBot;
 
-public sealed partial class PostingService(
+public sealed partial class BotService(
     IMenuService menuService,
     IPostService postService,
     IHostEnvironment environment,
-    ILogger<PostingService> logger,
+    ILogger<BotService> logger,
     IOptions<BotConfig> botConfig)
 {
     private BotConfig BotConfig => botConfig.Value;
@@ -138,7 +140,7 @@ public sealed partial class PostingService(
         return builder.ToString();
     }
 
-    private static string FormatMenu(Menu menu)
+    private static string FormatMenu(Menu.Menu menu)
     {
         return menu.IsEmpty() ? "-" : string.Join(", ", menu.Menus);
     }

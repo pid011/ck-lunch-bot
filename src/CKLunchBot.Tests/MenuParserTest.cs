@@ -1,11 +1,9 @@
-using System;
-using System.Linq;
 using System.Reflection;
-using CKLunchBot.Core;
+using CKLunchBot.Extensions;
+using CKLunchBot.Menu;
 using HtmlAgilityPack;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CKLunchBot.Core.Tests;
+namespace CKLunchBot.Tests;
 
 [TestClass]
 public class MenuParserTest
@@ -94,8 +92,8 @@ public class MenuParserTest
     private static HtmlDocument LoadSampleHtml()
     {
         var assembly = Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream("CKLunchBot.Core.Tests.TestData.menu.html")
-            ?? throw new InvalidOperationException("Sample HTML resource not found");
+        using var stream = assembly.GetManifestResourceStream("CKLunchBot.Tests.TestData.menu.html")
+                           ?? throw new InvalidOperationException("Sample HTML resource not found");
 
         var html = new HtmlDocument();
         html.Load(stream);

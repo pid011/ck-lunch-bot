@@ -1,6 +1,7 @@
+using CKLunchBot.Post;
 using Microsoft.Extensions.Options;
 
-namespace CKLunchBot.Functions.Tests;
+namespace CKLunchBot.Tests;
 
 [TestClass]
 public class XPostServiceTest

@@ -1,10 +1,10 @@
-using CKLunchBot.Core;
+using CKLunchBot.Menu;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace CKLunchBot.Functions;
+namespace CKLunchBot;
 
-public partial class MealPostFunctions(PostingService postingService, ILogger<MealPostFunctions> logger)
+public partial class MealPostFunctions(BotService postingService, ILogger<MealPostFunctions> logger)
 {
     [Function("BriefingPost")]
     public async Task RunBriefing(

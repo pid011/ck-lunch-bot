@@ -1,7 +1,9 @@
 using System.Text.Json;
+using CKLunchBot.Menu;
+using CKLunchBot.Post;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace CKLunchBot.Functions.Tests;
+namespace CKLunchBot.Tests;
 
 [TestClass]
 public class BotTest

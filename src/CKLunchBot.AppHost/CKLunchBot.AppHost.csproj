@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CKLunchBot.Functions\CKLunchBot.Functions.csproj" />
+    <ProjectReference Include="..\CKLunchBot\CKLunchBot.csproj" />
   </ItemGroup>
 
 </Project>

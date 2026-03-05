@@ -1,7 +1,7 @@
-using CKLunchBot.Core;
+using CKLunchBot.Extensions;
 using HtmlAgilityPack;
 
-namespace CKLunchBot;
+namespace CKLunchBot.Menu;
 
 public interface IMenuParser
 {

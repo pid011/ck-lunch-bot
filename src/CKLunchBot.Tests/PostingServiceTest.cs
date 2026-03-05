@@ -1,5 +1,7 @@
 using CKLunchBot;
-using CKLunchBot.Core;
+using CKLunchBot.Extensions;
+using CKLunchBot.Menu;
+using CKLunchBot.Post;
 using Imposter.Abstractions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -9,7 +11,7 @@ using Microsoft.Extensions.Options;
 [assembly: GenerateImposter(typeof(IPostService))]
 [assembly: GenerateImposter(typeof(IHostEnvironment))]
 
-namespace CKLunchBot.Functions.Tests;
+namespace CKLunchBot.Tests;
 
 [TestClass]
 public class PostingServiceTest
@@ -18,16 +20,16 @@ public class PostingServiceTest
 
     private static readonly MenuTable s_todayMenuTable = new(s_today)
     {
-        Breakfast = new Menu(["백미밥", "된장찌개"]),
-        Lunch = new Menu(["볶음밥", "탕수육"]),
-        Dinner = new Menu(["라면", "만두"]),
+        Breakfast = new Menu.Menu(["백미밥", "된장찌개"]),
+        Lunch = new Menu.Menu(["볶음밥", "탕수육"]),
+        Dinner = new Menu.Menu(["라면", "만두"]),
     };
 
     private static readonly MenuTable s_emptyMenuTable = new(s_today)
     {
-        Breakfast = Menu.Empty,
-        Lunch = Menu.Empty,
-        Dinner = Menu.Empty,
+        Breakfast = Menu.Menu.Empty,
+        Lunch = Menu.Menu.Empty,
+        Dinner = Menu.Menu.Empty,
     };
 
     private static readonly BotConfig s_testConfig = new()
@@ -39,16 +41,16 @@ public class PostingServiceTest
         Emoji = ["🍚"],
     };
 
-    private static PostingService CreateService(
+    private static BotService CreateService(
         IMenuServiceImposter menuService,
         IPostServiceImposter postService,
         IHostEnvironmentImposter environment)
     {
-        return new PostingService(
+        return new BotService(
             menuService.Instance(),
             postService.Instance(),
             environment.Instance(),
-            NullLogger<PostingService>.Instance,
+            NullLogger<BotService>.Instance,
             Options.Create(s_testConfig));
     }
 
@@ -75,7 +77,7 @@ public class PostingServiceTest
         var postService = new IPostServiceImposter();
         postService
             .PostMessageAsync(Arg<string>.Any(), Arg<CancellationToken>.Any())
-            .ReturnsAsync(new Post("1", "posted"));
+            .ReturnsAsync(new CKLunchBot.Post.Post("1", "posted"));
         var environment = CreateEnvironment("Production");
 
         var service = CreateService(menuService, postService, environment);
@@ -92,9 +94,9 @@ public class PostingServiceTest
         var yesterday = s_today.AddDays(-1);
         var menuTable = new MenuTable(yesterday)
         {
-            Breakfast = new Menu(["밥"]),
-            Lunch = new Menu(["밥"]),
-            Dinner = new Menu(["밥"]),
+            Breakfast = new Menu.Menu(["밥"]),
+            Lunch = new Menu.Menu(["밥"]),
+            Dinner = new Menu.Menu(["밥"]),
         };
 
         var menuService = CreateMenuServiceWithTodayMenu(menuTable);
@@ -131,7 +133,7 @@ public class PostingServiceTest
         var postService = new IPostServiceImposter();
         postService
             .PostMessageAsync(Arg<string>.Any(), Arg<CancellationToken>.Any())
-            .ReturnsAsync(new Post("1", "posted"));
+            .ReturnsAsync(new CKLunchBot.Post.Post("1", "posted"));
         var environment = CreateEnvironment("Production");
 
         var service = CreateService(menuService, postService, environment);
@@ -147,9 +149,9 @@ public class PostingServiceTest
     {
         var menuTable = new MenuTable(s_today)
         {
-            Breakfast = Menu.Empty,
-            Lunch = new Menu(["볶음밥"]),
-            Dinner = Menu.Empty,
+            Breakfast = Menu.Menu.Empty,
+            Lunch = new Menu.Menu(["볶음밥"]),
+            Dinner = Menu.Menu.Empty,
         };
 
         var menuService = CreateMenuServiceWithTodayMenu(menuTable);

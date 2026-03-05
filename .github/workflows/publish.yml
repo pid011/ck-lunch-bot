@@ -20,7 +20,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Publish Functions project
-        run: dotnet publish src/CKLunchBot.Functions -c Release -o ./output
+        run: dotnet publish src/CKLunchBot -c Release -o ./output
 
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1

@@ -1,10 +1,12 @@
 using CKLunchBot;
-using CKLunchBot.Core;
-using CKLunchBot.Functions;
+using CKLunchBot.Menu;
+using CKLunchBot.Post;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MenuWebService = CKLunchBot.Menu.MenuWebService;
+using XPostService = CKLunchBot.Post.XPostService;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -21,6 +23,6 @@ builder.Services
     .AddHttpClient<IMenuService, MenuWebService>()
     .Services
     .AddSingleton<IPostService, XPostService>()
-    .AddSingleton<PostingService>();
+    .AddSingleton<BotService>();
 
 builder.Build().Run();

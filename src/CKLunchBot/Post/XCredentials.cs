@@ -1,4 +1,4 @@
-namespace CKLunchBot.Core;
+namespace CKLunchBot.Post;
 
 public interface IXCredentials
 {

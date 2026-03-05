@@ -1,8 +1,7 @@
-using CKLunchBot.Core;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-namespace CKLunchBot;
+namespace CKLunchBot.Menu;
 
 public interface IMenuService
 {
