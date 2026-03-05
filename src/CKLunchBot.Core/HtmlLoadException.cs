@@ -1,4 +1,4 @@
-﻿namespace CKLunchBot;
+namespace CKLunchBot;
 
 [Serializable]
 public class HtmlLoadException : Exception

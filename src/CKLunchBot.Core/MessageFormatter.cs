@@ -2,12 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace CKLunchBot;
 
-internal interface IMessageFormatter
+public interface IMessageFormatter
 {
     string Format(string message, Func<string, string> replace);
 }
 
-internal class MessageFormatter : IMessageFormatter
+public class MessageFormatter : IMessageFormatter
 {
     public string Format(string message, Func<string, string> replace)
     {

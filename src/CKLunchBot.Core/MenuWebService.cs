@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using CKLunchBot.Core;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 
 namespace CKLunchBot;
 

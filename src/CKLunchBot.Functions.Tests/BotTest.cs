@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace CKLunchBot.Tests;
+namespace CKLunchBot.Functions.Tests;
 
 [TestClass]
 public class BotTest

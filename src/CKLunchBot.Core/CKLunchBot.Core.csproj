@@ -5,10 +5,14 @@
         <Version>3.0.1</Version>
         <RepositoryUrl>https://github.com/pid011/ck-lunch-bot</RepositoryUrl>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+        <PackageReference Include="RestSharp" Version="113.1.0" />
     </ItemGroup>
 </Project>

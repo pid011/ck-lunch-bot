@@ -4,7 +4,6 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
@@ -20,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CKLunchBot\CKLunchBot.csproj" />
+    <ProjectReference Include="..\CKLunchBot.Core\CKLunchBot.Core.csproj" />
   </ItemGroup>
 
 </Project>
