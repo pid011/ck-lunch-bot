@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Imposter" Version="0.1.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
     <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
@@ -20,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CKLunchBot.Core\CKLunchBot.Core.csproj" />
+    <ProjectReference Include="..\CKLunchBot.Functions\CKLunchBot.Functions.csproj" />
   </ItemGroup>
 
 </Project>

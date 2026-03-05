@@ -2,17 +2,17 @@ using CKLunchBot.Core;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace CKLunchBot;
+namespace CKLunchBot.Functions;
 
-public class MealPostFunctions(PostingHelper helper, ILogger<MealPostFunctions> logger)
+public partial class MealPostFunctions(PostingService postingService, ILogger<MealPostFunctions> logger)
 {
     [Function("BriefingPost")]
     public async Task RunBriefing(
         [TimerTrigger("0 0 21 * * *")] TimerInfo timer,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Briefing function triggered at {time} UTC", DateTime.UtcNow);
-        await helper.ProcessBriefingAsync(cancellationToken);
+        LogFunctionTriggered("Briefing");
+        await postingService.ProcessBriefingAsync(cancellationToken);
     }
 
     [Function("BreakfastPost")]
@@ -20,8 +20,8 @@ public class MealPostFunctions(PostingHelper helper, ILogger<MealPostFunctions> 
         [TimerTrigger("0 10 21 * * *")] TimerInfo timer,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Breakfast function triggered at {time} UTC", DateTime.UtcNow);
-        await helper.ProcessMealAsync(MenuType.Breakfast, cancellationToken);
+        LogFunctionTriggered("Breakfast");
+        await postingService.ProcessMealAsync(MenuType.Breakfast, cancellationToken);
     }
 
     [Function("LunchPost")]
@@ -29,8 +29,8 @@ public class MealPostFunctions(PostingHelper helper, ILogger<MealPostFunctions> 
         [TimerTrigger("0 0 2 * * *")] TimerInfo timer,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Lunch function triggered at {time} UTC", DateTime.UtcNow);
-        await helper.ProcessMealAsync(MenuType.Lunch, cancellationToken);
+        LogFunctionTriggered("Lunch");
+        await postingService.ProcessMealAsync(MenuType.Lunch, cancellationToken);
     }
 
     [Function("DinnerPost")]
@@ -38,7 +38,10 @@ public class MealPostFunctions(PostingHelper helper, ILogger<MealPostFunctions> 
         [TimerTrigger("0 0 7 * * *")] TimerInfo timer,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Dinner function triggered at {time} UTC", DateTime.UtcNow);
-        await helper.ProcessMealAsync(MenuType.Dinner, cancellationToken);
+        LogFunctionTriggered("Dinner");
+        await postingService.ProcessMealAsync(MenuType.Dinner, cancellationToken);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{functionName} function triggered.")]
+    private partial void LogFunctionTriggered(string functionName);
 }

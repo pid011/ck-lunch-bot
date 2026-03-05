@@ -3,12 +3,13 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using CKLunchBot.Core;
 using RestSharp;
 using RestSharp.Authenticators;
 
 namespace CKLunchBot;
 
-public sealed partial class X(X.Credentials credentials)
+public sealed class XClient(IXCredentials credentials)
 {
     private readonly IAuthenticator _authenticator = GetAuthenticatorFromCredentials(credentials);
 
@@ -57,7 +58,7 @@ public sealed partial class X(X.Credentials credentials)
             text: post?["data"]?["text"]?.GetValue<string>() ?? throw new JsonException("Faild to parse tweet response data!"));
     }
 
-    private static OAuth1Authenticator GetAuthenticatorFromCredentials(Credentials credentials)
+    private static OAuth1Authenticator GetAuthenticatorFromCredentials(IXCredentials credentials)
     {
         return OAuth1Authenticator.ForAccessToken(
             credentials.ConsumerApiKey, credentials.ConsumerSecretKey, credentials.AccessToken, credentials.AccessTokenSecret);

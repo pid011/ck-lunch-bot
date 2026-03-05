@@ -17,7 +17,9 @@ public class BotTest
     [TestMethod]
     public async Task MenuLoadTest()
     {
-        var menuService = new MenuWebService(NullLogger<MenuWebService>.Instance);
+        var menuParser = new MenuParser();
+        var httpClient = new HttpClient();
+        var menuService = new MenuWebService(menuParser, httpClient, NullLogger<MenuWebService>.Instance);
         try
         {
             using var cancellation = new CancellationTokenSource(new TimeSpan(0, 0, 30));

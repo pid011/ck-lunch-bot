@@ -1,14 +1,15 @@
+using CKLunchBot.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CKLunchBot;
 
-public sealed class XPostService : IPostService
+public sealed partial class XPostService : IPostService
 {
     private readonly ILogger<XPostService> _logger;
-    private readonly X _x;
+    private readonly XClient _x;
 
-    public XPostService(ILogger<XPostService> logger, IOptions<X.Credentials> credentials)
+    public XPostService(ILogger<XPostService> logger, IOptions<XCredentials> credentials)
     {
         _logger = logger;
         if (!credentials.Value.IsValid())
@@ -31,11 +32,11 @@ public sealed class XPostService : IPostService
         }
         catch (ApiException e) when (e.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
-            _logger.LogWarning("Failed to get user information. Too many requests to X api.");
+            LogTooManyRequests();
         }
         catch (Exception e)
         {
-            _logger.LogDebug(e, "Failed to check X api.");
+            LogFailedToCheckXApi(e);
             return false;
         }
 
@@ -46,4 +47,10 @@ public sealed class XPostService : IPostService
     {
         return await _x.PostAsync(message, cancellationToken);
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to get user information. Too many requests to X api.")]
+    private partial void LogTooManyRequests();
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Failed to check X api.")]
+    private partial void LogFailedToCheckXApi(Exception ex);
 }

@@ -1,4 +1,6 @@
 using CKLunchBot;
+using CKLunchBot.Core;
+using CKLunchBot.Functions;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,11 +15,12 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 builder.Services
-    .Configure<X.Credentials>(builder.Configuration.GetSection("Credentials"))
+    .Configure<XCredentials>(builder.Configuration.GetSection("Credentials"))
     .Configure<BotConfig>(builder.Configuration.GetSection("BotConfig"))
-    .AddSingleton<IMenuService, MenuWebService>()
+    .AddSingleton<IMenuParser, MenuParser>()
+    .AddHttpClient<IMenuService, MenuWebService>()
+    .Services
     .AddSingleton<IPostService, XPostService>()
-    .AddSingleton<IMessageFormatter, MessageFormatter>()
-    .AddSingleton<PostingHelper>();
+    .AddSingleton<PostingService>();
 
 builder.Build().Run();
